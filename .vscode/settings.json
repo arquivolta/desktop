@@ -1,0 +1,4 @@
+{
+  "dart.flutterSdkPath": "vendor/flutter",
+  "dart.analysisExcludedFolders": ["vendor"]
+}

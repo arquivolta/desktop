@@ -1,4 +1,5 @@
 {
   "dart.flutterSdkPath": "vendor/flutter",
-  "dart.analysisExcludedFolders": ["vendor"]
+  "dart.analysisExcludedFolders": ["vendor"],
+  "cmake.configureOnOpen": false
 }

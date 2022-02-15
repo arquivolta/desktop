@@ -1,0 +1,9 @@
+#!/bin/bash
+set -euo pipefail
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+## Assuming you have run `git submodule add https://github.com/flutter/flutter ./vendor/flutter`
+export PATH="$DIR/vendor/flutter/bin:$PATH"
+
+exec flutter $@

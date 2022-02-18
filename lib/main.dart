@@ -1,6 +1,8 @@
+import 'package:arquivolta/arch_to_rootfs.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
+import 'package:path_provider/path_provider.dart';
 
 // ignore: avoid_void_async
 void main() async {
@@ -59,13 +61,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
-  void _incrementCounter() {
+  Future<void> _setupWorkerAndDoStuff() async {
+    final dir = await getApplicationSupportDirectory();
+    debugPrint(dir.path);
+
+    await installArchLinux('arch-foobar');
+
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
       _counter++;
     });
   }
@@ -111,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               //style: Theme.of(context).textTheme.headline4,
             ),
-            Button(onPressed: _incrementCounter, child: const Text('+')),
+            Button(onPressed: _setupWorkerAndDoStuff, child: const Text('+')),
           ],
         ),
       ),

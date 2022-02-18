@@ -1,0 +1,21 @@
+name: Build MSIX Package
+
+on:
+  push:
+    branches: main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Checkout Submodules
+        run: git submodule update --init --recursive
+
+      - name: Install dependencies
+        run: ./flutterw pub get
+
+      - name: Build the app
+        run: ./flutterw build windows

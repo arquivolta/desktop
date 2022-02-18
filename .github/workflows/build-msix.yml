@@ -19,6 +19,12 @@ jobs:
       - name: Install dependencies
         run: ./flutterw pub get
 
+      - name: Analyze project source
+        run: ./flutterw analyze
+
+      - name: Run tests
+        run: ./flutterw test
+
       - name: Build the app
         run: ./flutterw build windows
 

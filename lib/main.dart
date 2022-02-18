@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:arquivolta/arch-to-rootfs.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
@@ -70,6 +73,21 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _setupWorkerAndDoStuff() async {
+    /*
+    final worker = await setupWorkWSLImage();
+
+    final lsOut = await worker.run('ls', ['/bin']);
+    debugPrint(lsOut.stdout.toString());
+
+    await Future<void>.delayed(const Duration(milliseconds: 1500));
+    await worker.destroy();
+    */
+
+    await convertArchBootstrapToWSLRootFs2(
+        'C:\\foobar\\archlinux.tar.gz', 'C:\\foobar\\rootfs.tar');
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -111,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               //style: Theme.of(context).textTheme.headline4,
             ),
-            Button(onPressed: _incrementCounter, child: const Text('+')),
+            Button(onPressed: _setupWorkerAndDoStuff, child: const Text('+')),
           ],
         ),
       ),

@@ -21,3 +21,6 @@ jobs:
 
       - name: Build the app
         run: ./flutterw build windows
+
+      - name: Package the app as MSIX
+        run: ./flutterw pub run msix:create

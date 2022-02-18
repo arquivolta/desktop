@@ -1,6 +1,4 @@
-import 'dart:io';
-
-import 'package:arquivolta/arch-to-rootfs.dart';
+import 'package:arquivolta/arch_to_rootfs.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
@@ -62,30 +60,15 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
-  void _incrementCounter() {
+  Future<void> _setupWorkerAndDoStuff() async {
+    await convertArchBootstrapToWSLRootFs(
+      r'C:\foobar\archlinux.tar.gz',
+      r'C:\foobar\rootfs.tar',
+    );
+
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
       _counter++;
     });
-  }
-
-  void _setupWorkerAndDoStuff() async {
-    /*
-    final worker = await setupWorkWSLImage();
-
-    final lsOut = await worker.run('ls', ['/bin']);
-    debugPrint(lsOut.stdout.toString());
-
-    await Future<void>.delayed(const Duration(milliseconds: 1500));
-    await worker.destroy();
-    */
-
-    await convertArchBootstrapToWSLRootFs2(
-        'C:\\foobar\\archlinux.tar.gz', 'C:\\foobar\\rootfs.tar');
   }
 
   @override

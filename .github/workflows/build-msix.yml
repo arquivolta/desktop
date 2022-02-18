@@ -23,7 +23,7 @@ jobs:
         run: ./flutterw build windows
 
       - name: Package the app as MSIX
-        run: ./flutterw pub run msix:create
+        run: ./flutterw pub run msix:create --install-certificate false
 
       - uses: actions/upload-artifact@v2
         with:

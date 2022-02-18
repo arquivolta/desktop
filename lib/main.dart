@@ -2,6 +2,7 @@ import 'package:arquivolta/arch_to_rootfs.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
+import 'package:path_provider/path_provider.dart';
 
 // ignore: avoid_void_async
 void main() async {
@@ -61,10 +62,10 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
   Future<void> _setupWorkerAndDoStuff() async {
-    await convertArchBootstrapToWSLRootFs(
-      r'C:\foobar\archlinux.tar.gz',
-      r'C:\foobar\rootfs.tar',
-    );
+    final dir = await getApplicationSupportDirectory();
+    debugPrint(dir.path);
+
+    await installArchLinux('arch-foobar');
 
     setState(() {
       _counter++;

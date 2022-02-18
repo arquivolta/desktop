@@ -58,3 +58,27 @@ extension ThrowOnProcessErrorExtension on Future<ProcessResult> {
     );
   }
 }
+
+String getLocalAppDataPath() {
+  final appsFolder = win32.GUIDFromString(win32.FOLDERID_LocalAppData);
+  final ppszPath = calloc<win32.PWSTR>();
+
+  try {
+    final hr = win32.SHGetKnownFolderPath(
+      appsFolder,
+      win32.KF_FLAG_DEFAULT,
+      win32.NULL,
+      ppszPath,
+    );
+
+    if (win32.FAILED(hr)) {
+      throw win32.WindowsException(hr);
+    }
+
+    final path = ppszPath.value.toDartString();
+    return path;
+  } finally {
+    win32.free(appsFolder);
+    win32.free(ppszPath);
+  }
+}

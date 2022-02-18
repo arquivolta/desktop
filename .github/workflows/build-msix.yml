@@ -1,0 +1,37 @@
+name: Test and Build MSIX Package
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Checkout Submodules
+        run: git submodule update --init --recursive
+
+      - name: Install dependencies
+        run: ./flutterw pub get
+
+      - name: Analyze project source
+        run: ./flutterw analyze
+
+      - name: Run tests
+        run: ./flutterw test
+
+      - name: Build the app
+        run: ./flutterw build windows
+
+      - name: Package the app as MSIX
+        run: ./flutterw pub run msix:create --install-certificate false
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: build/windows/runner/Release

@@ -1,4 +1,4 @@
-name: Build MSIX Package
+name: Test and Build MSIX Package
 
 on:
   push:

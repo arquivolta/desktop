@@ -24,3 +24,8 @@ jobs:
 
       - name: Package the app as MSIX
         run: ./flutterw pub run msix:create
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: build/windows/runner/Release

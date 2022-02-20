@@ -50,10 +50,7 @@ class ActionWidget extends HookWidget {
       direction: Axis.horizontal,
       children: [
         TextButton(
-          onPressed: () {
-            debugPrint('what the fuck');
-            ar.invoke();
-          },
+          onPressed: ar.invoke,
           key: const Key('invoke'),
           child: const Text('button'),
         ),
@@ -149,22 +146,6 @@ void main() {
     // Changing deps should cause a refresh
     await tester.pumpWidget(widgeter('bar'));
     expect(find.text('Second'), findsOneWidget);
-  });
-
-  testWidgets('button test', (tester) async {
-    var isPressed = false;
-    await tester.pumpWidget(
-      FluentApp(
-        builder: (ctx, child) => TextButton(
-          onPressed: () => isPressed = true,
-          key: const Key('foo'),
-          child: const Text('foo'),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byKey(const Key('foo')));
-    expect(isPressed, true);
   });
 
   /*

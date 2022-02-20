@@ -1,5 +1,6 @@
 {
   "dart.flutterSdkPath": "vendor/flutter",
   "dart.analysisExcludedFolders": ["vendor"],
+  "dart.allowTestsOutsideTestFolder": false,
   "cmake.configureOnOpen": false
 }

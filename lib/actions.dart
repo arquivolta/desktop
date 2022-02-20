@@ -7,9 +7,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class ActionResult<T> {
-  final Function invoke;
+  final void Function() invoke;
   final AsyncSnapshot<T> result;
-  final Function reset;
+  final void Function() reset;
 
   ActionResult._(this.invoke, this.result, this.reset);
 }
@@ -34,7 +34,6 @@ ActionResult<T> useAction<T>(
   final invokeCommand = useAsyncCallbackDedup(
     () async {
       try {
-        if (mounted()) current.value = const AsyncSnapshot.waiting();
         final ret = await block();
         if (mounted()) {
           current.value = AsyncSnapshot.withData(ConnectionState.done, ret);

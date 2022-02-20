@@ -52,9 +52,6 @@ class MyHomePage extends HookWidget {
 
     final installResult = useAction(
       () async {
-        final dir = await getApplicationSupportDirectory();
-        debugPrint(dir.path);
-
         await installArchLinux('arch-foobar');
         counter.value++;
       },

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:arquivolta/actions.dart';
 import 'package:arquivolta/util.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
@@ -36,6 +37,14 @@ Future<void> convertArchBootstrapToWSLRootFs(
 
   final worker = await _setupWorkWSLImage();
   final arch = _getArchitecturePrefix();
+
+  // NB: We do this just to make sure the machine is actually working
+  await retry(
+    () => worker.run('uname', ['-a']),
+    count: 5,
+    delay: const Duration(seconds: 1),
+  );
+
   await worker
       .run(
         'tar',

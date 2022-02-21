@@ -38,7 +38,7 @@ class ActionWidget extends HookWidget {
 
     var content = Text(ar.result.data ?? '(null)');
 
-    if (ar.result.connectionState == ConnectionState.waiting) {
+    if (ar.isPending) {
       content = const Text('Pending!');
     }
 
@@ -163,7 +163,7 @@ void main() {
         );
 
     await tester.pumpWidget(widgeter('foo'));
-    expect(find.text('Pending!'), findsOneWidget);
+    expect(find.text('(null)'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('invoke')));
     await tester.pumpAndSettle();
@@ -171,7 +171,7 @@ void main() {
 
     await tester.tap(find.byKey(const Key('reset')));
     await tester.pumpAndSettle();
-    expect(find.text('Pending!'), findsOneWidget);
+    expect(find.text('(null)'), findsOneWidget);
 
     box[0] = 'Second';
     await tester.tap(find.byKey(const Key('invoke')));
@@ -197,6 +197,7 @@ void main() {
         );
 
     await tester.pumpWidget(widgeter('foo'));
+    expect(find.text('(null)'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('invoke')));
     await tester.pumpAndSettle();
@@ -216,7 +217,7 @@ void main() {
     await tester.tap(find.byKey(const Key('invoke')));
     await tester.pumpAndSettle();
     expect(callCount, 2);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Pending!'), findsOneWidget);
 
     gate[0].add('bar');
     await tester.pumpWidget(widgeter('foo'));

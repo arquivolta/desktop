@@ -12,6 +12,8 @@ class ActionResult<T> {
   final void Function() reset;
 
   ActionResult._(this.invoke, this.result, this.reset);
+
+  bool get isPending => result.connectionState == ConnectionState.waiting;
 }
 
 ActionResult<T> useAction<T>(
@@ -20,12 +22,12 @@ ActionResult<T> useAction<T>(
   bool runOnStart = false,
 }) {
   final mounted = useIsMounted();
-  final current = useState(AsyncSnapshot<T>.waiting());
+  final current = useState(AsyncSnapshot<T>.nothing());
 
   final reset = useCallback(
     () {
       if (mounted()) {
-        current.value = const AsyncSnapshot.waiting();
+        current.value = const AsyncSnapshot.nothing();
       }
     },
     [mounted],
@@ -34,6 +36,7 @@ ActionResult<T> useAction<T>(
   final invokeCommand = useAsyncCallbackDedup(
     () async {
       try {
+        current.value = AsyncSnapshot<T>.waiting();
         final ret = await block();
         if (mounted()) {
           current.value = AsyncSnapshot.withData(ConnectionState.done, ret);
@@ -157,4 +160,27 @@ Future<T?> Function() useAsyncCallbackDedup<T>(
   );
 
   return cb;
+}
+
+Future<T> retry<T>(
+  Future<T> Function() block, {
+  int count = 3,
+  Duration? delay,
+}) async {
+  var retries = count;
+
+  while (true) {
+    try {
+      return await block();
+    } catch (e) {
+      retries--;
+      if (retries < 1) {
+        rethrow;
+      }
+
+      if (delay != null) {
+        await Future<void>.delayed(delay);
+      }
+    }
+  }
 }

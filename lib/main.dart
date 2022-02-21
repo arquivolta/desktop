@@ -4,7 +4,6 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:path_provider/path_provider.dart';
 
 // ignore: avoid_void_async
 void main() async {

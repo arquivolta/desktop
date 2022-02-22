@@ -1,23 +1,28 @@
+import 'dart:async';
+
 import 'package:arquivolta/app.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
+import 'package:window_manager/window_manager.dart';
 
 // ignore: avoid_void_async
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  App.setupRegistration();
 
-  await flutter_acrylic.Window.initialize();
+  await Future.wait([
+    App.setupRegistration(),
+    flutter_acrylic.Window.initialize(),
+    WindowManager.instance.ensureInitialized(),
+  ]);
 
-  runApp(const MainWindow());
+  unawaited(
+    windowManager.waitUntilReadyToShow().then((_) async {
+      await windowManager.setTitleBarStyle('hidden');
+      await windowManager.show();
+      await windowManager.setSkipTaskbar(false);
+    }),
+  );
 
-  doWhenWindowReady(() {
-    appWindow
-      ..minSize = const Size(410, 540)
-      ..size = const Size(755, 545)
-      ..alignment = Alignment.center
-      ..title = 'Arquivolta Installer'
-      ..show();
-  });
+  runApp(MainWindow());
 }

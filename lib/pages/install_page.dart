@@ -5,6 +5,7 @@ import 'package:arquivolta/pages/page_base.dart';
 import 'package:arquivolta/services/arch_to_rootfs.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:rxdart/rxdart.dart';
 
 class InstallPage extends HookWidget
     with PageScaffolder
@@ -35,7 +36,9 @@ class InstallPage extends HookWidget
 
     final installResult = useAction(
       () async {
-        await installArchLinux('arch-foobar');
+        final dontcare = PublishSubject<double>();
+
+        await installArchLinuxJob('arch-foobar').execute(dontcare.sink);
         counter.value++;
       },
       [

@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 import 'package:path/path.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:win32/win32.dart' as win32;
 
 enum OperatingSystemType { amd64, aarch64, dunnoButItsNotGonnaWork }
@@ -81,4 +83,28 @@ String getLocalAppDataPath() {
     win32.free(appsFolder);
     win32.free(ppszPath);
   }
+}
+
+Future<void> downloadUrlToFile(
+  Uri url,
+  String target,
+  StreamSink<double> progress,
+) async {
+  final client = HttpClient();
+  final rq = await client.getUrl(url);
+  final resp = await rq.close();
+  final bytes = PublishSubject<int>();
+
+  double prev = 0;
+  bytes.stream
+      .scan<double>((acc, x, _) => acc + x, 0)
+      .sampleTime(const Duration(seconds: 2))
+      .listen((percent) {
+    progress.add(percent - prev);
+    prev = percent;
+  });
+
+  await resp
+      .doOnData((buf) => bytes.add(buf.length))
+      .pipe(File(target).openWrite());
 }

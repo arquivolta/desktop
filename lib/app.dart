@@ -5,6 +5,7 @@ import 'package:arquivolta/pages/install_page.dart';
 import 'package:beamer/beamer.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:get_it/get_it.dart';
+import 'package:logger/logger.dart';
 
 enum ApplicationMode { debug, production, test }
 
@@ -36,7 +37,22 @@ class App {
             ? ApplicationMode.debug
             : ApplicationMode.production;
 
-    find.registerSingleton(appMode);
+    find
+      ..registerSingleton(appMode)
+      ..registerSingleton(
+        Logger(
+          printer: PrettyPrinter(
+            methodCount: 0,
+            errorMethodCount: 4,
+            excludeBox: {
+              Level.debug: true,
+              Level.info: true,
+              Level.verbose: true,
+            },
+            printEmojis: false, // NB: We add these in later
+          ),
+        ),
+      );
 
     _setupRoutes(find);
     return find;
@@ -57,12 +73,17 @@ class App {
   }
 }
 
-class MainWindow extends StatelessWidget {
+// ignore: must_be_immutable
+class MainWindow extends StatelessWidget
+    with LoggableMixin
+    implements Loggable {
   late final RoutesLocationBuilder routesBuilder;
 
   MainWindow({Key? key}) : super(key: key) {
     // NB: If we don't do this here we get a crash on hot reload.
     routesBuilder = RoutesLocationBuilder(routes: App.find<BeamerRouteList>());
+
+    d('Creating MainWindow!');
   }
 
   @override

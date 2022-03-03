@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:arquivolta/actions.dart';
+import 'package:arquivolta/services/job.dart';
 import 'package:arquivolta/services/util.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:rxdart/rxdart.dart';
 
 /// Converts an Arch Linux image downloaded from the web into a format that
 /// wsl --import can handle
@@ -133,17 +136,87 @@ class DistroWorker {
     String executable,
     List<String> arguments, {
     String? workingDirectory,
+    StreamSink<String>? output,
   }) async {
-    return Process.run(
+    final process = await Process.start(
       'wsl.exe',
       ['-d', _distro, executable, ...arguments],
       workingDirectory: workingDirectory,
+    );
+
+    final sb = StringBuffer();
+    Rx.merge([process.stderr, process.stdout])
+        .map((buf) => utf8.decode(buf, allowMalformed: true))
+        .listen((line) {
+      sb.write(line);
+      output?.add(line);
+    });
+
+    return ProcessResult(
+      process.pid,
+      await process.exitCode,
+      sb.toString(),
+      '',
     );
   }
 
   Future<void> destroy() async {
     await Process.run('wsl.exe', ['--unregister', _distro])
         .throwOnError('Failed to destroy distro');
+  }
+
+  JobBase asJob(
+    String name,
+    String executable,
+    List<String> arguments,
+    String failureMessage, {
+    String? workingDirectory,
+  }) {
+    return _DistroWorkerJob(
+      this,
+      name,
+      executable,
+      arguments,
+      failureMessage,
+      wd: workingDirectory,
+    );
+  }
+}
+
+class _DistroWorkerJob extends JobBase {
+  final DistroWorker worker;
+  final String exec;
+  final String failureMessage;
+  final List<String> args;
+  final String? wd;
+
+  _DistroWorkerJob(
+    this.worker,
+    String name,
+    this.exec,
+    this.args,
+    this.failureMessage, {
+    this.wd,
+  }) : super(name, "$exec ${args.join(' ')}");
+
+  @override
+  Future<void> execute(StreamSink<int> progress) async {
+    i(friendlyDescription);
+    progress.add(10);
+
+    final out = StreamController<String>();
+    out.stream.listen(i);
+    final result =
+        await worker.run(exec, args, workingDirectory: wd, output: out.sink);
+
+    await out.close();
+
+    progress.add(90);
+
+    if (result.exitCode != 0) {
+      e(failureMessage);
+      e('Process $exec exited with code ${result.exitCode}');
+    }
   }
 }
 

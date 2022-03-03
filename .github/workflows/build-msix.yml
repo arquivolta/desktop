@@ -30,6 +30,9 @@ jobs:
       - name: Build the app
         run: ./flutterw build windows
 
+      - name: Copy assets into place
+        run: cp ./assets/* ./build/windows/runner/Release
+
       - name: Package the app as MSIX
         run: ./flutterw pub run msix:create --install-certificate false
 

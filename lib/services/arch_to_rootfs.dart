@@ -81,18 +81,13 @@ final arm64ImageUri = Uri.parse(
 final shasumUri =
     Uri.parse('http://mirror.rackspace.com/archlinux/iso/latest/sha1sums.txt');
 
-Future<void> downloadUrlToFile(Uri url, String target) async {
-  final client = HttpClient();
-  final rq = await client.getUrl(url);
-  final resp = await rq.close();
-
-  await resp.pipe(File(target).openWrite());
-}
-
-Future<void> downloadArchLinux(String targetFile) async {
+Future<JobBase> downloadArchLinux(String targetFile) async {
   if (getOSArchitecture() == OperatingSystemType.aarch64) {
-    await downloadUrlToFile(arm64ImageUri, targetFile);
-    return;
+    return DownloadUrlJob(
+      arm64ImageUri,
+      targetFile,
+      'Downloading Arch Linux ARM',
+    );
   }
 
   final shaText = (await http.get(shasumUri)).body;
@@ -102,9 +97,10 @@ Future<void> downloadArchLinux(String targetFile) async {
 
   final imageName = imageLine.split(RegExp(r'\s+'))[1];
 
-  await downloadUrlToFile(
+  return DownloadUrlJob(
     Uri.parse('http://mirror.rackspace.com/archlinux/iso/latest/$imageName'),
     targetFile,
+    'Downloading Arch Linux x86_64',
   );
 }
 
@@ -257,4 +253,51 @@ Future<DistroWorker> _setupWorkWSLImage() async {
   // try to run a command on it, it will report that it doesn't exist
   await Future<void>.delayed(const Duration(milliseconds: 2500));
   return DistroWorker(distroName);
+}
+
+Future<void> downloadUrlToFile(
+  Uri url,
+  String target,
+  StreamSink<int> progress,
+) async {
+  final client = HttpClient();
+  final rq = await client.getUrl(url);
+  final resp = await rq.close();
+  final bytes = PublishSubject<int>();
+
+  int prev = 0;
+  bytes.stream
+      .scan<int>((acc, x, _) => acc + x, 0)
+      .sampleTime(const Duration(seconds: 2))
+      .listen((percent) {
+    progress.add(percent - prev);
+    prev = percent;
+  });
+
+  await resp
+      .doOnData((buf) => bytes.add(buf.length))
+      .pipe(File(target).openWrite());
+}
+
+class DownloadUrlJob extends JobBase {
+  final Uri _uri;
+  final String _target;
+
+  DownloadUrlJob(
+    this._uri,
+    this._target,
+    String friendlyName,
+  ) : super(friendlyName, 'Downloading ${_uri.toString()} to $_target');
+
+  @override
+  Future<void> execute(StreamSink<int> progress) async {
+    i(friendlyDescription);
+
+    try {
+      await downloadUrlToFile(_uri, _target, progress);
+    } catch (ex, st) {
+      e('Failed to download file', ex, st);
+      rethrow;
+    }
+  }
 }

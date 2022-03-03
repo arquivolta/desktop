@@ -45,7 +45,7 @@ JobBase<void> convertArchBootstrapToWSLRootFsJob(
     }
 
     final worker =
-        await job.executeInferiorJob(setupWorkWSLImageJob(), progress, 20);
+        await JobBase.executeInferiorJob(setupWorkWSLImageJob(), progress, 20);
 
     // NB: We do this just to make sure the machine is actually working
     await retry(
@@ -56,7 +56,7 @@ JobBase<void> convertArchBootstrapToWSLRootFsJob(
 
     progress.add(10);
 
-    await job.executeInferiorJob(
+    await JobBase.executeInferiorJob(
       worker.asJob(
         'Extracting Arch Linux image',
         'tar',
@@ -71,7 +71,7 @@ JobBase<void> convertArchBootstrapToWSLRootFsJob(
     final rootfsName = basename(targetRootfsFile);
     final arch = getArchitecturePrefix();
 
-    await job.executeInferiorJob(
+    await JobBase.executeInferiorJob(
       worker.asJob(
         'Recompressing Arch Linux image in WSL2 format',
         'sh',
@@ -82,7 +82,7 @@ JobBase<void> convertArchBootstrapToWSLRootFsJob(
       25,
     );
 
-    await job.executeInferiorJob(
+    await JobBase.executeInferiorJob(
       worker.asJob(
         'Moving Image back into Windows',
         'mv',
@@ -147,7 +147,7 @@ JobBase<DistroWorker> installArchLinuxJob(String distroName) {
     final convertJob =
         convertArchBootstrapToWSLRootFsJob(archLinuxPath, rootfsPath);
 
-    await job.executeInSequence([downloadJob, convertJob], progress, 80);
+    await JobBase.executeInSequence([downloadJob, convertJob], progress, 80);
 
     await Process.run(
       'wsl.exe',

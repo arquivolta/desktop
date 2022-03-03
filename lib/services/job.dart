@@ -30,7 +30,7 @@ abstract class JobBase<T> extends CustomLoggable with LoggableMixin {
 
   Future<T> execute(StreamSink<double> progress);
 
-  Future<TRet> executeInferiorJob<TRet>(
+  static Future<TRet> executeInferiorJob<TRet>(
     JobBase<TRet> job,
     StreamSink<double> progress,
     int range,
@@ -42,7 +42,7 @@ abstract class JobBase<T> extends CustomLoggable with LoggableMixin {
     return job.execute(scaledProgress.sink);
   }
 
-  Future<void> executeInSequence(
+  static Future<void> executeInSequence(
     List<JobBase<dynamic>> jobs,
     StreamSink<double> progress, [
     int totalPercentage = 100,

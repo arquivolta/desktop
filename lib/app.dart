@@ -4,7 +4,6 @@ import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/pages/install_page.dart';
 import 'package:beamer/beamer.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:get_it/get_it.dart';
 
 enum ApplicationMode { debug, production, test }
@@ -59,7 +58,7 @@ class App {
 }
 
 class MainWindow extends StatelessWidget {
-  late RoutesLocationBuilder routesBuilder;
+  late final RoutesLocationBuilder routesBuilder;
 
   MainWindow({Key? key}) : super(key: key) {
     // NB: If we don't do this here we get a crash on hot reload.

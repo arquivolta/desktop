@@ -44,23 +44,24 @@ class InstallPage extends HookWidget
     );
 
     return Center(
-        child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        const Text(
-          'You have pushed the button this many times:',
-        ),
-        Text(
-          '${counter.value}',
-        ),
-        if (installResult.isPending)
-          const ProgressRing()
-        else
-          Button(
-            onPressed: installResult.invoke,
-            child: const Text('Install Arch Linux'),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Text(
+            'You have pushed the button this many times:',
           ),
-      ],
-    ));
+          Text(
+            '${counter.value}',
+          ),
+          if (installResult.isPending)
+            const ProgressRing()
+          else
+            Button(
+              onPressed: installResult.invoke,
+              child: const Text('Install Arch Linux'),
+            ),
+        ],
+      ),
+    );
   }
 }

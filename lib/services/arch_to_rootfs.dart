@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:arquivolta/actions.dart';
-import 'package:arquivolta/util.dart';
+import 'package:arquivolta/services/util.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';

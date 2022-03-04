@@ -61,7 +61,7 @@ class App {
 
   static GetIt _setupRoutes(GetIt locator) {
     final pageList = [
-      (const InstallPage(key: Key('dontcare')).registerPages()),
+      (InstallPage(key: const Key('dontcare')).registerPages()),
     ].reduce((acc, x) => [...acc, ...x]);
 
     locator
@@ -74,7 +74,6 @@ class App {
   }
 }
 
-// ignore: must_be_immutable
 class MainWindow extends StatelessWidget
     with LoggableMixin
     implements Loggable {

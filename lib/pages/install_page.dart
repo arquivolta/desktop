@@ -1,6 +1,7 @@
 import 'package:arquivolta/actions.dart';
 import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
+import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/pages/page_base.dart';
 import 'package:arquivolta/services/arch_to_rootfs.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -8,9 +9,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:rxdart/rxdart.dart';
 
 class InstallPage extends HookWidget
-    with PageScaffolder
+    with PageScaffolder, LoggableMixin
     implements RoutablePages {
-  const InstallPage({required Key key}) : super(key: key);
+  InstallPage({required Key key}) : super(key: key);
 
   @override
   BeamerRouteList registerRoutes() => {};
@@ -24,7 +25,7 @@ class InstallPage extends HookWidget
         () => FluentIcons.download,
         (ctx, _state, _) => buildScaffoldContent(
           ctx,
-          const InstallPage(key: Key('install')),
+          InstallPage(key: const Key('install')),
         ),
       ),
     ];
@@ -33,12 +34,18 @@ class InstallPage extends HookWidget
   @override
   Widget build(BuildContext context) {
     final counter = useState(0);
+    final progress = useState<double>(0);
 
     final installResult = useAction(
       () async {
-        final dontcare = PublishSubject<double>();
+        final progressSubj = PublishSubject<double>();
+        progressSubj
+            .sampleTime(const Duration(milliseconds: 250))
+            .doOnData((p) => d('Progress: $p'))
+            .listen((x) => progress.value = x);
 
-        await installArchLinuxJob('arch-foobar').execute(dontcare.sink);
+        await installArchLinuxJob('arch-foobar').execute(progressSubj.sink);
+        i('We did it!');
         counter.value++;
       },
       [
@@ -57,7 +64,9 @@ class InstallPage extends HookWidget
             '${counter.value}',
           ),
           if (installResult.isPending)
-            const ProgressRing()
+            ProgressRing(
+              value: progress.value,
+            )
           else
             Button(
               onPressed: installResult.invoke,

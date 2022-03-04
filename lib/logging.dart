@@ -8,8 +8,8 @@ abstract class CustomLoggable {
 }
 
 mixin LoggableMixin implements Loggable {
-  String? _klass;
-  Logger? _global;
+  late final String? _klass;
+  late final Logger? _global;
 
   void d(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     _klass ??= runtimeType.toString();

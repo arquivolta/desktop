@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:arquivolta/actions.dart';
+import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:arquivolta/services/util.dart';
 import 'package:arquivolta/services/wsl.dart';

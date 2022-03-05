@@ -4,13 +4,14 @@ import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/pages/page_base.dart';
 import 'package:arquivolta/services/arch_to_rootfs.dart';
+import 'package:arquivolta/services/job.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:rxdart/rxdart.dart';
 
 class InstallPage extends HookWidget
-    with PageScaffolder, LoggableMixin
-    implements RoutablePages {
+    with PageScaffolder
+    implements RoutablePages, Loggable {
   InstallPage({required Key key}) : super(key: key);
 
   @override
@@ -40,11 +41,14 @@ class InstallPage extends HookWidget
       () async {
         final progressSubj = PublishSubject<double>();
         progressSubj
-            .sampleTime(const Duration(milliseconds: 250))
             .doOnData((p) => d('Progress: $p'))
             .listen((x) => progress.value = x);
 
-        await installArchLinuxJob('arch-foobar').execute(progressSubj.sink);
+        await JobBase.executeTopLevelJob(
+          installArchLinuxJob('arch-foobar'),
+          progressSubj.sink,
+        );
+
         i('We did it!');
         counter.value++;
       },

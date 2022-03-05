@@ -95,13 +95,8 @@ Future<void> downloadUrlToFile(
   final resp = await rq.close();
   final bytes = PublishSubject<int>();
 
-  double prev = 0;
-  bytes.stream
-      .scan<double>((acc, x, _) => acc + x, 0)
-      .sampleTime(const Duration(seconds: 2))
-      .listen((percent) {
-    progress.add(percent - prev);
-    prev = percent;
+  bytes.stream.listen((length) {
+    progress.add(length / resp.contentLength);
   });
 
   await resp

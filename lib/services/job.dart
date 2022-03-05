@@ -6,7 +6,7 @@ import 'package:arquivolta/services/util.dart';
 import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 
-abstract class JobBase<T> extends CustomLoggable with LoggableMixin {
+abstract class JobBase<T> extends CustomLoggable implements Loggable {
   late final Stream logOutput;
   late final Logger _logger;
 
@@ -29,6 +29,25 @@ abstract class JobBase<T> extends CustomLoggable with LoggableMixin {
   }
 
   Future<T> execute(StreamSink<double> progress);
+
+  static Future<TRet> executeTopLevelJob<TRet>(
+    JobBase<TRet> job,
+    StreamSink<double> totalProgress,
+  ) {
+    final subj = PublishSubject<double>();
+    subj
+        .scan<double>((acc, x, _) => acc + x, 0)
+        .sampleTime(const Duration(milliseconds: 250))
+        .map<double>((x) {
+      if (x > 100 || x < 0) {
+        job.wtf('Progress is out of bounds! $x');
+      }
+
+      return x.clamp(0, 100);
+    }).listen(totalProgress.add);
+
+    return job.execute(subj);
+  }
 
   static Future<TRet> executeInferiorJob<TRet>(
     JobBase<TRet> job,
@@ -55,7 +74,6 @@ abstract class JobBase<T> extends CustomLoggable with LoggableMixin {
       progressController.stream.map((x) => x * scale).listen(progress.add);
 
       await job.execute(progressController.sink);
-      await progressController.close();
     }
   }
 

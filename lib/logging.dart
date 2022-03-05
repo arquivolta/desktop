@@ -7,12 +7,11 @@ abstract class CustomLoggable {
   Logger get logger;
 }
 
-mixin LoggableMixin implements Loggable {
-  late final String? _klass;
-  late final Logger? _global;
+extension LoggableMixin on Loggable {
+  static Logger? _global;
 
   void d(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    _klass ??= runtimeType.toString();
+    final _klass = runtimeType.toString();
     _global ??= App.find<Logger>();
 
     _global!.d('$_klass: $message', error, stackTrace);
@@ -22,7 +21,7 @@ mixin LoggableMixin implements Loggable {
   }
 
   void i(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    _klass ??= runtimeType.toString();
+    final _klass = runtimeType.toString();
     _global ??= App.find<Logger>();
 
     _global!.i('$_klass: $message', error, stackTrace);
@@ -32,7 +31,7 @@ mixin LoggableMixin implements Loggable {
   }
 
   void w(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    _klass ??= runtimeType.toString();
+    final _klass = runtimeType.toString();
     _global ??= App.find<Logger>();
 
     _global!.w('⚠️ $_klass: $message', error, stackTrace);
@@ -44,7 +43,7 @@ mixin LoggableMixin implements Loggable {
   }
 
   void e(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    _klass ??= runtimeType.toString();
+    final _klass = runtimeType.toString();
     _global ??= App.find<Logger>();
 
     _global!.e('�� $_klass: $message', error, stackTrace);
@@ -56,7 +55,7 @@ mixin LoggableMixin implements Loggable {
   }
 
   void wtf(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    _klass ??= runtimeType.toString();
+    final _klass = runtimeType.toString();
     _global ??= App.find<Logger>();
 
     _global!.wtf('�� _klass: $message', error, stackTrace);

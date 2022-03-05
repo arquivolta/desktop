@@ -74,9 +74,7 @@ class App {
   }
 }
 
-class MainWindow extends StatelessWidget
-    with LoggableMixin
-    implements Loggable {
+class MainWindow extends StatelessWidget implements Loggable {
   late final RoutesLocationBuilder routesBuilder;
 
   MainWindow({Key? key}) : super(key: key) {

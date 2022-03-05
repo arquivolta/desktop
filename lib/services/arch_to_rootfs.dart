@@ -29,11 +29,10 @@ JobBase<void> convertArchBootstrapToWSLRootFsJob(
 ) {
   return JobBase.fromBlock('Converting Arch Linux image to WSL format',
       'Converting Arch Linux Bootstrap image to be importable via WSL2',
-      (progress, job) async {
+      (job) async {
     if (getOSArchitecture() == OperatingSystemType.aarch64) {
       // NB: Arch Linux ARM images aren't brain-damaged like x86_64, so we can
       // just unzip it and be done
-      progress.add(50);
 
       job.i('Decompressing $archImage to $targetRootfsFile');
       await File(archImage)
@@ -41,12 +40,10 @@ JobBase<void> convertArchBootstrapToWSLRootFsJob(
           .transform(gzip.decoder)
           .pipe(File(targetRootfsFile).openWrite());
 
-      progress.add(50);
       return;
     }
 
-    final worker =
-        await JobBase.executeInferiorJob(setupWorkWSLImageJob(), progress, 20);
+    final worker = await setupWorkWSLImageJob().execute();
 
     // NB: We do this just to make sure the machine is actually working
     await retry(
@@ -55,51 +52,41 @@ JobBase<void> convertArchBootstrapToWSLRootFsJob(
       delay: const Duration(seconds: 1),
     );
 
-    progress.add(10);
-
-    await JobBase.executeInferiorJob(
-      worker.asJob(
-        'Extracting Arch Linux image',
-        'tar',
-        ['-C', '/tmp', '-xzpf', basename(archImage)],
-        'Failed to extract image',
-        workingDirectory: dirname(archImage),
-      ),
-      progress,
-      25,
-    );
+    await worker
+        .asJob(
+          'Extracting Arch Linux image',
+          'tar',
+          ['-C', '/tmp', '-xzpf', basename(archImage)],
+          'Failed to extract image',
+          workingDirectory: dirname(archImage),
+        )
+        .execute();
 
     final rootfsName = basename(targetRootfsFile);
     final arch = getArchitecturePrefix();
 
-    await JobBase.executeInferiorJob(
-      worker.asJob(
-        'Recompressing Arch Linux image in WSL2 format',
-        'sh',
-        ['-c', 'cd /tmp/root.$arch && tar -cpf ../$rootfsName *'],
-        'Failed to create rootfs image',
-      ),
-      progress,
-      25,
-    );
+    await worker
+        .asJob(
+          'Recompressing Arch Linux image in WSL2 format',
+          'sh',
+          ['-c', 'cd /tmp/root.$arch && tar -cpf ../$rootfsName *'],
+          'Failed to create rootfs image',
+        )
+        .execute();
 
-    await JobBase.executeInferiorJob(
-      worker.asJob(
-        'Moving Image back into Windows',
-        'mv',
-        ['/tmp/$rootfsName', '.'],
-        'Failed to move rootfs image',
-        workingDirectory: dirname(targetRootfsFile),
-      ),
-      progress,
-      10,
-    );
+    await worker
+        .asJob(
+          'Moving Image back into Windows',
+          'mv',
+          ['/tmp/$rootfsName', '.'],
+          'Failed to move rootfs image',
+          workingDirectory: dirname(targetRootfsFile),
+        )
+        .execute();
 
     job.i('Cleaning up');
     await Future<void>.delayed(const Duration(milliseconds: 1500));
     await worker.destroy();
-
-    progress.add(10);
   });
 }
 
@@ -135,7 +122,7 @@ Future<JobBase> downloadArchLinux(String targetFile) async {
 
 JobBase<DistroWorker> installArchLinuxJob(String distroName) {
   return JobBase.fromBlock('Install Arch Linux', 'Install Arch Linux',
-      (progress, job) async {
+      (job) async {
     final targetPath = join(getLocalAppDataPath(), distroName);
     final tmpDir = (await getTemporaryDirectory()).path;
     final archLinuxPath = join(tmpDir, 'archlinux.tar.gz');
@@ -148,7 +135,8 @@ JobBase<DistroWorker> installArchLinuxJob(String distroName) {
     final convertJob =
         convertArchBootstrapToWSLRootFsJob(archLinuxPath, rootfsPath);
 
-    await JobBase.executeInSequence([downloadJob, convertJob], progress, 80);
+    await downloadJob.execute();
+    await convertJob.execute();
 
     await Process.run(
       'wsl.exe',

@@ -46,21 +46,17 @@ JobBase<ProcessResult> startProcessAsJob(
   String? workingDirectory,
 }) {
   return JobBase.fromBlock<ProcessResult>(
-      name, "$executable ${arguments.join(' ')}", (progress, job) async {
+      name, "$executable ${arguments.join(' ')}", (job) async {
     final out = PublishSubject<String>();
     out.stream.listen(job.i);
 
     try {
-      progress.add(10);
-
       final ret = await startProcessWithOutput(
         executable,
         arguments,
         workingDirectory: workingDirectory,
         output: out.sink,
       );
-
-      progress.add(90);
 
       if (ret.exitCode != 0) {
         job
@@ -135,9 +131,8 @@ class _DistroWorkerJob extends JobBase<ProcessResult> {
   }) : super(name, "$exec ${args.join(' ')}");
 
   @override
-  Future<ProcessResult> execute(StreamSink<double> progress) async {
+  Future<ProcessResult> execute() async {
     i(friendlyDescription);
-    progress.add(10);
 
     final out = StreamController<String>();
     out.stream.listen(i);
@@ -145,8 +140,6 @@ class _DistroWorkerJob extends JobBase<ProcessResult> {
         await worker.run(exec, args, workingDirectory: wd, output: out.sink);
 
     await out.close();
-
-    progress.add(90);
 
     if (result.exitCode != 0) {
       e(failureMessage);
@@ -166,7 +159,7 @@ String getArchitecturePrefix() {
 JobBase<DistroWorker> setupWorkWSLImageJob() {
   return JobBase.fromBlock('Setting up worker WSL installation',
       'Installing temporary Alpine Linux install to fixup Arch Linux tarball',
-      (progress, job) async {
+      (job) async {
     final arch = getArchitecturePrefix();
 
     final tempDir = (await getTemporaryDirectory()).path;
@@ -178,13 +171,10 @@ JobBase<DistroWorker> setupWorkWSLImageJob() {
       ..i('Decompressing Alpine Linux')
       ..d('$alpineImage => $targetRootFs');
 
-    progress.add(20);
     await File(alpineImage)
         .openRead()
         .transform(gzip.decoder)
         .pipe(File(targetRootFs).openWrite());
-
-    progress.add(30);
 
     final targetDir = join(tempDir, 'alpine-$suffix');
     await Directory(targetDir).create();
@@ -201,14 +191,10 @@ JobBase<DistroWorker> setupWorkWSLImageJob() {
       targetRootFs,
     ]);
 
-    progress.add(40);
-
     // NB: WSL2 has a race condition where if you create a distro then
     // immediately try to run a command on it, it will report that it doesn't
     // exist
     await Future<void>.delayed(const Duration(milliseconds: 2500));
-    progress.add(10);
-
     return DistroWorker(distroName);
   });
 }

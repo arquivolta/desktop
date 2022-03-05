@@ -28,66 +28,19 @@ abstract class JobBase<T> extends CustomLoggable implements Loggable {
     );
   }
 
-  Future<T> execute(StreamSink<double> progress);
-
-  static Future<TRet> executeTopLevelJob<TRet>(
-    JobBase<TRet> job,
-    StreamSink<double> totalProgress,
-  ) {
-    final subj = PublishSubject<double>();
-    subj
-        .scan<double>((acc, x, _) => acc + x, 0)
-        .sampleTime(const Duration(milliseconds: 250))
-        .map<double>((x) {
-      if (x > 100 || x < 0) {
-        job.wtf('Progress is out of bounds! $x');
-      }
-
-      return x.clamp(0, 100);
-    }).listen(totalProgress.add);
-
-    return job.execute(subj);
-  }
-
-  static Future<TRet> executeInferiorJob<TRet>(
-    JobBase<TRet> job,
-    StreamSink<double> progress,
-    int range,
-  ) {
-    final scale = range / 100.0;
-    final scaledProgress = PublishSubject<double>();
-
-    scaledProgress.map((x) => x * scale).listen(progress.add);
-    return job.execute(scaledProgress.sink);
-  }
-
-  static Future<void> executeInSequence(
-    List<JobBase<dynamic>> jobs,
-    StreamSink<double> progress, [
-    int totalPercentage = 100,
-  ]) async {
-    final scale = totalPercentage / 100.0 / jobs.length;
-
-    for (final job in jobs) {
-      final progressController = StreamController<double>();
-
-      progressController.stream.map((x) => x * scale).listen(progress.add);
-
-      await job.execute(progressController.sink);
-    }
-  }
+  Future<T> execute();
 
   static JobBase<T> fromBlock<T>(
     String friendlyName,
     String friendlyDescription,
-    Future<T> Function(StreamSink<double> progress, JobBase<T> job) block,
+    Future<T> Function(JobBase<T> job) block,
   ) {
     return FuncJob<T>(friendlyName, friendlyDescription, block);
   }
 }
 
 class FuncJob<T> extends JobBase<T> {
-  final Future<T> Function(StreamSink<double> progress, JobBase<T> job) block;
+  final Future<T> Function(JobBase<T> job) block;
 
   FuncJob(String friendlyName, String friendlyDescription, this.block)
       : super(
@@ -96,8 +49,8 @@ class FuncJob<T> extends JobBase<T> {
         );
 
   @override
-  Future<T> execute(StreamSink<double> progress) {
-    return block(progress, this);
+  Future<T> execute() {
+    return block(this);
   }
 }
 
@@ -109,11 +62,16 @@ JobBase<void> downloadUrlToFileJob(
   return JobBase.fromBlock<void>(
     friendlyName,
     'Downloading ${uri.toString()} to $target',
-    (progress, job) async {
+    (job) async {
+      final progressSubj = PublishSubject<double>();
       job.i(job.friendlyDescription);
 
+      progressSubj
+          .sampleTime(const Duration(seconds: 2))
+          .listen((x) => job.i('Progress: ${x.toStringAsFixed(2)}%'));
+
       try {
-        await downloadUrlToFile(uri, target, progress);
+        await downloadUrlToFile(uri, target, progressSubj.sink);
       } catch (ex, st) {
         job.e('Failed to download file', ex, st);
         rethrow;

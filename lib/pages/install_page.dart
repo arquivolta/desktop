@@ -1,6 +1,7 @@
 import 'package:arquivolta/actions.dart';
 import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
+import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/pages/page_base.dart';
 import 'package:arquivolta/services/arch_to_rootfs.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -8,8 +9,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 class InstallPage extends HookWidget
     with PageScaffolder
-    implements RoutablePages {
-  const InstallPage({required Key key}) : super(key: key);
+    implements RoutablePages, Loggable {
+  InstallPage({required Key key}) : super(key: key);
 
   @override
   BeamerRouteList registerRoutes() => {};
@@ -23,7 +24,7 @@ class InstallPage extends HookWidget
         () => FluentIcons.download,
         (ctx, _state, _) => buildScaffoldContent(
           ctx,
-          const InstallPage(key: Key('install')),
+          InstallPage(key: const Key('install')),
         ),
       ),
     ];
@@ -35,7 +36,9 @@ class InstallPage extends HookWidget
 
     final installResult = useAction(
       () async {
-        await installArchLinux('arch-foobar');
+        await installArchLinuxJob('arch-foobar').execute();
+
+        i('We did it!');
         counter.value++;
       },
       [

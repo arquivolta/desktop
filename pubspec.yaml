@@ -20,8 +20,10 @@ dependencies:
   flutter_hooks: ^0.18.2+1
   get_it: ^7.2.0
   http: ^0.13.4
+  logger: ^1.1.0
   path: ^1.8.0
   path_provider: ^2.0.9
+  rxdart: ^0.27.3
   squirrel: ^0.1.0
   very_good_analysis: ^2.4.0
   win32: ^2.4.1

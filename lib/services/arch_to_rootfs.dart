@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:arquivolta/actions.dart';
+import 'package:arquivolta/logging.dart';
+import 'package:arquivolta/services/job.dart';
 import 'package:arquivolta/services/util.dart';
+import 'package:arquivolta/services/wsl.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -20,55 +23,71 @@ import 'package:path_provider/path_provider.dart';
 /// possibly the least sane method possible, by creating a temporary Alpine
 /// Linux WSL2 distro, unarchiving and rearchiving the image, and then
 /// importing that.
-Future<void> convertArchBootstrapToWSLRootFs(
+JobBase<void> convertArchBootstrapToWSLRootFsJob(
   String archImage,
   String targetRootfsFile,
-) async {
-  if (getOSArchitecture() == OperatingSystemType.aarch64) {
-    // NB: Arch Linux ARM images aren't brain-damaged like x86_64, so we can
-    // just unzip it and be done
-    await File(archImage)
-        .openRead()
-        .transform(gzip.decoder)
-        .pipe(File(targetRootfsFile).openWrite());
+) {
+  return JobBase.fromBlock('Converting Arch Linux image to WSL format',
+      'Converting Arch Linux Bootstrap image to be importable via WSL2',
+      (job) async {
+    if (getOSArchitecture() == OperatingSystemType.aarch64) {
+      // NB: Arch Linux ARM images aren't brain-damaged like x86_64, so we can
+      // just unzip it and be done
 
-    return;
-  }
+      job.i('Decompressing $archImage to $targetRootfsFile');
+      await File(archImage)
+          .openRead()
+          .transform(gzip.decoder)
+          .pipe(File(targetRootfsFile).openWrite());
 
-  final worker = await _setupWorkWSLImage();
-  final arch = _getArchitecturePrefix();
+      return;
+    }
 
-  // NB: We do this just to make sure the machine is actually working
-  await retry(
-    () => worker.run('uname', ['-a']),
-    count: 5,
-    delay: const Duration(seconds: 1),
-  );
+    final worker = await setupWorkWSLImageJob().execute();
 
-  await worker
-      .run(
-        'tar',
-        ['-C', '/tmp', '-xzpf', basename(archImage)],
-        workingDirectory: dirname(archImage),
-      )
-      .throwOnError('Failed to extract image');
+    // NB: We do this just to make sure the machine is actually working
+    await retry(
+      () => worker.run('uname', ['-a']),
+      count: 5,
+      delay: const Duration(seconds: 1),
+    );
 
-  final rootfsName = basename(targetRootfsFile);
-  await worker.run(
-    'sh',
-    ['-c', 'cd /tmp/root.$arch && tar -cpf ../$rootfsName *'],
-  ).throwOnError('Failed to create rootfs image');
+    await worker
+        .asJob(
+          'Extracting Arch Linux image',
+          'tar',
+          ['-C', '/tmp', '-xzpf', basename(archImage)],
+          'Failed to extract image',
+          workingDirectory: dirname(archImage),
+        )
+        .execute();
 
-  await worker
-      .run(
-        'mv',
-        ['/tmp/$rootfsName', '.'],
-        workingDirectory: dirname(targetRootfsFile),
-      )
-      .throwOnError('Failed to move rootfs image');
+    final rootfsName = basename(targetRootfsFile);
+    final arch = getArchitecturePrefix();
 
-  await Future<void>.delayed(const Duration(milliseconds: 1500));
-  await worker.destroy();
+    await worker
+        .asJob(
+          'Recompressing Arch Linux image in WSL2 format',
+          'sh',
+          ['-c', 'cd /tmp/root.$arch && tar -cpf ../$rootfsName *'],
+          'Failed to create rootfs image',
+        )
+        .execute();
+
+    await worker
+        .asJob(
+          'Moving Image back into Windows',
+          'mv',
+          ['/tmp/$rootfsName', '.'],
+          'Failed to move rootfs image',
+          workingDirectory: dirname(targetRootfsFile),
+        )
+        .execute();
+
+    job.i('Cleaning up');
+    await Future<void>.delayed(const Duration(milliseconds: 1500));
+    await worker.destroy();
+  });
 }
 
 final arm64ImageUri = Uri.parse(
@@ -78,18 +97,13 @@ final arm64ImageUri = Uri.parse(
 final shasumUri =
     Uri.parse('http://mirror.rackspace.com/archlinux/iso/latest/sha1sums.txt');
 
-Future<void> downloadUrlToFile(Uri url, String target) async {
-  final client = HttpClient();
-  final rq = await client.getUrl(url);
-  final resp = await rq.close();
-
-  await resp.pipe(File(target).openWrite());
-}
-
-Future<void> downloadArchLinux(String targetFile) async {
+Future<JobBase> downloadArchLinux(String targetFile) async {
   if (getOSArchitecture() == OperatingSystemType.aarch64) {
-    await downloadUrlToFile(arm64ImageUri, targetFile);
-    return;
+    return downloadUrlToFileJob(
+      'Downloading Arch Linux ARM',
+      arm64ImageUri,
+      targetFile,
+    );
   }
 
   final shaText = (await http.get(shasumUri)).body;
@@ -99,89 +113,36 @@ Future<void> downloadArchLinux(String targetFile) async {
 
   final imageName = imageLine.split(RegExp(r'\s+'))[1];
 
-  await downloadUrlToFile(
+  return downloadUrlToFileJob(
+    'Downloading Arch Linux x86_64',
     Uri.parse('http://mirror.rackspace.com/archlinux/iso/latest/$imageName'),
     targetFile,
   );
 }
 
-Future<DistroWorker> installArchLinux(String distroName) async {
-  final targetPath = join(getLocalAppDataPath(), distroName);
-  final tmpDir = (await getTemporaryDirectory()).path;
-  final archLinuxPath = join(tmpDir, 'archlinux.tar.gz');
-  final rootfsPath = join(tmpDir, 'rootfs-arch.tar');
+JobBase<DistroWorker> installArchLinuxJob(String distroName) {
+  return JobBase.fromBlock('Install Arch Linux', 'Install Arch Linux',
+      (job) async {
+    final targetPath = join(getLocalAppDataPath(), distroName);
+    final tmpDir = (await getTemporaryDirectory()).path;
+    final archLinuxPath = join(tmpDir, 'archlinux.tar.gz');
+    final rootfsPath = join(tmpDir, 'rootfs-arch.tar');
 
-  await Directory(targetPath).create();
+    job.i('Creating $targetPath');
+    await Directory(targetPath).create();
 
-  await downloadArchLinux(archLinuxPath);
-  await convertArchBootstrapToWSLRootFs(archLinuxPath, rootfsPath);
+    final downloadJob = await downloadArchLinux(archLinuxPath);
+    final convertJob =
+        convertArchBootstrapToWSLRootFsJob(archLinuxPath, rootfsPath);
 
-  await Process.run(
-    'wsl.exe',
-    ['--import', distroName, targetPath, rootfsPath, '--version', '2'],
-  ).throwOnError('Failed to create Arch distro');
+    await downloadJob.execute();
+    await convertJob.execute();
 
-  return DistroWorker(distroName);
-}
-
-class DistroWorker {
-  DistroWorker(this._distro);
-
-  final String _distro;
-
-  Future<ProcessResult> run(
-    String executable,
-    List<String> arguments, {
-    String? workingDirectory,
-  }) async {
-    return Process.run(
+    await Process.run(
       'wsl.exe',
-      ['-d', _distro, executable, ...arguments],
-      workingDirectory: workingDirectory,
-    );
-  }
+      ['--import', distroName, targetPath, rootfsPath, '--version', '2'],
+    ).throwOnError('Failed to create Arch distro');
 
-  Future<void> destroy() async {
-    await Process.run('wsl.exe', ['--unregister', _distro])
-        .throwOnError('Failed to destroy distro');
-  }
-}
-
-String _getArchitecturePrefix() {
-  return getOSArchitecture() == OperatingSystemType.amd64
-      ? 'x86_64'
-      : 'aarch64';
-}
-
-Future<DistroWorker> _setupWorkWSLImage() async {
-  final arch = _getArchitecturePrefix();
-
-  final tempDir = (await getTemporaryDirectory()).path;
-  final suffix = DateTime.now().toIso8601String().replaceAll(':', '-');
-  final alpineImage = absolute(rootAppDir(), 'assets/alpine-$arch.tar.gz');
-  final targetRootFs = join(tempDir, 'rootfs-$suffix.tar');
-
-  await File(alpineImage)
-      .openRead()
-      .transform(gzip.decoder)
-      .pipe(File(targetRootFs).openWrite());
-
-  final targetDir = join(tempDir, 'alpine-$suffix');
-  await Directory(targetDir).create();
-
-  final distroName = 'arquivolta-$suffix';
-
-  // decompress the image to temp
-  // sic WSL --import on it
-  await Process.start('wsl.exe', [
-    '--import',
-    distroName,
-    targetDir,
-    targetRootFs,
-  ]);
-
-  // NB: WSL2 has a race condition where if you create a distro then immediately
-  // try to run a command on it, it will report that it doesn't exist
-  await Future<void>.delayed(const Duration(milliseconds: 2500));
-  return DistroWorker(distroName);
+    return DistroWorker(distroName);
+  });
 }

@@ -168,13 +168,16 @@ class InProgressInstall extends HookWidget implements Loggable {
 
         final sub = JobBase.jobStream.listen((job) {
           jobList.value = [...jobList.value, job];
-          consoleScroll.value[jobList.value.length - 1] = ScrollController();
+          final idx = jobList.value.length - 1;
+          consoleScroll.value[idx] = ScrollController();
 
           job.logOutput.listen((lines) {
             jobLogOutput.value[job.hashCode] ??= [];
             jobLogOutput.value[job.hashCode]!.addAll(lines);
 
-            redraw.value++;
+            if (selectedIndex.value == idx) {
+              redraw.value++;
+            }
           });
         });
 

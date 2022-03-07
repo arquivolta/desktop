@@ -76,10 +76,12 @@ class App {
 
 class MainWindow extends StatelessWidget implements Loggable {
   late final RoutesLocationBuilder routesBuilder;
+  late final BeamerDelegate delegate;
 
   MainWindow({Key? key}) : super(key: key) {
     // NB: If we don't do this here we get a crash on hot reload.
     routesBuilder = RoutesLocationBuilder(routes: App.find<BeamerRouteList>());
+    delegate = BeamerDelegate(locationBuilder: routesBuilder);
 
     d('Creating MainWindow!');
   }
@@ -92,7 +94,7 @@ class MainWindow extends StatelessWidget implements Loggable {
         visualDensity: VisualDensity.standard,
       ),
       routeInformationParser: BeamerParser(),
-      routerDelegate: BeamerDelegate(locationBuilder: routesBuilder),
+      routerDelegate: delegate,
     );
   }
 }

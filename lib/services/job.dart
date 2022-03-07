@@ -8,7 +8,7 @@ import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 
 abstract class JobBase<T> extends CustomLoggable implements Loggable {
-  late final Stream logOutput;
+  late final Stream<List<String>> logOutput;
   late final Logger _logger;
 
   final String friendlyName;

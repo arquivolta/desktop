@@ -66,12 +66,14 @@ class InstallPage extends HookWidget
                   )
                 : Padding(
                     padding: const EdgeInsets.symmetric(vertical: 24),
-                    child: InstallPrompt(onPressedInstall: (d, u, p) {
-                      distroName.value = d;
-                      username.value = u;
-                      password.value = p;
-                      installResult.invoke();
-                    }),
+                    child: InstallPrompt(
+                      onPressedInstall: (d, u, p) {
+                        distroName.value = d;
+                        username.value = u;
+                        password.value = p;
+                        installResult.invoke();
+                      },
+                    ),
                   ),
           ),
         ],
@@ -155,12 +157,25 @@ class InProgressInstall extends HookWidget implements Loggable {
     final style = FluentTheme.of(context);
     final jobList = useState(<JobBase<dynamic>>[]);
     final selectedIndex = useState(-1);
+    final jobLogOutput = useRef(<int, List<String>>{});
+    final redraw = useState(0);
+    final listScroll = useScrollController();
+    final consoleScroll = useRef(<int, ScrollController>{});
 
     useEffect(
       () {
+        consoleScroll.value[-1] = ScrollController();
+
         final sub = JobBase.jobStream.listen((job) {
           d('Found a job!');
           jobList.value = [...jobList.value, job];
+          consoleScroll.value[jobList.value.length - 1] = ScrollController();
+          job.logOutput.listen((lines) {
+            jobLogOutput.value[job.hashCode] ??= [];
+            jobLogOutput.value[job.hashCode]!.addAll(lines);
+
+            redraw.value++;
+          });
         });
 
         return sub.cancel;
@@ -168,43 +183,96 @@ class InProgressInstall extends HookWidget implements Loggable {
       [],
     );
 
+    useEffect(
+      () {
+        // ignore: avoid_function_literals_in_foreach_calls
+        return () => consoleScroll.value.values.forEach((sc) => sc.dispose());
+      },
+      [],
+    );
+
+    final selectedJobLogOutput = selectedIndex.value >= 0
+        ? jobLogOutput.value[jobList.value[selectedIndex.value].hashCode]
+        : null;
+
+    final consoleFont = style.typography.body!
+        .copyWith(fontFamily: 'Consolas', color: Colors.green);
+
     return Flex(
       direction: Axis.horizontal,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Scrollbar(
-          child: Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: SizedBox(
-              width: 600,
-              height: 200,
-              child: ListView.builder(
-                itemCount: jobList.value.length,
-                itemBuilder: (ctx, i) => TappableListTile(
-                  key: Key(jobList.value[i].friendlyName),
-                  tileColor: selectedIndex.value == i
-                      ? ButtonState.all(style.accentColor)
-                      : null,
-                  title: Text(
-                    jobList.value[i].friendlyName,
-                    style: style.typography.bodyStrong,
-                  ),
-                  subtitle: Text(
-                    jobList.value[i].friendlyDescription,
-                    style: style.typography.body,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  onTap: () => selectedIndex.value = i,
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: SizedBox(
+            width: 400,
+            height: 200,
+            child: ListView.builder(
+              itemCount: jobList.value.length,
+              controller: listScroll,
+              itemBuilder: (ctx, i) => TappableListTile(
+                key: Key(jobList.value[i].friendlyName),
+                tileColor: selectedIndex.value == i
+                    ? ButtonState.all(style.accentColor)
+                    : null,
+                title: Text(
+                  jobList.value[i].friendlyName,
+                  style: style.typography.bodyStrong,
                 ),
+                subtitle: Text(
+                  jobList.value[i].friendlyDescription,
+                  style: style.typography.body,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                onTap: () => selectedIndex.value = i,
               ),
             ),
           ),
         ),
         Expanded(
-          child: Container(color: Colors.red, child: const Text('A box')),
+          child: ConsoleOutput(
+            consoleScroll: consoleScroll.value[selectedIndex.value]!,
+            selectedIndex: selectedIndex.value,
+            lines: selectedJobLogOutput,
+            consoleFont: consoleFont,
+          ),
         )
       ],
+    );
+  }
+}
+
+class ConsoleOutput extends StatelessWidget implements Loggable {
+  const ConsoleOutput({
+    Key? key,
+    required this.consoleScroll,
+    required this.selectedIndex,
+    required this.lines,
+    required this.consoleFont,
+  }) : super(key: key);
+
+  final ScrollController consoleScroll;
+  final int selectedIndex;
+  final List<String>? lines;
+  final TextStyle consoleFont;
+
+  @override
+  Widget build(BuildContext context) {
+    d('Build! ${lines?.length}, scroller: ${consoleScroll.hashCode}');
+
+    return Container(
+      color: Colors.black,
+      child: ListView.builder(
+        controller: consoleScroll,
+        itemCount: lines?.length ?? 0,
+        itemBuilder: (ctx, i) {
+          return Text(
+            lines![i],
+            style: consoleFont,
+          );
+        },
+      ),
     );
   }
 }

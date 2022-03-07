@@ -167,9 +167,9 @@ class InProgressInstall extends HookWidget implements Loggable {
         consoleScroll.value[-1] = ScrollController();
 
         final sub = JobBase.jobStream.listen((job) {
-          d('Found a job!');
           jobList.value = [...jobList.value, job];
           consoleScroll.value[jobList.value.length - 1] = ScrollController();
+
           job.logOutput.listen((lines) {
             jobLogOutput.value[job.hashCode] ??= [];
             jobLogOutput.value[job.hashCode]!.addAll(lines);
@@ -195,8 +195,8 @@ class InProgressInstall extends HookWidget implements Loggable {
         ? jobLogOutput.value[jobList.value[selectedIndex.value].hashCode]
         : null;
 
-    final consoleFont = style.typography.body!
-        .copyWith(fontFamily: 'Consolas', color: Colors.green);
+    final selectedJob =
+        selectedIndex.value >= 0 ? jobList.value[selectedIndex.value] : null;
 
     return Flex(
       direction: Axis.horizontal,
@@ -205,7 +205,7 @@ class InProgressInstall extends HookWidget implements Loggable {
         Padding(
           padding: const EdgeInsets.only(right: 16),
           child: SizedBox(
-            width: 400,
+            width: 350,
             height: 200,
             child: ListView.builder(
               itemCount: jobList.value.length,
@@ -218,12 +218,14 @@ class InProgressInstall extends HookWidget implements Loggable {
                 title: Text(
                   jobList.value[i].friendlyName,
                   style: style.typography.bodyStrong,
+                  maxLines: 1,
+                  overflow: TextOverflow.fade,
                 ),
                 subtitle: Text(
                   jobList.value[i].friendlyDescription,
                   style: style.typography.body,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  overflow: TextOverflow.fade,
                 ),
                 onTap: () => selectedIndex.value = i,
               ),
@@ -231,11 +233,28 @@ class InProgressInstall extends HookWidget implements Loggable {
           ),
         ),
         Expanded(
-          child: ConsoleOutput(
-            consoleScroll: consoleScroll.value[selectedIndex.value]!,
-            selectedIndex: selectedIndex.value,
-            lines: selectedJobLogOutput,
-            consoleFont: consoleFont,
+          child: Flex(
+            direction: Axis.vertical,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                selectedJob?.friendlyName ?? '',
+                style: style.typography.bodyStrong,
+              ),
+              Flexible(
+                child: Text(
+                  selectedJob?.friendlyDescription ?? '',
+                  style: style.typography.body,
+                ),
+              ),
+              Expanded(
+                child: ConsoleOutput(
+                  consoleScroll: consoleScroll.value[selectedIndex.value]!,
+                  selectedIndex: selectedIndex.value,
+                  lines: selectedJobLogOutput,
+                ),
+              ),
+            ],
           ),
         )
       ],
@@ -249,17 +268,20 @@ class ConsoleOutput extends StatelessWidget implements Loggable {
     required this.consoleScroll,
     required this.selectedIndex,
     required this.lines,
-    required this.consoleFont,
   }) : super(key: key);
 
   final ScrollController consoleScroll;
   final int selectedIndex;
   final List<String>? lines;
-  final TextStyle consoleFont;
 
   @override
   Widget build(BuildContext context) {
     d('Build! ${lines?.length}, scroller: ${consoleScroll.hashCode}');
+
+    final consoleFont = FluentTheme.of(context)
+        .typography
+        .body!
+        .copyWith(fontFamily: 'Consolas', color: Colors.green);
 
     return Container(
       color: Colors.black,

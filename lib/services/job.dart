@@ -27,9 +27,12 @@ abstract class JobBase<T> extends CustomLoggable implements Loggable {
           ? Level.info
           : Level.debug,
     );
+
+    App.find<PublishSubject<JobBase<dynamic>>>(instanceName: 'jobSubject')
+        .add(this);
   }
 
-  static GetIt setupRoutes(GetIt locator) {
+  static GetIt setupRegistration(GetIt locator) {
     locator.registerSingleton(
       PublishSubject<JobBase<dynamic>>(),
       instanceName: 'jobSubject',

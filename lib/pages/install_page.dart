@@ -4,6 +4,7 @@ import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/pages/page_base.dart';
 import 'package:arquivolta/services/arch_to_rootfs.dart';
+import 'package:arquivolta/services/job.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
@@ -59,7 +60,10 @@ class InstallPage extends HookWidget
           Text(headerText, style: style.typography.titleLarge),
           Expanded(
             child: installResult.isPending
-                ? InProgressInstall()
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: InProgressInstall(),
+                  )
                 : Padding(
                     padding: const EdgeInsets.symmetric(vertical: 24),
                     child: InstallPrompt(onPressedInstall: (d, u, p) {
@@ -85,7 +89,7 @@ class InstallPrompt extends HookWidget implements Loggable {
 
   @override
   Widget build(BuildContext context) {
-    final distro = useTextEditingController(text: 'arch');
+    final distro = useTextEditingController(text: 'arch-foobar');
     final user = useTextEditingController();
     final password = useTextEditingController();
     final passwordHidden = useState(true);
@@ -144,9 +148,63 @@ class InstallPrompt extends HookWidget implements Loggable {
 }
 
 class InProgressInstall extends HookWidget implements Loggable {
+  const InProgressInstall({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    //final style = FluentTheme.of(context);
-    return Container();
+    final style = FluentTheme.of(context);
+    final jobList = useState(<JobBase<dynamic>>[]);
+    final selectedIndex = useState(-1);
+
+    useEffect(
+      () {
+        final sub = JobBase.jobStream.listen((job) {
+          d('Found a job!');
+          jobList.value = [...jobList.value, job];
+        });
+
+        return sub.cancel;
+      },
+      [],
+    );
+
+    return Flex(
+      direction: Axis.horizontal,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Scrollbar(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: SizedBox(
+              width: 600,
+              height: 200,
+              child: ListView.builder(
+                itemCount: jobList.value.length,
+                itemBuilder: (ctx, i) => TappableListTile(
+                  key: Key(jobList.value[i].friendlyName),
+                  tileColor: selectedIndex.value == i
+                      ? ButtonState.all(style.accentColor)
+                      : null,
+                  title: Text(
+                    jobList.value[i].friendlyName,
+                    style: style.typography.bodyStrong,
+                  ),
+                  subtitle: Text(
+                    jobList.value[i].friendlyDescription,
+                    style: style.typography.body,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  onTap: () => selectedIndex.value = i,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Container(color: Colors.red, child: const Text('A box')),
+        )
+      ],
+    );
   }
 }

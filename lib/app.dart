@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/pages/install_page.dart';
+import 'package:arquivolta/services/job.dart';
 import 'package:beamer/beamer.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:get_it/get_it.dart';
@@ -54,6 +55,8 @@ class App {
           ),
         ),
       );
+
+    JobBase.setupRegistration(find);
 
     _setupRoutes(find);
     return find;

@@ -1,8 +1,13 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:arquivolta/logging.dart';
+import 'package:arquivolta/services/arch_to_rootfs.dart';
 import 'package:arquivolta/services/job.dart';
+import 'package:arquivolta/services/util.dart';
 import 'package:arquivolta/services/wsl.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 
 // XXX: This Feels Bad?
 const arquivoltaRepoKey = '8C23AC40F9AC3CD756ADBB240D3678F5DF8F474D';
@@ -75,6 +80,64 @@ cd /tmp/yay
 pacman --noconfirm -U $(ls *.zst)
 ''';
 
+Future<DistroWorker> installArchLinux(String distroName) async {
+  final targetPath = join(getLocalAppDataPath(), distroName);
+  final tmpDir = (await getTemporaryDirectory()).path;
+  final archLinuxPath = join(tmpDir, 'archlinux.tar.gz');
+  final rootfsPath = join(tmpDir, 'rootfs-arch.tar');
+
+  await Directory(targetPath).create();
+
+  final downloadJob = await downloadArchLinux(archLinuxPath);
+  final convertJob =
+      convertArchBootstrapToWSLRootFsJob(archLinuxPath, rootfsPath);
+
+  await downloadJob.execute();
+  await convertJob.execute();
+
+  final importArgs = [
+    '--import',
+    distroName,
+    targetPath,
+    rootfsPath,
+    '--version',
+    '2'
+  ];
+
+  final importJob = JobBase.fromBlock<void>(
+    'Import into WSL2',
+    'Import Arch Linux image into WSL2',
+    (job) async {
+      job
+        ..i('Importing $distroName')
+        ..i('wsl.exe ${importArgs.join(' ')}');
+
+      try {
+        final result = await Process.run(
+          'wsl.exe',
+          importArgs,
+        );
+
+        // NB: We mangle the encoding here because stdout is in UTF-16
+        // but we don't actually have a supported decoder
+        // https://github.com/dart-lang/convert/issues/30
+        job
+          ..i(result.stdout)
+          ..i(result.stderr)
+          ..i('Process wsl.exe exited with code ${result.exitCode}');
+
+        if (result.exitCode != 0) throw Exception('wsl.exe failed');
+      } catch (ex, st) {
+        job.e('Failed to import', ex, st);
+        rethrow;
+      }
+    },
+  );
+
+  await importJob.execute();
+  return DistroWorker(distroName);
+}
+
 Future<void> runArchLinuxPostInstall(
   DistroWorker worker,
   String username,
@@ -124,4 +187,8 @@ Future<void> runArchLinuxPostInstall(
   for (final job in jobQueue) {
     await job.execute();
   }
+
+  // NB: The user that we set up to run via /etc/wsl.conf won't apply until we
+  // restart the distro, so terminate it off now
+  await worker.terminate();
 }

@@ -10,7 +10,6 @@ import 'package:arquivolta/services/wsl.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 
 /// Converts an Arch Linux image downloaded from the web into a format that
 /// wsl --import can handle
@@ -143,62 +142,4 @@ Future<JobBase> downloadArchLinux(String targetFile) async {
     Uri.parse('http://mirror.rackspace.com/archlinux/iso/latest/$imageName'),
     targetFile,
   );
-}
-
-Future<DistroWorker> installArchLinux(String distroName) async {
-  final targetPath = join(getLocalAppDataPath(), distroName);
-  final tmpDir = (await getTemporaryDirectory()).path;
-  final archLinuxPath = join(tmpDir, 'archlinux.tar.gz');
-  final rootfsPath = join(tmpDir, 'rootfs-arch.tar');
-
-  await Directory(targetPath).create();
-
-  final downloadJob = await downloadArchLinux(archLinuxPath);
-  final convertJob =
-      convertArchBootstrapToWSLRootFsJob(archLinuxPath, rootfsPath);
-
-  await downloadJob.execute();
-  await convertJob.execute();
-
-  final importArgs = [
-    '--import',
-    distroName,
-    targetPath,
-    rootfsPath,
-    '--version',
-    '2'
-  ];
-
-  final importJob = JobBase.fromBlock(
-    'Import into WSL2',
-    'Import Arch Linux image into WSL2',
-    (job) async {
-      job
-        ..i('Importing $distroName')
-        ..i('wsl.exe ${importArgs.join(' ')}');
-
-      try {
-        final result = await Process.run(
-          'wsl.exe',
-          importArgs,
-        );
-
-        // NB: We mangle the encoding here because stdout is in UTF-16
-        // but we don't actually have a supported decoder
-        // https://github.com/dart-lang/convert/issues/30
-        job
-          ..i(result.stdout)
-          ..i(result.stderr)
-          ..i('Process wsl.exe exited with code ${result.exitCode}');
-
-        if (result.exitCode != 0) throw Exception('wsl.exe failed');
-      } catch (ex, st) {
-        job.e('Failed to import', ex, st);
-        rethrow;
-      }
-    },
-  );
-
-  await importJob.execute();
-  return DistroWorker(distroName);
 }

@@ -3,7 +3,6 @@ import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/pages/page_base.dart';
-import 'package:arquivolta/services/arch_to_rootfs.dart';
 import 'package:arquivolta/services/install_arch.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:fluent_ui/fluent_ui.dart';

@@ -72,7 +72,7 @@ JobBase<ProcessResult> startProcessAsJob(
   });
 }
 
-class DistroWorker {
+class DistroWorker implements Loggable {
   DistroWorker(this._distro);
 
   final String _distro;
@@ -111,6 +111,35 @@ class DistroWorker {
       failureMessage,
       wd: workingDirectory,
     );
+  }
+
+  Future<JobBase<ProcessResult>> runScriptInDistroAsJob(
+    String friendlyName,
+    String scriptCode,
+    List<String> arguments,
+    String failureMessage,
+  ) async {
+    final tempDir = (await getTemporaryDirectory()).path;
+    final scriptFile = '${DateTime.now().millisecondsSinceEpoch}.sh';
+    final target = '$tempDir\\scriptFile';
+
+    await File(target).writeAsString(scriptCode);
+
+    d('Moving script $scriptFile into distro');
+    await run('mv', [scriptFile, '/tmp/'], workingDirectory: tempDir);
+
+    final ret = _DistroWorkerJob(
+      this,
+      friendlyName,
+      '/bin/bash',
+      [target],
+      failureMessage,
+      wd: '/tmp',
+    );
+
+    // ignore: cascade_invocations
+    ret.i('Launching script:\n$scriptCode');
+    return ret;
   }
 }
 

@@ -291,22 +291,23 @@ class JobListTile extends HookWidget {
     }
 
     return TappableListTile(
-        key: Key(job.friendlyName),
-        leading: leading,
-        tileColor: isSelected ? ButtonState.all(style.accentColor) : null,
-        title: Text(
-          job.friendlyName,
-          style: style.typography.bodyStrong,
-          maxLines: 1,
-          overflow: TextOverflow.fade,
-        ),
-        subtitle: Text(
-          job.friendlyDescription,
-          style: style.typography.body,
-          maxLines: 1,
-          overflow: TextOverflow.fade,
-        ),
-        onTap: onTap);
+      key: Key(job.friendlyName),
+      leading: leading,
+      tileColor: isSelected ? ButtonState.all(style.accentColor) : null,
+      title: Text(
+        job.friendlyName,
+        style: style.typography.bodyStrong,
+        maxLines: 1,
+        overflow: TextOverflow.fade,
+      ),
+      subtitle: Text(
+        job.friendlyDescription,
+        style: style.typography.body,
+        maxLines: 1,
+        overflow: TextOverflow.fade,
+      ),
+      onTap: onTap,
+    );
   }
 }
 

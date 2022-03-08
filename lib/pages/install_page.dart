@@ -277,15 +277,17 @@ class JobListTile extends HookWidget {
     final style = FluentTheme.of(context);
     final jobStatus = useValueListenable(job.jobStatus);
 
-    Widget? leading;
+    const double s = 16;
+    Widget? leading = SizedBox(width: s, height: s, child: Container());
+
     if (jobStatus == JobStatus.running) {
-      leading = const SizedBox(width: 16, height: 16, child: ProgressRing());
+      leading = const SizedBox(width: s, height: s, child: ProgressRing());
     }
     if (jobStatus == JobStatus.error) {
-      leading = const Icon(FluentIcons.error_badge, size: 16);
+      leading = const Icon(FluentIcons.error_badge, size: s);
     }
     if (jobStatus == JobStatus.success) {
-      leading = const Icon(FluentIcons.check_mark, size: 16);
+      leading = const Icon(FluentIcons.check_mark, size: s);
     }
 
     return TappableListTile(

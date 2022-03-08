@@ -38,7 +38,7 @@ set -eux
 
 pacman --noconfirm -Syu
 pacman --noconfirm -Sy base base-devel \
-  git zsh sudo docker htop tmux go \
+  git zsh sudo docker htop tmux go vim \
   wsl-use-windows-openssh
 ''';
 
@@ -72,7 +72,7 @@ String installYay = r'''
 set -eux
 
 cd /tmp/yay
-pacman --noconfirm -U ``$(ls *.zst`)
+pacman --noconfirm -U $(ls *.zst)
 ''';
 
 Future<void> runArchLinuxPostInstall(

@@ -5,6 +5,7 @@ abstract class Loggable {}
 
 abstract class CustomLoggable {
   Logger get logger;
+  bool usePrefix = false;
 }
 
 extension LoggableMixin on Loggable {
@@ -16,7 +17,14 @@ extension LoggableMixin on Loggable {
 
     _global!.d('$_klass: $message', error, stackTrace);
     if (this is CustomLoggable) {
-      (this as CustomLoggable).logger.d('$_klass: $message', error, stackTrace);
+      final cl = this as CustomLoggable;
+      if (cl.usePrefix) {
+        (this as CustomLoggable)
+            .logger
+            .d('$_klass: $message', error, stackTrace);
+      } else {
+        (this as CustomLoggable).logger.d('$message', error, stackTrace);
+      }
     }
   }
 
@@ -26,7 +34,14 @@ extension LoggableMixin on Loggable {
 
     _global!.i('$_klass: $message', error, stackTrace);
     if (this is CustomLoggable) {
-      (this as CustomLoggable).logger.i('$_klass: $message', error, stackTrace);
+      final cl = this as CustomLoggable;
+      if (cl.usePrefix) {
+        (this as CustomLoggable)
+            .logger
+            .i('$_klass: $message', error, stackTrace);
+      } else {
+        (this as CustomLoggable).logger.i('$message', error, stackTrace);
+      }
     }
   }
 
@@ -35,10 +50,16 @@ extension LoggableMixin on Loggable {
     _global ??= App.find<Logger>();
 
     _global!.w('⚠️ $_klass: $message', error, stackTrace);
+
     if (this is CustomLoggable) {
-      (this as CustomLoggable)
-          .logger
-          .w('⚠️ $_klass: $message', error, stackTrace);
+      final cl = this as CustomLoggable;
+      if (cl.usePrefix) {
+        (this as CustomLoggable)
+            .logger
+            .i('⚠️ $_klass: $message', error, stackTrace);
+      } else {
+        (this as CustomLoggable).logger.i('⚠️ $message', error, stackTrace);
+      }
     }
   }
 

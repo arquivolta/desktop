@@ -54,6 +54,8 @@ chmod 600 /etc/sudoers.d/sudo-group-allowed
 ## Set our user
 echo '[user]' > /etc/wsl.conf
 echo 'default=$userName' >> /etc/wsl.conf
+
+## XXX: Set the password!
 ''';
 
 String buildYay = '''

@@ -144,6 +144,8 @@ class _DistroWorkerJob extends JobBase<ProcessResult> {
     if (result.exitCode != 0) {
       e(failureMessage);
       e('Process $exec exited with code ${result.exitCode}');
+    } else {
+      i('Process $exec completed successfully');
     }
 
     return result;

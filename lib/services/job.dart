@@ -3,11 +3,12 @@ import 'dart:async';
 import 'package:arquivolta/app.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/services/util.dart';
+import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 
 abstract class JobBase<T> extends CustomLoggable implements Loggable {
-  late final Stream logOutput;
+  late final Stream<List<String>> logOutput;
   late final Logger _logger;
 
   final String friendlyName;
@@ -26,7 +27,23 @@ abstract class JobBase<T> extends CustomLoggable implements Loggable {
           ? Level.info
           : Level.debug,
     );
+
+    App.find<PublishSubject<JobBase<dynamic>>>(instanceName: 'jobSubject')
+        .add(this);
   }
+
+  static GetIt setupRegistration(GetIt locator) {
+    locator.registerSingleton(
+      PublishSubject<JobBase<dynamic>>(),
+      instanceName: 'jobSubject',
+    );
+
+    return locator;
+  }
+
+  static Stream<JobBase<dynamic>> get jobStream =>
+      App.find<PublishSubject<JobBase<dynamic>>>(instanceName: 'jobSubject')
+          .stream;
 
   Future<T> execute();
 

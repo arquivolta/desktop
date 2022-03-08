@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/pages/install_page.dart';
+import 'package:arquivolta/services/job.dart';
 import 'package:beamer/beamer.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:get_it/get_it.dart';
@@ -55,6 +56,8 @@ class App {
         ),
       );
 
+    JobBase.setupRegistration(find);
+
     _setupRoutes(find);
     return find;
   }
@@ -76,10 +79,12 @@ class App {
 
 class MainWindow extends StatelessWidget implements Loggable {
   late final RoutesLocationBuilder routesBuilder;
+  late final BeamerDelegate delegate;
 
   MainWindow({Key? key}) : super(key: key) {
     // NB: If we don't do this here we get a crash on hot reload.
     routesBuilder = RoutesLocationBuilder(routes: App.find<BeamerRouteList>());
+    delegate = BeamerDelegate(locationBuilder: routesBuilder);
 
     d('Creating MainWindow!');
   }
@@ -92,7 +97,7 @@ class MainWindow extends StatelessWidget implements Loggable {
         visualDensity: VisualDensity.standard,
       ),
       routeInformationParser: BeamerParser(),
-      routerDelegate: BeamerDelegate(locationBuilder: routesBuilder),
+      routerDelegate: delegate,
     );
   }
 }

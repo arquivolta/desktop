@@ -141,6 +141,8 @@ class DistroWorker implements Loggable {
       wd: '/tmp',
     );
 
+    // NB: We intentionally log to the distro's log so that the log entries
+    // show up in the UI under the correct job
     // ignore: cascade_invocations
     ret.i('Launching script:\n$scriptCode');
     return ret;

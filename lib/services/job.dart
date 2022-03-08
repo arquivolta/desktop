@@ -3,9 +3,17 @@ import 'dart:async';
 import 'package:arquivolta/app.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/services/util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
+
+enum JobStatus {
+  idle,
+  running,
+  success,
+  error,
+}
 
 abstract class JobBase<T> extends CustomLoggable implements Loggable {
   late final Stream<List<String>> logOutput;
@@ -13,6 +21,8 @@ abstract class JobBase<T> extends CustomLoggable implements Loggable {
 
   final String friendlyName;
   final String friendlyDescription;
+  final ValueNotifier<JobStatus> jobStatus =
+      ValueNotifier<JobStatus>(JobStatus.idle);
 
   @override
   Logger get logger => _logger;
@@ -23,6 +33,7 @@ abstract class JobBase<T> extends CustomLoggable implements Loggable {
 
     _logger = Logger(
       output: so,
+      printer: ZeroAnnotationPrinter(),
       level: App.find<ApplicationMode>() == ApplicationMode.production
           ? Level.info
           : Level.debug,
@@ -67,7 +78,18 @@ class FuncJob<T> extends JobBase<T> {
 
   @override
   Future<T> execute() {
-    return block(this);
+    jobStatus.value = JobStatus.running;
+
+    try {
+      final ret = block(this);
+
+      jobStatus.value = JobStatus.success;
+      return ret;
+    } catch (ex, st) {
+      e('Failed to run job $friendlyName', ex, st);
+      jobStatus.value = JobStatus.error;
+      rethrow;
+    }
   }
 }
 
@@ -95,4 +117,12 @@ JobBase<void> downloadUrlToFileJob(
       }
     },
   );
+}
+
+class ZeroAnnotationPrinter extends LogPrinter {
+  @override
+  List<String> log(LogEvent event) {
+    final errorStr = event.error != null ? '  ERROR: ${event.error}' : '';
+    return ['${event.message}$errorStr'];
+  }
 }

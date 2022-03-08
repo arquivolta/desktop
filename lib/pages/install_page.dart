@@ -3,7 +3,7 @@ import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/pages/page_base.dart';
-import 'package:arquivolta/services/arch_to_rootfs.dart';
+import 'package:arquivolta/services/install_arch.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -39,9 +39,13 @@ class InstallPage extends HookWidget
 
     final installResult = useAction(
       () async {
-        await installArchLinuxJob(distroName.value).execute();
+        d('Starting Phase 1');
+        final worker = await installArchLinux(distroName.value);
 
-        i('We did it!');
+        d('Starting Phase 2');
+        await runArchLinuxPostInstall(worker, username.value, password.value);
+
+        i('Completed install!');
       },
       [],
     );
@@ -215,23 +219,9 @@ class InProgressInstall extends HookWidget implements Loggable {
             child: ListView.builder(
               itemCount: jobList.value.length,
               controller: listScroll,
-              itemBuilder: (ctx, i) => TappableListTile(
-                key: Key(jobList.value[i].friendlyName),
-                tileColor: selectedIndex.value == i
-                    ? ButtonState.all(style.accentColor)
-                    : null,
-                title: Text(
-                  jobList.value[i].friendlyName,
-                  style: style.typography.bodyStrong,
-                  maxLines: 1,
-                  overflow: TextOverflow.fade,
-                ),
-                subtitle: Text(
-                  jobList.value[i].friendlyDescription,
-                  style: style.typography.body,
-                  maxLines: 1,
-                  overflow: TextOverflow.fade,
-                ),
+              itemBuilder: (ctx, i) => JobListTile(
+                job: jobList.value[i],
+                isSelected: selectedIndex.value == i,
                 onTap: () => selectedIndex.value = i,
               ),
             ),
@@ -265,6 +255,57 @@ class InProgressInstall extends HookWidget implements Loggable {
           ),
         )
       ],
+    );
+  }
+}
+
+class JobListTile extends HookWidget {
+  const JobListTile({
+    Key? key,
+    required this.job,
+    required this.onTap,
+    required this.isSelected,
+  }) : super(key: key);
+
+  final JobBase job;
+  final VoidCallback onTap;
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = FluentTheme.of(context);
+    final jobStatus = useValueListenable(job.jobStatus);
+
+    const double s = 16;
+    Widget? leading = SizedBox(width: s, height: s, child: Container());
+
+    if (jobStatus == JobStatus.running) {
+      leading = const SizedBox(width: s, height: s, child: ProgressRing());
+    }
+    if (jobStatus == JobStatus.error) {
+      leading = const Icon(FluentIcons.error_badge, size: s);
+    }
+    if (jobStatus == JobStatus.success) {
+      leading = const Icon(FluentIcons.check_mark, size: s);
+    }
+
+    return TappableListTile(
+      key: Key(job.friendlyName),
+      leading: leading,
+      tileColor: isSelected ? ButtonState.all(style.accentColor) : null,
+      title: Text(
+        job.friendlyName,
+        style: style.typography.bodyStrong,
+        maxLines: 1,
+        overflow: TextOverflow.fade,
+      ),
+      subtitle: Text(
+        job.friendlyDescription,
+        style: style.typography.body,
+        maxLines: 1,
+        overflow: TextOverflow.fade,
+      ),
+      onTap: onTap,
     );
   }
 }

@@ -72,7 +72,7 @@ JobBase<ProcessResult> startProcessAsJob(
   });
 }
 
-class DistroWorker {
+class DistroWorker implements Loggable {
   DistroWorker(this._distro);
 
   final String _distro;
@@ -81,14 +81,22 @@ class DistroWorker {
     String executable,
     List<String> arguments, {
     String? workingDirectory,
+    String? user,
     StreamSink<String>? output,
   }) {
+    final userArgs = user != null ? ['-u', user] : <String>[];
+
     return startProcessWithOutput(
       'wsl.exe',
-      ['-d', _distro, executable, ...arguments],
+      ['-d', _distro, ...userArgs, executable, ...arguments],
       workingDirectory: workingDirectory,
       output: output,
     );
+  }
+
+  Future<void> terminate() async {
+    await Process.run('wsl.exe', ['--terminate', _distro])
+        .throwOnError('Failed to terminate distro');
   }
 
   Future<void> destroy() async {
@@ -112,6 +120,32 @@ class DistroWorker {
       wd: workingDirectory,
     );
   }
+
+  Future<JobBase<ProcessResult>> runScriptInDistroAsJob(
+    String friendlyName,
+    String scriptCode,
+    List<String> arguments,
+    String failureMessage, {
+    String? user,
+  }) async {
+    final tempDir = (await getTemporaryDirectory()).path;
+    final scriptFile = '${DateTime.now().millisecondsSinceEpoch}.sh';
+    final target = '$tempDir\\$scriptFile';
+
+    await File(target).writeAsString(scriptCode);
+
+    d('Moving script $scriptFile into distro');
+    await run('mv', [scriptFile, '/tmp/'], workingDirectory: tempDir);
+
+    return _DistroWorkerJob(
+      this,
+      friendlyName,
+      '/bin/bash',
+      ['/tmp/$scriptFile'],
+      failureMessage,
+      user: user,
+    );
+  }
 }
 
 class _DistroWorkerJob extends JobBase<ProcessResult> {
@@ -120,6 +154,7 @@ class _DistroWorkerJob extends JobBase<ProcessResult> {
   final String failureMessage;
   final List<String> args;
   final String? wd;
+  final String? user;
 
   _DistroWorkerJob(
     this.worker,
@@ -128,22 +163,44 @@ class _DistroWorkerJob extends JobBase<ProcessResult> {
     this.args,
     this.failureMessage, {
     this.wd,
+    this.user,
   }) : super(name, "$exec ${args.join(' ')}");
 
   @override
   Future<ProcessResult> execute() async {
     i(friendlyDescription);
+    jobStatus.value = JobStatus.running;
 
     final out = StreamController<String>();
     out.stream.listen(i);
-    final result =
-        await worker.run(exec, args, workingDirectory: wd, output: out.sink);
+
+    ProcessResult result;
+    try {
+      result = await worker.run(
+        exec,
+        args,
+        workingDirectory: wd,
+        user: user,
+        output: out.sink,
+      );
+    } catch (ex, st) {
+      e('Failed to start $exec', ex, st);
+
+      jobStatus.value = JobStatus.error;
+      rethrow;
+    }
 
     await out.close();
 
     if (result.exitCode != 0) {
       e(failureMessage);
       e('Process $exec exited with code ${result.exitCode}');
+      jobStatus.value = JobStatus.error;
+
+      throw Exception(failureMessage);
+    } else {
+      i('Process $exec completed successfully');
+      jobStatus.value = JobStatus.success;
     }
 
     return result;
@@ -197,4 +254,10 @@ JobBase<DistroWorker> setupWorkWSLImageJob() {
     await Future<void>.delayed(const Duration(milliseconds: 2500));
     return DistroWorker(distroName);
   });
+}
+
+String getLinuxArchitectureForOS() {
+  return getOSArchitecture() == OperatingSystemType.aarch64
+      ? 'aarch64'
+      : 'x86_64';
 }

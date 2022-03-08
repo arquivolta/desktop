@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:arquivolta/actions.dart';
+import 'package:arquivolta/app.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:arquivolta/services/util.dart';
 import 'package:arquivolta/services/wsl.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 
 /// Converts an Arch Linux image downloaded from the web into a format that
 /// wsl --import can handle
@@ -98,12 +99,35 @@ final shasumUri =
     Uri.parse('http://mirror.rackspace.com/archlinux/iso/latest/sha1sums.txt');
 
 Future<JobBase> downloadArchLinux(String targetFile) async {
+  final log = App.find<Logger>();
+
   if (getOSArchitecture() == OperatingSystemType.aarch64) {
     return downloadUrlToFileJob(
       'Downloading Arch Linux ARM',
       arm64ImageUri,
       targetFile,
     );
+  }
+
+  // NB: In Debug mode, try to find our local copy of the image so we're not
+  // abusing Arch Linux mirrors all the time
+  if (App.find<ApplicationMode>() == ApplicationMode.debug) {
+    final dirents =
+        await Directory(absolute(rootAppDir(), 'resources')).list().toList();
+    try {
+      final img =
+          dirents.firstWhere((x) => x.path.contains('archlinux-bootstrap'));
+
+      return JobBase.fromBlock<void>(
+          'Using local Arch image', 'Copying ${img.path} into place',
+          (job) async {
+        job.i('Using local image ${img.path}');
+        await File(img.path).openRead().pipe(File(targetFile).openWrite());
+        job.i('Copying complete');
+      });
+    } catch (_ex) {
+      log.d("Can't find local image, continuing to download...");
+    }
   }
 
   final shaText = (await http.get(shasumUri)).body;
@@ -118,31 +142,4 @@ Future<JobBase> downloadArchLinux(String targetFile) async {
     Uri.parse('http://mirror.rackspace.com/archlinux/iso/latest/$imageName'),
     targetFile,
   );
-}
-
-JobBase<DistroWorker> installArchLinuxJob(String distroName) {
-  return JobBase.fromBlock('Install Arch Linux', 'Install Arch Linux',
-      (job) async {
-    final targetPath = join(getLocalAppDataPath(), distroName);
-    final tmpDir = (await getTemporaryDirectory()).path;
-    final archLinuxPath = join(tmpDir, 'archlinux.tar.gz');
-    final rootfsPath = join(tmpDir, 'rootfs-arch.tar');
-
-    job.i('Creating $targetPath');
-    await Directory(targetPath).create();
-
-    final downloadJob = await downloadArchLinux(archLinuxPath);
-    final convertJob =
-        convertArchBootstrapToWSLRootFsJob(archLinuxPath, rootfsPath);
-
-    await downloadJob.execute();
-    await convertJob.execute();
-
-    await Process.run(
-      'wsl.exe',
-      ['--import', distroName, targetPath, rootfsPath, '--version', '2'],
-    ).throwOnError('Failed to create Arch distro');
-
-    return DistroWorker(distroName);
-  });
 }

@@ -133,19 +133,33 @@ class _DistroWorkerJob extends JobBase<ProcessResult> {
   @override
   Future<ProcessResult> execute() async {
     i(friendlyDescription);
+    jobStatus.value = JobStatus.running;
 
     final out = StreamController<String>();
     out.stream.listen(i);
-    final result =
-        await worker.run(exec, args, workingDirectory: wd, output: out.sink);
+
+    ProcessResult result;
+    try {
+      result =
+          await worker.run(exec, args, workingDirectory: wd, output: out.sink);
+    } catch (ex, st) {
+      e('Failed to start $exec', ex, st);
+
+      jobStatus.value = JobStatus.error;
+      rethrow;
+    }
 
     await out.close();
 
     if (result.exitCode != 0) {
       e(failureMessage);
       e('Process $exec exited with code ${result.exitCode}');
+      jobStatus.value = JobStatus.error;
+
+      throw Exception(failureMessage);
     } else {
       i('Process $exec completed successfully');
+      jobStatus.value = JobStatus.success;
     }
 
     return result;

@@ -6,6 +6,14 @@ import 'package:arquivolta/services/util.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:flutter/foundation.dart';
+
+enum JobStatus {
+  idle,
+  running,
+  success,
+  error,
+}
 
 abstract class JobBase<T> extends CustomLoggable implements Loggable {
   late final Stream<List<String>> logOutput;
@@ -13,6 +21,8 @@ abstract class JobBase<T> extends CustomLoggable implements Loggable {
 
   final String friendlyName;
   final String friendlyDescription;
+  final ValueNotifier<JobStatus> jobStatus =
+      ValueNotifier<JobStatus>(JobStatus.idle);
 
   @override
   Logger get logger => _logger;
@@ -67,7 +77,18 @@ class FuncJob<T> extends JobBase<T> {
 
   @override
   Future<T> execute() {
-    return block(this);
+    jobStatus.value = JobStatus.running;
+
+    try {
+      final ret = block(this);
+
+      jobStatus.value = JobStatus.success;
+      return ret;
+    } catch (ex, st) {
+      e('Failed to run job $friendlyName', ex, st);
+      jobStatus.value = JobStatus.error;
+      rethrow;
+    }
   }
 }
 

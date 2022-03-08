@@ -94,6 +94,11 @@ class DistroWorker implements Loggable {
     );
   }
 
+  Future<void> terminate() async {
+    await Process.run('wsl.exe', ['--terminate', _distro])
+        .throwOnError('Failed to terminate distro');
+  }
+
   Future<void> destroy() async {
     await Process.run('wsl.exe', ['--unregister', _distro])
         .throwOnError('Failed to destroy distro');

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:arquivolta/actions.dart';
@@ -119,8 +120,13 @@ Future<JobBase> downloadArchLinux(String targetFile) async {
       final img =
           dirents.firstWhere((x) => x.path.contains('archlinux-bootstrap'));
 
-      log.d('Using local image ${img.path}');
-      await File(img.path).openRead().pipe(File(targetFile).openWrite());
+      return JobBase.fromBlock<void>(
+          'Using local Arch image', 'Copying ${img.path} into place',
+          (job) async {
+        job.i('Using local image ${img.path}');
+        await File(img.path).openRead().pipe(File(targetFile).openWrite());
+        job.i('Copying complete');
+      });
     } catch (_ex) {
       log.d("Can't find local image, continuing to download...");
     }
@@ -140,29 +146,57 @@ Future<JobBase> downloadArchLinux(String targetFile) async {
   );
 }
 
-JobBase<DistroWorker> installArchLinuxJob(String distroName) {
-  return JobBase.fromBlock('Install Arch Linux', 'Install Arch Linux',
-      (job) async {
-    final targetPath = join(getLocalAppDataPath(), distroName);
-    final tmpDir = (await getTemporaryDirectory()).path;
-    final archLinuxPath = join(tmpDir, 'archlinux.tar.gz');
-    final rootfsPath = join(tmpDir, 'rootfs-arch.tar');
+Future<DistroWorker> installArchLinux(String distroName) async {
+  final targetPath = join(getLocalAppDataPath(), distroName);
+  final tmpDir = (await getTemporaryDirectory()).path;
+  final archLinuxPath = join(tmpDir, 'archlinux.tar.gz');
+  final rootfsPath = join(tmpDir, 'rootfs-arch.tar');
 
-    job.i('Creating $targetPath');
-    await Directory(targetPath).create();
+  await Directory(targetPath).create();
 
-    final downloadJob = await downloadArchLinux(archLinuxPath);
-    final convertJob =
-        convertArchBootstrapToWSLRootFsJob(archLinuxPath, rootfsPath);
+  final downloadJob = await downloadArchLinux(archLinuxPath);
+  final convertJob =
+      convertArchBootstrapToWSLRootFsJob(archLinuxPath, rootfsPath);
 
-    await downloadJob.execute();
-    await convertJob.execute();
+  await downloadJob.execute();
+  await convertJob.execute();
 
-    await Process.run(
-      'wsl.exe',
-      ['--import', distroName, targetPath, rootfsPath, '--version', '2'],
-    ).throwOnError('Failed to create Arch distro');
+  final importArgs = [
+    '--import',
+    distroName,
+    targetPath,
+    rootfsPath,
+    '--version',
+    '2'
+  ];
 
-    return DistroWorker(distroName);
-  });
+  final importJob = JobBase.fromBlock(
+    'Import into WSL2',
+    'Import Arch Linux image into WSL2',
+    (job) async {
+      job
+        ..i('Importing $distroName')
+        ..i('wsl.exe ${importArgs.join(' ')}');
+
+      try {
+        final result = await Process.run(
+          'wsl.exe',
+          importArgs,
+        );
+
+        job
+          ..i(utf8.decode(result.stdout as List<int>))
+          ..i(utf8.decode(result.stderr as List<int>))
+          ..i('Process wsl.exe exited with code ${result.exitCode}');
+
+        if (result.exitCode != 0) throw Exception('wsl.exe failed');
+      } catch (ex, st) {
+        job.e('Failed to import', ex, st);
+        rethrow;
+      }
+    },
+  );
+
+  await importJob.execute();
+  return DistroWorker(distroName);
 }

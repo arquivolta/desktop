@@ -125,7 +125,7 @@ class DistroWorker implements Loggable {
   }) async {
     final tempDir = (await getTemporaryDirectory()).path;
     final scriptFile = '${DateTime.now().millisecondsSinceEpoch}.sh';
-    final target = '$tempDir\\scriptFile';
+    final target = '$tempDir\\$scriptFile';
 
     await File(target).writeAsString(scriptCode);
 
@@ -136,7 +136,7 @@ class DistroWorker implements Loggable {
       this,
       friendlyName,
       '/bin/bash',
-      [target],
+      [scriptFile],
       failureMessage,
       wd: '/tmp',
     );

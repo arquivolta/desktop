@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:arquivolta/actions.dart';
+import 'package:arquivolta/app.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:arquivolta/services/util.dart';
 import 'package:arquivolta/services/wsl.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -98,12 +100,30 @@ final shasumUri =
     Uri.parse('http://mirror.rackspace.com/archlinux/iso/latest/sha1sums.txt');
 
 Future<JobBase> downloadArchLinux(String targetFile) async {
+  final log = App.find<Logger>();
+
   if (getOSArchitecture() == OperatingSystemType.aarch64) {
     return downloadUrlToFileJob(
       'Downloading Arch Linux ARM',
       arm64ImageUri,
       targetFile,
     );
+  }
+
+  // NB: In Debug mode, try to find our local copy of the image so we're not
+  // abusing Arch Linux mirrors all the time
+  if (App.find<ApplicationMode>() == ApplicationMode.debug) {
+    final dirents =
+        await Directory(absolute(rootAppDir(), 'resources')).list().toList();
+    try {
+      final img =
+          dirents.firstWhere((x) => x.path.contains('archlinux-bootstrap'));
+
+      log.d('Using local image ${img.path}');
+      await File(img.path).openRead().pipe(File(targetFile).openWrite());
+    } catch (_ex) {
+      log.d("Can't find local image, continuing to download...");
+    }
   }
 
   final shaText = (await http.get(shasumUri)).body;

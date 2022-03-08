@@ -150,7 +150,9 @@ class InstallPrompt extends HookWidget implements Loggable {
 }
 
 class InProgressInstall extends HookWidget implements Loggable {
-  const InProgressInstall({Key? key}) : super(key: key);
+  const InProgressInstall({
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -245,6 +247,8 @@ class InProgressInstall extends HookWidget implements Loggable {
                 style: style.typography.bodyStrong,
               ),
               Flexible(
+                flex: 0,
+                fit: FlexFit.tight,
                 child: Text(
                   selectedJob?.friendlyDescription ?? '',
                   style: style.typography.body,
@@ -284,10 +288,10 @@ class ConsoleOutput extends StatelessWidget implements Loggable {
     final consoleFont = FluentTheme.of(context)
         .typography
         .body!
-        .copyWith(fontFamily: 'Consolas', color: Colors.green);
+        .copyWith(fontFamily: 'Consolas', color: Colors.grey);
 
     return Container(
-      color: Colors.black,
+      color: Colors.grey[40],
       child: ListView.builder(
         controller: consoleScroll,
         itemCount: lines?.length ?? 0,

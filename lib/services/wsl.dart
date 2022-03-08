@@ -132,20 +132,13 @@ class DistroWorker implements Loggable {
     d('Moving script $scriptFile into distro');
     await run('mv', [scriptFile, '/tmp/'], workingDirectory: tempDir);
 
-    final ret = _DistroWorkerJob(
+    return _DistroWorkerJob(
       this,
       friendlyName,
       '/bin/bash',
-      [scriptFile],
+      ['/tmp/$scriptFile'],
       failureMessage,
-      wd: '/tmp',
     );
-
-    // NB: We intentionally log to the distro's log so that the log entries
-    // show up in the UI under the correct job
-    // ignore: cascade_invocations
-    ret.i('Launching script:\n$scriptCode');
-    return ret;
   }
 }
 

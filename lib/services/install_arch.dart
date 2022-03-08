@@ -44,7 +44,7 @@ set -eux
 pacman --noconfirm -Syu
 pacman --noconfirm -Sy base base-devel \
   git zsh sudo docker htop tmux go vim \
-  wsl-use-windows-openssh
+  wsl-use-windows-openssh wsl-set-up-wsld wsl-enable-systemd
 ''';
 
 String addUser(String userName, String password) => '''
@@ -52,14 +52,16 @@ String addUser(String userName, String password) => '''
 set -eux
 
 useradd -m -G wheel -s /bin/zsh '$userName'
-echo "$userName:$password" | chpasswd
+echo '$userName:$password' | chpasswd
 
 ## Set up sudo
-echo '%wheel ALL=(ALL:ALL) ALL' > /etc/sudoers.d/sudo-group-allowed
-chmod 600 /etc/sudoers.d/sudo-group-allowed
+echo '%wheel ALL=(ALL:ALL) ALL' > /etc/sudoers.d/00-enable-wheel
+echo '' >> /etc/sudoers.d/00-enable-wheel
+chmod 644 /etc/sudoers.d/00-enable-wheel
 
 ## Set our user
-echo '[user]' > /etc/wsl.conf
+echo '' >> /etc/wsl.conf
+echo '[user]' >> /etc/wsl.conf
 echo 'default=$userName' >> /etc/wsl.conf
 ''';
 

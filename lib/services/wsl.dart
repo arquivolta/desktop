@@ -138,6 +138,7 @@ class DistroWorker implements Loggable {
       '/bin/bash',
       ['/tmp/$scriptFile'],
       failureMessage,
+      user: user,
     );
   }
 }

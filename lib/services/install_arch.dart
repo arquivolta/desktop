@@ -38,7 +38,7 @@ set -eux
 
 pacman --noconfirm -Syu
 pacman --noconfirm -Sy base base-devel \
-  git zsh sudo docker htop tmux \
+  git zsh sudo docker htop tmux go \
   wsl-use-windows-openssh
 ''';
 
@@ -89,7 +89,7 @@ Future<void> runArchLinuxPostInstall(
     ),
     await worker.runScriptInDistroAsJob(
       'Set up locale',
-      configureLocale(ui.window.locale.toLanguageTag()),
+      configureLocale(ui.window.locale.toLanguageTag().replaceAll('-', '_')),
       [],
       "Couldn't set up locale",
     ),

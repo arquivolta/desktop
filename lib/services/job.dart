@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:arquivolta/app.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/services/util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:flutter/foundation.dart';
 
 enum JobStatus {
   idle,

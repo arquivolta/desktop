@@ -81,11 +81,14 @@ class DistroWorker implements Loggable {
     String executable,
     List<String> arguments, {
     String? workingDirectory,
+    String? user,
     StreamSink<String>? output,
   }) {
+    final userArgs = user != null ? ['-u', user] : <String>[];
+
     return startProcessWithOutput(
       'wsl.exe',
-      ['-d', _distro, executable, ...arguments],
+      ['-d', _distro, ...userArgs, executable, ...arguments],
       workingDirectory: workingDirectory,
       output: output,
     );
@@ -117,8 +120,9 @@ class DistroWorker implements Loggable {
     String friendlyName,
     String scriptCode,
     List<String> arguments,
-    String failureMessage,
-  ) async {
+    String failureMessage, {
+    String? user,
+  }) async {
     final tempDir = (await getTemporaryDirectory()).path;
     final scriptFile = '${DateTime.now().millisecondsSinceEpoch}.sh';
     final target = '$tempDir\\scriptFile';
@@ -149,6 +153,7 @@ class _DistroWorkerJob extends JobBase<ProcessResult> {
   final String failureMessage;
   final List<String> args;
   final String? wd;
+  final String? user;
 
   _DistroWorkerJob(
     this.worker,
@@ -157,6 +162,7 @@ class _DistroWorkerJob extends JobBase<ProcessResult> {
     this.args,
     this.failureMessage, {
     this.wd,
+    this.user,
   }) : super(name, "$exec ${args.join(' ')}");
 
   @override
@@ -169,8 +175,13 @@ class _DistroWorkerJob extends JobBase<ProcessResult> {
 
     ProcessResult result;
     try {
-      result =
-          await worker.run(exec, args, workingDirectory: wd, output: out.sink);
+      result = await worker.run(
+        exec,
+        args,
+        workingDirectory: wd,
+        user: user,
+        output: out.sink,
+      );
     } catch (ex, st) {
       e('Failed to start $exec', ex, st);
 
@@ -242,4 +253,10 @@ JobBase<DistroWorker> setupWorkWSLImageJob() {
     await Future<void>.delayed(const Duration(milliseconds: 2500));
     return DistroWorker(distroName);
   });
+}
+
+String getLinuxArchitectureForOS() {
+  return getOSArchitecture() == OperatingSystemType.aarch64
+      ? 'aarch64'
+      : 'x86_64';
 }

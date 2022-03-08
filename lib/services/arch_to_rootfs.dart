@@ -184,9 +184,12 @@ Future<DistroWorker> installArchLinux(String distroName) async {
           importArgs,
         );
 
+        // NB: We mangle the encoding here because stdout is in UTF-16
+        // but we don't actually have a supported decoder
+        // https://github.com/dart-lang/convert/issues/30
         job
-          ..i(utf8.decode(result.stdout as List<int>))
-          ..i(utf8.decode(result.stderr as List<int>))
+          ..i(result.stdout)
+          ..i(result.stderr)
           ..i('Process wsl.exe exited with code ${result.exitCode}');
 
         if (result.exitCode != 0) throw Exception('wsl.exe failed');

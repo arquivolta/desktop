@@ -33,6 +33,7 @@ abstract class JobBase<T> extends CustomLoggable implements Loggable {
 
     _logger = Logger(
       output: so,
+      printer: ZeroAnnotationPrinter(),
       level: App.find<ApplicationMode>() == ApplicationMode.production
           ? Level.info
           : Level.debug,
@@ -116,4 +117,12 @@ JobBase<void> downloadUrlToFileJob(
       }
     },
   );
+}
+
+class ZeroAnnotationPrinter extends LogPrinter {
+  @override
+  List<String> log(LogEvent event) {
+    final errorStr = event.error != null ? '  ERROR: ${event.error}' : '';
+    return ['${event.message}$errorStr'];
+  }
 }

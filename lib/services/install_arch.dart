@@ -27,6 +27,8 @@ mv /tmp/mirrorlist /etc/pacman.d/
 
 echo '[arquivolta]' >> /etc/pacman.conf
 echo 'Server = https://$architecture.repo.arquivolta.dev' >> /etc/pacman.conf
+echo '[arquivolta-extras]' >> /etc/pacman.conf
+echo 'Server = https://$architecture.repo-extras.arquivolta.dev' >> /etc/pacman.conf
 ''';
 
 String configureLocale(String locale) => '''

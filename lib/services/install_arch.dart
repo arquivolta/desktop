@@ -43,7 +43,7 @@ set -eux
 
 pacman --noconfirm -Syu
 pacman --noconfirm -Sy base base-devel \
-  git zsh sudo docker htop tmux go vim \
+  git zsh sudo docker htop tmux go vim zenity \
   wsl-use-windows-openssh wsl-set-up-wsld wsl-enable-systemd
 ''';
 
@@ -52,7 +52,8 @@ String addUser(String userName, String password) => '''
 set -eux
 
 useradd -m -G wheel -s /bin/zsh '$userName'
-echo '$userName:$password' | chpasswd
+
+echo "$userName:\$(zenity --password --title 'Enter a new password for $userName')" | chpasswd
 
 ## Set up sudo
 echo '%wheel ALL=(ALL:ALL) ALL' > /etc/sudoers.d/00-enable-wheel

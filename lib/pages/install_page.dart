@@ -97,23 +97,28 @@ class InstallPrompt extends HookWidget implements Loggable {
   Widget build(BuildContext context) {
     final distro = useTextEditingController(text: 'arch-foobar');
     final user = useTextEditingController();
-    final password = useTextEditingController();
-    final passwordHidden = useState(true);
+    //final password = useTextEditingController();
+    //final passwordHidden = useState(true);
 
     // Reevaluate shouldEnableButton whenever any of the text changes
-    [distro, user, password].forEach(useValueListenable);
+    [
+      distro,
+      user, /*password*/
+    ].forEach(useValueListenable);
 
     final shouldEnableButton = distro.text.length > 1 &&
-        user.text.length > 1 &&
-        password.text.length > 1;
+        user.text.length > 1; //&& password.text.length > 1;
 
     final onPress = useCallback(
       () => onPressedInstall(
         distro.text,
         user.text,
-        password.text,
+        '', //password.text,
       ),
-      [distro, user, password],
+      [
+        distro,
+        user, /*password*/
+      ],
     );
 
     return Flex(
@@ -127,6 +132,7 @@ class InstallPrompt extends HookWidget implements Loggable {
           controller: user,
           header: 'Linux Username',
         ),
+        /*
         TextBox(
           controller: password,
           header: 'Password',
@@ -138,6 +144,7 @@ class InstallPrompt extends HookWidget implements Loggable {
             onPressed: () => passwordHidden.value = !passwordHidden.value,
           ),
         ),
+        */
         Align(
           alignment: Alignment.centerRight,
           child: Padding(

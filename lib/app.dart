@@ -4,10 +4,14 @@ import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/pages/install_page.dart';
 import 'package:arquivolta/services/job.dart';
+import 'package:arquivolta/services/util.dart';
 import 'package:beamer/beamer.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
+
+// ignore: implementation_imports
+import 'package:logger/src/outputs/file_output.dart';
 
 enum ApplicationMode { debug, production, test }
 
@@ -15,6 +19,47 @@ typedef BeamerRouteList
     = Map<Pattern, dynamic Function(BuildContext, BeamState, Object?)>;
 
 typedef BeamerPageList = List<PageInfo>;
+
+Logger createLogger(ApplicationMode mode) {
+  if (mode == ApplicationMode.production) {
+    final appData = getLocalAppDataPath();
+    final ourAppDataDir = Directory('$appData/Arquivolta')
+      ..createSync(recursive: true);
+
+    return Logger(
+      output: FileOutput(file: File('${ourAppDataDir.path}/log.txt')),
+      filter: ProductionFilter(),
+      printer: PrettyPrinter(
+        methodCount: 0,
+        errorMethodCount: 4,
+        excludeBox: {
+          Level.debug: true,
+          Level.info: true,
+          Level.verbose: true,
+        },
+        colors: false,
+        printEmojis: false, // NB: We add these in later
+      ),
+      level: Level.info,
+    );
+  }
+
+  // NB: filter: ProductionFilter is not a typo :facepalm:
+  return Logger(
+    filter: ProductionFilter(),
+    printer: PrettyPrinter(
+      methodCount: 0,
+      errorMethodCount: 4,
+      excludeBox: {
+        Level.debug: true,
+        Level.info: true,
+        Level.verbose: true,
+      },
+      colors: false,
+      printEmojis: false, // NB: We add these in later
+    ),
+  );
+}
 
 class App {
   static GetIt find = GetIt.instance;
@@ -41,20 +86,7 @@ class App {
 
     find
       ..registerSingleton(appMode)
-      ..registerSingleton(
-        Logger(
-          printer: PrettyPrinter(
-            methodCount: 0,
-            errorMethodCount: 4,
-            excludeBox: {
-              Level.debug: true,
-              Level.info: true,
-              Level.verbose: true,
-            },
-            printEmojis: false, // NB: We add these in later
-          ),
-        ),
-      );
+      ..registerSingleton(createLogger(appMode));
 
     JobBase.setupRegistration(find);
 
@@ -86,7 +118,7 @@ class MainWindow extends StatelessWidget implements Loggable {
     routesBuilder = RoutesLocationBuilder(routes: App.find<BeamerRouteList>());
     delegate = BeamerDelegate(locationBuilder: routesBuilder);
 
-    d('Creating MainWindow!');
+    i('Starting Arquivolta!');
   }
 
   @override

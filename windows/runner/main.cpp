@@ -5,12 +5,19 @@
 #include "flutter_window.h"
 #include "utils.h"
 
+#include <bitsdojo_window_windows/bitsdojo_window_plugin.h>
+auto bdw = bitsdojo_window_configure(BDW_CUSTOM_FRAME);
+
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
   // Attach to console when present (e.g., 'flutter run') or create a
   // new console when running with a debugger.
-  if (!::AttachConsole(ATTACH_PARENT_PROCESS) && ::IsDebuggerPresent()) {
+  if (!::AttachConsole(ATTACH_PARENT_PROCESS)) {
     CreateAndAttachConsole();
+
+    if (!::IsDebuggerPresent()) {
+      ShowWindow(GetConsoleWindow(), SW_HIDE);
+    }
   }
 
   // Initialize COM, so that it is available for use in the library and/or
@@ -41,3 +48,5 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   ::CoUninitialize();
   return EXIT_SUCCESS;
 }
+
+// vim: ts=2 sw=2 et

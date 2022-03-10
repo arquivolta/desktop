@@ -103,3 +103,19 @@ Future<void> downloadUrlToFile(
       .doOnData((buf) => bytes.add(buf.length))
       .pipe(File(target).openWrite());
 }
+
+final re = RegExp('[a-zA-Z0-9,._+:@%/-]');
+String escapeStringForBash(String str) {
+  final ret = StringBuffer();
+
+  // NB: Yes I know this is incredibly inefficient
+  for (int i = 0; i < str.length; i++) {
+    if (re.hasMatch(str[i])) {
+      ret.write(str[i]);
+    } else {
+      ret.write('\\${str[i]}');
+    }
+  }
+
+  return ret.toString();
+}

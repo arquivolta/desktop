@@ -45,7 +45,7 @@ set -eux
 
 pacman --noconfirm -Syu
 pacman --noconfirm -Sy base base-devel \
-  git zsh sudo docker htop tmux go vim \
+  git zsh sudo docker htop tmux go vim zenity \
   wsl-use-windows-openssh wsl-set-up-wsld wsl-enable-systemd
 ''';
 
@@ -54,7 +54,8 @@ String addUser(String userName, String password) => '''
 set -eux
 
 useradd -m -G wheel -s /bin/zsh '$userName'
-echo '$userName:$password' | chpasswd
+
+echo "$userName:\$(zenity --password --title 'Enter a new password for $userName')" | chpasswd
 
 ## Set up sudo
 echo '%wheel ALL=(ALL:ALL) ALL' > /etc/sudoers.d/00-enable-wheel
@@ -153,24 +154,29 @@ Future<void> runArchLinuxPostInstall(
       setUpPacman(getLinuxArchitectureForOS().replaceAll('_', '-')),
       [],
       'Unable to configure Pacman updater',
+      friendlyDescription: 'Setup Pacman keychain and add Arquivolta repos',
     ),
     await worker.runScriptInDistroAsJob(
       'Set up locale',
       configureLocale(ui.window.locale.toLanguageTag().replaceAll('-', '_')),
       [],
       "Couldn't set up locale",
+      friendlyDescription:
+          'Set Arch locale to ${ui.window.locale.toLanguageTag()}',
     ),
     await worker.runScriptInDistroAsJob(
       'Install base system',
       installSystem,
       [],
       'Failed to install base packages',
+      friendlyDescription: 'Install developer tools and base packages',
     ),
     await worker.runScriptInDistroAsJob(
       'Create user $username',
-      addUser(username, password),
+      addUser(escapeStringForBash(username), escapeStringForBash(password)),
       [],
       "Couldn't create new user",
+      friendlyDescription: 'Setting up user and sudo access',
     ),
     await worker.runScriptInDistroAsJob(
       'Build Yay package',
@@ -178,6 +184,7 @@ Future<void> runArchLinuxPostInstall(
       [],
       "Couldn't build package for Yay",
       user: username,
+      friendlyDescription: 'Building Yay, a tool to install packages',
     ),
     await worker.runScriptInDistroAsJob(
       'Install Yay package',
@@ -185,6 +192,7 @@ Future<void> runArchLinuxPostInstall(
       [],
       "Couldn't install built package for Yay",
       user: 'root',
+      friendlyDescription: 'Installing Yay, a tool to install packages',
     ),
   ];
 

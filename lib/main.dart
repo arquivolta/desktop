@@ -18,8 +18,9 @@ void main() async {
   unawaited(
     windowManager.waitUntilReadyToShow().then((_) async {
       await windowManager.setTitleBarStyle('hidden');
-      await windowManager.show();
       await windowManager.setSkipTaskbar(false);
+      await windowManager.setMinimumSize(const Size(600, 400));
+      await windowManager.show();
     }),
   );
 

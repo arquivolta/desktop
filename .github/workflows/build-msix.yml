@@ -31,7 +31,7 @@ jobs:
         run: ./flutterw build windows
 
       - name: Copy assets into place
-        run: cp ./assets/* ./build/windows/runner/Release
+        run: mkdir ./build/windows/runner/Release/assets ; cp ./assets/* ./build/windows/runner/Release/assets
 
       - name: Package the app as MSIX
         run: ./flutterw pub run msix:create --install-certificate false

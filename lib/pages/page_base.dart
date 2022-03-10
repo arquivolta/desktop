@@ -13,12 +13,17 @@ mixin PageScaffolder implements RoutablePages {
     final uri = beamState.uri.toString();
     final idx = pages.indexWhere((p) => p.route.matchAsPrefix(uri) != null);
 
+    final style = FluentTheme.of(context);
+
     return NavigationView(
       appBar: NavigationAppBar(
-        title: const DragToMoveArea(
+        title: DragToMoveArea(
           child: Align(
             alignment: AlignmentDirectional.centerStart,
-            child: Text('Arquivolta Installer'),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text('Arquivolta Installer', style: style.typography.body),
+            ),
           ),
         ),
         actions: DragToMoveArea(
@@ -30,6 +35,9 @@ mixin PageScaffolder implements RoutablePages {
         automaticallyImplyLeading: false,
       ),
       pane: NavigationPane(
+        // NB: Auto looks nicer here but it's broken at the moment
+        // because when the pane is open the Title gets no padding
+        displayMode: PaneDisplayMode.open,
         selected: idx,
         size: const NavigationPaneSize(
           openMinWidth: 250,

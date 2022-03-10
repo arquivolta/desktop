@@ -170,7 +170,7 @@ Future<void> runArchLinuxPostInstall(
     ),
     await worker.runScriptInDistroAsJob(
       'Create user $username',
-      addUser(username, password),
+      addUser(escapeStringForBash(username), escapeStringForBash(password)),
       [],
       "Couldn't create new user",
       friendlyDescription: 'Setting up user and sudo access',

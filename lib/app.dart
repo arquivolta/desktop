@@ -118,7 +118,7 @@ class MainWindow extends StatelessWidget implements Loggable {
     routesBuilder = RoutesLocationBuilder(routes: App.find<BeamerRouteList>());
     delegate = BeamerDelegate(locationBuilder: routesBuilder);
 
-    d('Creating MainWindow!');
+    i('Starting Arquivolta!');
   }
 
   @override

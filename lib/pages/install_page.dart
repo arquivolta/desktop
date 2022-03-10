@@ -324,8 +324,6 @@ class ConsoleOutput extends StatelessWidget implements Loggable {
 
   @override
   Widget build(BuildContext context) {
-    d('Build! ${lines?.length}, scroller: ${consoleScroll.hashCode}');
-
     final consoleFont = FluentTheme.of(context)
         .typography
         .body!

@@ -126,6 +126,7 @@ class DistroWorker implements Loggable {
     String scriptCode,
     List<String> arguments,
     String failureMessage, {
+    String? friendlyDescription,
     String? user,
   }) async {
     final tempDir = (await getTemporaryDirectory()).path;
@@ -144,6 +145,7 @@ class DistroWorker implements Loggable {
       ['/tmp/$scriptFile'],
       failureMessage,
       user: user,
+      desc: friendlyDescription,
     );
   }
 }
@@ -155,6 +157,7 @@ class _DistroWorkerJob extends JobBase<ProcessResult> {
   final List<String> args;
   final String? wd;
   final String? user;
+  final String? logPreExec;
 
   _DistroWorkerJob(
     this.worker,
@@ -162,9 +165,11 @@ class _DistroWorkerJob extends JobBase<ProcessResult> {
     this.exec,
     this.args,
     this.failureMessage, {
+    String? desc,
     this.wd,
     this.user,
-  }) : super(name, "$exec ${args.join(' ')}");
+    this.logPreExec,
+  }) : super(name, desc ?? "$exec ${args.join(' ')}");
 
   @override
   Future<ProcessResult> execute() async {
@@ -176,6 +181,8 @@ class _DistroWorkerJob extends JobBase<ProcessResult> {
 
     ProcessResult result;
     try {
+      if (logPreExec != null) i(logPreExec);
+
       result = await worker.run(
         exec,
         args,

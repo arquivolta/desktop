@@ -24,8 +24,10 @@ mixin PageScaffolder implements RoutablePages {
             alignment: AlignmentDirectional.centerStart,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text('Arquivolta Installer',
-                  style: style.typography.bodyStrong),
+              child: Text(
+                'Arquivolta Installer',
+                style: style.typography.bodyStrong,
+              ),
             ),
           ),
         ),

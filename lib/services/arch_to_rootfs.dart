@@ -29,7 +29,7 @@ JobBase<void> convertArchBootstrapToWSLRootFsJob(
   String targetRootfsFile,
 ) {
   return JobBase.fromBlock('Converting Arch Linux image to WSL format',
-      'Converting Arch Linux Bootstrap image to be importable via WSL2',
+      'Converting Arch Linux Bootstrap image to be usable via WSL2',
       (job) async {
     if (getOSArchitecture() == OperatingSystemType.aarch64) {
       // NB: Arch Linux ARM images aren't brain-damaged like x86_64, so we can

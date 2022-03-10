@@ -28,6 +28,7 @@ Logger createLogger(ApplicationMode mode) {
 
     return Logger(
       output: FileOutput(file: File('${ourAppDataDir.path}/log.txt')),
+      filter: ProductionFilter(),
       printer: PrettyPrinter(
         methodCount: 0,
         errorMethodCount: 4,
@@ -43,7 +44,9 @@ Logger createLogger(ApplicationMode mode) {
     );
   }
 
+  // NB: filter: ProductionFilter is not a typo :facepalm:
   return Logger(
+    filter: ProductionFilter(),
     printer: PrettyPrinter(
       methodCount: 0,
       errorMethodCount: 4,

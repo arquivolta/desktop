@@ -32,6 +32,7 @@ abstract class JobBase<T> extends CustomLoggable implements Loggable {
     logOutput = so.stream;
 
     _logger = Logger(
+      filter: ProductionFilter(),
       output: so,
       printer: ZeroAnnotationPrinter(),
       level: App.find<ApplicationMode>() == ApplicationMode.production

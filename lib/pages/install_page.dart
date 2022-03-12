@@ -3,7 +3,6 @@ import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/pages/page_base.dart';
-import 'package:arquivolta/services/install_arch.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -39,11 +38,13 @@ class InstallPage extends HookWidget
 
     final installResult = useAction(
       () async {
+        /*
         d('Starting Phase 1');
         final worker = await installArchLinux(distroName.value);
 
         d('Starting Phase 2');
         await runArchLinuxPostInstall(worker, username.value, password.value);
+        */
 
         i('Completed install!');
       },

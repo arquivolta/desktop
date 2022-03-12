@@ -3,10 +3,11 @@ import 'dart:io';
 
 import 'package:arquivolta/actions.dart';
 import 'package:arquivolta/app.dart';
+import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
+import 'package:arquivolta/platform/win32/util.dart';
+import 'package:arquivolta/platform/win32/wsl.dart';
 import 'package:arquivolta/services/job.dart';
-import 'package:arquivolta/services/util.dart';
-import 'package:arquivolta/services/wsl.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:path/path.dart';

@@ -2,6 +2,8 @@ import 'package:arquivolta/app.dart';
 import 'package:beamer/beamer.dart';
 import 'package:flutter/widgets.dart';
 
+enum ApplicationMode { debug, production, test }
+
 // ignore: one_member_abstracts
 // ignore: use_key_in_widget_constructors
 abstract class Routable extends Widget {

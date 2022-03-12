@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/services/job.dart';
-import 'package:arquivolta/services/util.dart';
+import 'package:arquivolta/platform/win32/util.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';

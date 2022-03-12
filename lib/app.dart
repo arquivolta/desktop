@@ -21,7 +21,7 @@ typedef BeamerRouteList
 typedef BeamerPageList = List<PageInfo>;
 
 Logger createLogger(ApplicationMode mode) {
-  if (mode == ApplicationMode.production) {
+  if (mode == ApplicationMode.production && Platform.isWindows) {
     final appData = getLocalAppDataPath();
     final ourAppDataDir = Directory('$appData/Arquivolta')
       ..createSync(recursive: true);
@@ -71,7 +71,8 @@ class App {
       await locator.reset();
     }
 
-    final isTestMode = Platform.resolvedExecutable.contains('_tester');
+    final isTestMode =
+        Platform.isWindows && Platform.resolvedExecutable.contains('_tester');
     var isDebugMode = false;
 
     // NB: Assert statements are stripped from release mode. Clever!

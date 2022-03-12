@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:arquivolta/app.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -9,20 +10,25 @@ import 'package:window_manager/window_manager.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Future.wait([
-    App.setupRegistration(),
-    flutter_acrylic.Window.initialize(),
-    WindowManager.instance.ensureInitialized(),
-  ]);
+  final desktopTasks = Platform.isWindows
+      ? [
+          flutter_acrylic.Window.initialize(),
+          WindowManager.instance.ensureInitialized()
+        ]
+      : <Future<void>>[];
 
-  unawaited(
-    windowManager.waitUntilReadyToShow().then((_) async {
-      await windowManager.setTitleBarStyle('hidden');
-      await windowManager.setSkipTaskbar(false);
-      await windowManager.setMinimumSize(const Size(600, 400));
-      await windowManager.show();
-    }),
-  );
+  await Future.wait([App.setupRegistration(), ...desktopTasks]);
+
+  if (Platform.isWindows) {
+    unawaited(
+      windowManager.waitUntilReadyToShow().then((_) async {
+        await windowManager.setTitleBarStyle('hidden');
+        await windowManager.setSkipTaskbar(false);
+        await windowManager.setMinimumSize(const Size(600, 400));
+        await windowManager.show();
+      }),
+    );
+  }
 
   runApp(MainWindow());
 }

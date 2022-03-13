@@ -38,13 +38,17 @@ class InstallPage extends HookWidget
 
     final installResult = useAction(
       () async {
-        /*
+        final installer = App.find<ArchLinuxInstaller>();
+
         d('Starting Phase 1');
-        final worker = await installArchLinux(distroName.value);
+        final worker = await installer.installArchLinux(distroName.value);
 
         d('Starting Phase 2');
-        await runArchLinuxPostInstall(worker, username.value, password.value);
-        */
+        await installer.runArchLinuxPostInstall(
+          worker,
+          username.value,
+          password.value,
+        );
 
         i('Completed install!');
       },

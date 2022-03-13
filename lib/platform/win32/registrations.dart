@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:arquivolta/interfaces.dart';
+import 'package:arquivolta/platform/win32/install_arch.dart';
 import 'package:arquivolta/platform/win32/util.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
@@ -25,7 +26,8 @@ GetIt setupPlatformRegistrations(GetIt locator) {
   locator
     ..registerSingleton(appMode)
     ..registerSingleton(isTestMode, instanceName: 'isTestMode')
-    ..registerFactory<Logger>(() => _createLogger(appMode));
+    ..registerFactory<Logger>(() => _createLogger(appMode))
+    ..registerSingleton<ArchLinuxInstaller>(WSL2ArchLinuxInstaller());
 
   return locator;
 }

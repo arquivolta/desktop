@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:ffi/ffi.dart';
@@ -146,4 +147,15 @@ String escapeStringForBash(String str) {
   }
 
   return ret.toString();
+}
+
+extension ProcessOutputMixin on ProcessResult {
+  ProcessOutput toProcessOutput() {
+    return ProcessOutput(
+      pid,
+      exitCode,
+      stdout,
+      stderr,
+    );
+  }
 }

@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:arquivolta/interfaces.dart';
+import 'package:arquivolta/logging.dart';
+import 'package:arquivolta/services/job.dart';
 import 'package:ffi/ffi.dart';
 import 'package:path/path.dart';
 import 'package:rxdart/rxdart.dart';
@@ -104,6 +107,32 @@ Future<void> downloadUrlToFile(
       .pipe(File(target).openWrite());
 }
 
+JobBase<void> downloadUrlToFileJob(
+  String friendlyName,
+  Uri uri,
+  String target,
+) {
+  return JobBase.fromBlock<void>(
+    friendlyName,
+    'Downloading ${uri.toString()} to $target',
+    (job) async {
+      final progressSubj = PublishSubject<double>();
+      job.i(job.friendlyDescription);
+
+      progressSubj
+          .sampleTime(const Duration(seconds: 2))
+          .listen((x) => job.i('Progress: ${x.toStringAsFixed(2)}%'));
+
+      try {
+        await downloadUrlToFile(uri, target, progressSubj.sink);
+      } catch (ex, st) {
+        job.e('Failed to download file', ex, st);
+        rethrow;
+      }
+    },
+  );
+}
+
 final re = RegExp('[a-zA-Z0-9,._+:@%/-]');
 String escapeStringForBash(String str) {
   final ret = StringBuffer();
@@ -118,4 +147,15 @@ String escapeStringForBash(String str) {
   }
 
   return ret.toString();
+}
+
+extension ProcessOutputMixin on ProcessResult {
+  ProcessOutput toProcessOutput() {
+    return ProcessOutput(
+      pid,
+      exitCode,
+      stdout,
+      stderr,
+    );
+  }
 }

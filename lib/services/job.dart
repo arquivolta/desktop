@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:arquivolta/app.dart';
+import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
-import 'package:arquivolta/services/util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
@@ -92,32 +92,6 @@ class FuncJob<T> extends JobBase<T> {
       rethrow;
     }
   }
-}
-
-JobBase<void> downloadUrlToFileJob(
-  String friendlyName,
-  Uri uri,
-  String target,
-) {
-  return JobBase.fromBlock<void>(
-    friendlyName,
-    'Downloading ${uri.toString()} to $target',
-    (job) async {
-      final progressSubj = PublishSubject<double>();
-      job.i(job.friendlyDescription);
-
-      progressSubj
-          .sampleTime(const Duration(seconds: 2))
-          .listen((x) => job.i('Progress: ${x.toStringAsFixed(2)}%'));
-
-      try {
-        await downloadUrlToFile(uri, target, progressSubj.sink);
-      } catch (ex, st) {
-        job.e('Failed to download file', ex, st);
-        rethrow;
-      }
-    },
-  );
 }
 
 class ZeroAnnotationPrinter extends LogPrinter {

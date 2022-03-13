@@ -2,9 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
+import 'package:arquivolta/platform/win32/util.dart';
 import 'package:arquivolta/services/job.dart';
-import 'package:arquivolta/services/util.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
@@ -72,39 +73,45 @@ JobBase<ProcessResult> startProcessAsJob(
   });
 }
 
-class DistroWorker implements Loggable {
-  DistroWorker(this._distro);
+class Win32DistroWorker implements DistroWorker {
+  Win32DistroWorker(this._distro);
 
   final String _distro;
 
-  Future<ProcessResult> run(
+  @override
+  Future<ProcessOutput> run(
     String executable,
     List<String> arguments, {
     String? workingDirectory,
     String? user,
     StreamSink<String>? output,
-  }) {
+  }) async {
     final userArgs = user != null ? ['-u', user] : <String>[];
 
-    return startProcessWithOutput(
+    final ret = await startProcessWithOutput(
       'wsl.exe',
       ['-d', _distro, ...userArgs, executable, ...arguments],
       workingDirectory: workingDirectory,
       output: output,
     );
+
+    return ret.toProcessOutput();
   }
 
+  @override
   Future<void> terminate() async {
     await Process.run('wsl.exe', ['--terminate', _distro])
         .throwOnError('Failed to terminate distro');
   }
 
+  @override
   Future<void> destroy() async {
     await Process.run('wsl.exe', ['--unregister', _distro])
         .throwOnError('Failed to destroy distro');
   }
 
-  JobBase<ProcessResult> asJob(
+  @override
+  JobBase<ProcessOutput> asJob(
     String name,
     String executable,
     List<String> arguments,
@@ -121,7 +128,8 @@ class DistroWorker implements Loggable {
     );
   }
 
-  Future<JobBase<ProcessResult>> runScriptInDistroAsJob(
+  @override
+  Future<JobBase<ProcessOutput>> runScriptInDistroAsJob(
     String friendlyName,
     String scriptCode,
     List<String> arguments,
@@ -150,7 +158,7 @@ class DistroWorker implements Loggable {
   }
 }
 
-class _DistroWorkerJob extends JobBase<ProcessResult> {
+class _DistroWorkerJob extends JobBase<ProcessOutput> {
   final DistroWorker worker;
   final String exec;
   final String failureMessage;
@@ -172,14 +180,14 @@ class _DistroWorkerJob extends JobBase<ProcessResult> {
   }) : super(name, desc ?? "$exec ${args.join(' ')}");
 
   @override
-  Future<ProcessResult> execute() async {
+  Future<ProcessOutput> execute() async {
     i(friendlyDescription);
     jobStatus.value = JobStatus.running;
 
     final out = StreamController<String>();
     out.stream.listen(i);
 
-    ProcessResult result;
+    ProcessOutput result;
     try {
       if (logPreExec != null) i(logPreExec);
 
@@ -259,7 +267,7 @@ JobBase<DistroWorker> setupWorkWSLImageJob() {
     // immediately try to run a command on it, it will report that it doesn't
     // exist
     await Future<void>.delayed(const Duration(milliseconds: 2500));
-    return DistroWorker(distroName);
+    return Win32DistroWorker(distroName);
   });
 }
 

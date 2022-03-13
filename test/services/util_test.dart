@@ -1,4 +1,4 @@
-import 'package:arquivolta/services/util.dart';
+import 'package:arquivolta/platform/win32/util.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

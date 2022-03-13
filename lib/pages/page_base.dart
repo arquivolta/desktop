@@ -5,6 +5,7 @@ import 'package:beamer/beamer.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart'
     show MaximizeIcon, RestoreIcon, appWindow;
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:window_manager/window_manager.dart';
 
 mixin PageScaffolder implements RoutablePages {
@@ -36,9 +37,10 @@ mixin PageScaffolder implements RoutablePages {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: const [
               Spacer(),
-              WindowButtons(
-                height: 50,
-              )
+              if (!kIsWeb)
+                WindowButtons(
+                  height: 50,
+                )
             ],
           ),
         ),

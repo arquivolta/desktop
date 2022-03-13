@@ -4,6 +4,7 @@ import 'package:arquivolta/app.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 
 // ignore: avoid_void_async
@@ -29,6 +30,13 @@ void main() async {
       }),
     );
   }
-
-  runApp(MainWindow());
+  await SentryFlutter.init(
+    (options) {
+      options
+        ..dsn =
+            'https://e0fa7195269a44e682a2e01d21f8f32d@o1166384.ingest.sentry.io/6256841'
+        ..tracesSampleRate = 1.0;
+    },
+    appRunner: () => runApp(MainWindow()),
+  );
 }

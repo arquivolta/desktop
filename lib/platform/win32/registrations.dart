@@ -8,6 +8,7 @@ import 'package:logger/logger.dart';
 
 // ignore: implementation_imports
 import 'package:logger/src/outputs/file_output.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 GetIt setupPlatformRegistrations(GetIt locator) {
   final isTestMode = Platform.resolvedExecutable.contains('_tester');
@@ -71,4 +72,39 @@ Logger _createLogger(ApplicationMode mode) {
       printEmojis: false, // NB: We add these in later
     ),
   );
+}
+
+class SentryOutput implements LogOutput {
+  @override
+  void destroy() {}
+
+  @override
+  void init() {}
+
+  @override
+  void output(OutputEvent event) {
+    final msg = event.lines.join('\n');
+    if (event.level == Level.error || event.level == Level.wtf) {
+      Sentry.captureEvent(
+        SentryEvent(
+          message: SentryMessage(msg),
+          level: SentryLevel.error,
+        ),
+      );
+    }
+
+    if (event.level == Level.info || event.level == Level.warning) {
+      Sentry.addBreadcrumb(
+        Breadcrumb(
+          message: msg,
+          level: event.level == Level.info
+              ? SentryLevel.info
+              : SentryLevel.warning,
+        ),
+      );
+    }
+
+    // ignore: avoid_print
+    print(msg);
+  }
 }

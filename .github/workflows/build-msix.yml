@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  PUB_CACHE: ${{env.RUNNER_TEMP}}/pubcache
+  PUB_CACHE: $RUNNER_TEMP/pubcache
 
 jobs:
   build:
@@ -27,7 +27,7 @@ jobs:
       - name: Cache Flutter deps
         uses: actions/cache@v2
         with:
-          path: ${{env.RUNNER_TEMP}}/pubcache
+          path: ${{env.PUB_CACHE}}
           key: ${{ hashFiles('pubspec.lock')}}
 
       - name: Install dependencies

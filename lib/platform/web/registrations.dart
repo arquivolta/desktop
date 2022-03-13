@@ -2,7 +2,7 @@ import 'package:arquivolta/interfaces.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 
-GetIt setupPlatformRegistrations(GetIt locator, ApplicationMode mode) {
+GetIt setupPlatformRegistrations(GetIt locator) {
   var isDebugMode = false;
 
   // NB: Assert statements are stripped from release mode. Clever!
@@ -15,7 +15,7 @@ GetIt setupPlatformRegistrations(GetIt locator, ApplicationMode mode) {
   locator
     ..registerSingleton(appMode)
     ..registerSingleton(false, instanceName: 'isTestMode')
-    ..registerFactory<Logger>(() => _createLogger(mode));
+    ..registerFactory<Logger>(() => _createLogger(appMode));
 
   return locator;
 }

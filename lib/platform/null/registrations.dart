@@ -7,7 +7,7 @@ GetIt setupPlatformRegistrations(GetIt locator) {
     ..registerSingleton(ApplicationMode.debug)
     ..registerSingleton(false, instanceName: 'isTestMode')
     ..registerFactory<Logger>(
-      () => throw Exception('We should never get here'),
+      Logger.new,
     );
 
   return locator;

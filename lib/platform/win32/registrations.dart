@@ -8,7 +8,7 @@ import 'package:logger/logger.dart';
 // ignore: implementation_imports
 import 'package:logger/src/outputs/file_output.dart';
 
-GetIt setupPlatformRegistrations(GetIt locator, ApplicationMode mode) {
+GetIt setupPlatformRegistrations(GetIt locator) {
   final isTestMode = Platform.resolvedExecutable.contains('_tester');
   var isDebugMode = false;
 
@@ -25,7 +25,7 @@ GetIt setupPlatformRegistrations(GetIt locator, ApplicationMode mode) {
   locator
     ..registerSingleton(appMode)
     ..registerSingleton(isTestMode, instanceName: 'isTestMode')
-    ..registerFactory<Logger>(() => _createLogger(mode));
+    ..registerFactory<Logger>(() => _createLogger(appMode));
 
   return locator;
 }

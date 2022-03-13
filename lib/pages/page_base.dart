@@ -8,8 +8,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:window_manager/window_manager.dart';
 
-mixin PageScaffolder implements RoutablePages {
-  Widget buildScaffoldContent(BuildContext context, Widget body) {
+mixin PageScaffolder implements Routable {
+  BeamPage buildScaffoldContent(BuildContext context, Widget body) {
     final beamState = Beamer.of(context).currentBeamLocation.state as BeamState;
     final pages = App.find<BeamerPageList>();
 
@@ -18,7 +18,7 @@ mixin PageScaffolder implements RoutablePages {
 
     final style = FluentTheme.of(context);
 
-    return NavigationView(
+    final ret = NavigationView(
       appBar: NavigationAppBar(
         title: DragToMoveArea(
           child: Align(
@@ -57,16 +57,23 @@ mixin PageScaffolder implements RoutablePages {
         ),
         items: pages
             .map<NavigationPaneItem>(
-              (e) => PaneItem(
+              (e) => PaneItemAction(
                 icon: Icon(
                   e.sidebarIcon(),
                 ),
                 title: Text(e.sidebarName),
+                onTap: () => Beamer.of(context).beamToNamed(e.route.toString()),
               ),
             )
             .toList(),
       ),
       content: body,
+    );
+
+    return BeamPage(
+      key: ValueKey(beamState.uri.path),
+      child: ret,
+      type: BeamPageType.fadeTransition,
     );
   }
 }

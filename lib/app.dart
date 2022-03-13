@@ -1,6 +1,8 @@
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
-import 'package:arquivolta/pages/install_page.dart';
+import 'package:arquivolta/pages/debug_page.dart';
+import 'package:arquivolta/pages/install_begin_page.dart';
+import 'package:arquivolta/pages/install_progress_page.dart';
 import 'package:arquivolta/platform/registrations.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:beamer/beamer.dart';
@@ -23,22 +25,28 @@ class App {
       await locator.reset();
     }
 
-    setupPlatformRegistrations(find);
-    JobBase.setupRegistration(find);
+    setupPlatformRegistrations(locator);
+    JobBase.setupRegistration(locator);
 
-    _setupRoutes(find);
+    _setupRoutes(locator);
     return find;
   }
 
   static GetIt _setupRoutes(GetIt locator) {
     final pageList = [
       (InstallPage(key: const Key('dontcare')).registerPages()),
+      (DebugPage(key: const Key('dontcare')).registerPages()),
     ].reduce((acc, x) => [...acc, ...x]);
 
+    final routeList = [
+      const InProgressInstallPage(key: Key('dontcare')).registerRoutes(),
+    ];
+
     locator
-      ..registerSingleton<BeamerRouteList>(
-        pageList.fold({}, (acc, p) => {...acc, p.route: p.builder}),
-      )
+      ..registerSingleton<BeamerRouteList>({
+        ...pageList.fold({}, (acc, p) => {...acc, p.route: p.builder}),
+        ...routeList.fold({}, (acc, p) => {...acc, ...p}),
+      })
       ..registerSingleton<BeamerPageList>(pageList);
 
     return locator;
@@ -53,6 +61,7 @@ class MainWindow extends StatelessWidget implements Loggable {
     // NB: If we don't do this here we get a crash on hot reload.
     routesBuilder = RoutesLocationBuilder(routes: App.find<BeamerRouteList>());
     delegate = BeamerDelegate(
+      initialPath: '/install',
       locationBuilder: routesBuilder,
       navigatorObservers: [SentryNavigatorObserver()],
     );

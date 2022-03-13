@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  PUB_CACHE: $RUNNER_TEMP/pubcache
+  PUB_CACHE: "D:\\pubcache"
 
 jobs:
   build:

@@ -1,5 +1,6 @@
 import 'package:arquivolta/app.dart';
 import 'package:logger/logger.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 abstract class Loggable {}
 
@@ -85,5 +86,10 @@ extension LoggableMixin on Loggable {
           .logger
           .wtf('�� $_klass: $message', error, stackTrace);
     }
+  }
+
+  void n(String message) {
+    Sentry.addBreadcrumb(Breadcrumb(message: message, type: 'navigation'));
+    i(message);
   }
 }

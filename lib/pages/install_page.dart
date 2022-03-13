@@ -38,6 +38,7 @@ class InstallPage extends HookWidget
 
     final installResult = useAction(
       () async {
+        n('Clicked Install: ${distroName.value}');
         final installer = App.find<ArchLinuxInstaller>();
 
         d('Starting Phase 1');

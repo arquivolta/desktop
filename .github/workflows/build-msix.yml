@@ -8,6 +8,11 @@ on:
 
   workflow_dispatch:
 
+# NB: This shouldn't be hardcoded but I can't seem to reference RUNNER_TEMP
+# from here
+env:
+  PUB_CACHE: "D:\\pubcache"
+
 jobs:
   build:
     runs-on: windows-latest
@@ -17,6 +22,15 @@ jobs:
 
       - name: Checkout Submodules
         run: git submodule update --init --recursive
+
+      - name: Create pub cache
+        run: mkdir "${{env.PUB_CACHE}}"
+
+      - name: Cache Flutter deps
+        uses: actions/cache@v2
+        with:
+          path: ${{env.PUB_CACHE}}
+          key: ${{ hashFiles('pubspec.lock')}}
 
       - name: Install dependencies
         run: ./flutterw pub get
@@ -28,7 +42,7 @@ jobs:
         run: ./flutterw test
 
       - name: Build the app
-        run: ./flutterw build windows
+        run: ./flutterw build windows "--dart-define=SENTRY_DSN=${{ secrets.SENTRY_DSN }}"
 
       - name: Copy assets into place
         run: mkdir ./build/windows/runner/Release/assets ; cp ./assets/* ./build/windows/runner/Release/assets

@@ -6,6 +6,7 @@ import 'package:arquivolta/services/job.dart';
 import 'package:beamer/beamer.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:get_it/get_it.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 typedef BeamerRouteList
     = Map<Pattern, dynamic Function(BuildContext, BeamState, Object?)>;
@@ -51,7 +52,10 @@ class MainWindow extends StatelessWidget implements Loggable {
   MainWindow({Key? key}) : super(key: key) {
     // NB: If we don't do this here we get a crash on hot reload.
     routesBuilder = RoutesLocationBuilder(routes: App.find<BeamerRouteList>());
-    delegate = BeamerDelegate(locationBuilder: routesBuilder);
+    delegate = BeamerDelegate(
+      locationBuilder: routesBuilder,
+      navigatorObservers: [SentryNavigatorObserver()],
+    );
 
     i('Starting Arquivolta!');
   }

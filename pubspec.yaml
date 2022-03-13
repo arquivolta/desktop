@@ -24,6 +24,7 @@ dependencies:
   path: ^1.8.0
   path_provider: ^2.0.9
   rxdart: ^0.27.3
+  sentry_flutter: ^6.3.0
   squirrel: ^0.1.0
   very_good_analysis: ^2.4.0
   win32: ^2.4.1

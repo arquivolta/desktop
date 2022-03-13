@@ -89,9 +89,13 @@ class DemoArchLinuxInstaller extends ArchLinuxInstaller {
 
 class DemoDistroWorker implements DistroWorker {
   @override
-  JobBase<ProcessOutput> asJob(String name, String executable,
-      List<String> arguments, String failureMessage,
-      {String? workingDirectory}) {
+  JobBase<ProcessOutput> asJob(
+    String name,
+    String executable,
+    List<String> arguments,
+    String failureMessage, {
+    String? workingDirectory,
+  }) {
     throw UnimplementedError();
   }
 
@@ -101,15 +105,25 @@ class DemoDistroWorker implements DistroWorker {
   }
 
   @override
-  Future<ProcessOutput> run(String executable, List<String> arguments,
-      {String? workingDirectory, String? user, StreamSink<String>? output}) {
+  Future<ProcessOutput> run(
+    String executable,
+    List<String> arguments, {
+    String? workingDirectory,
+    String? user,
+    StreamSink<String>? output,
+  }) {
     throw UnimplementedError();
   }
 
   @override
-  Future<JobBase<ProcessOutput>> runScriptInDistroAsJob(String friendlyName,
-      String scriptCode, List<String> arguments, String failureMessage,
-      {String? friendlyDescription, String? user}) {
+  Future<JobBase<ProcessOutput>> runScriptInDistroAsJob(
+    String friendlyName,
+    String scriptCode,
+    List<String> arguments,
+    String failureMessage, {
+    String? friendlyDescription,
+    String? user,
+  }) {
     throw UnimplementedError();
   }
 

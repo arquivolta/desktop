@@ -2,12 +2,35 @@ import 'dart:io';
 
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/platform/win32/util.dart';
+import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 
 // ignore: implementation_imports
 import 'package:logger/src/outputs/file_output.dart';
 
-Logger createLogger(ApplicationMode mode) {
+GetIt setupPlatformRegistrations(GetIt locator, ApplicationMode mode) {
+  final isTestMode = Platform.resolvedExecutable.contains('_tester');
+  var isDebugMode = false;
+
+  // NB: Assert statements are stripped from release mode. Clever!
+  // ignore: prefer_asserts_with_message
+  assert(isDebugMode = true);
+
+  final appMode = isTestMode
+      ? ApplicationMode.test
+      : isDebugMode
+          ? ApplicationMode.debug
+          : ApplicationMode.production;
+
+  locator
+    ..registerSingleton(appMode)
+    ..registerSingleton(isTestMode, instanceName: 'isTestMode')
+    ..registerFactory<Logger>(() => _createLogger(mode));
+
+  return locator;
+}
+
+Logger _createLogger(ApplicationMode mode) {
   if (mode == ApplicationMode.production && Platform.isWindows) {
     final appData = getLocalAppDataPath();
     final ourAppDataDir = Directory('$appData/Arquivolta')
@@ -46,8 +69,4 @@ Logger createLogger(ApplicationMode mode) {
       printEmojis: false, // NB: We add these in later
     ),
   );
-}
-
-bool isTestMode() {
-  return Platform.resolvedExecutable.contains('_tester');
 }

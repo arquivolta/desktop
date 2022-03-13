@@ -1,7 +1,7 @@
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/pages/install_page.dart';
-import 'package:arquivolta/platform/logger.dart';
+import 'package:arquivolta/platform/registrations.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:beamer/beamer.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -22,23 +22,7 @@ class App {
       await locator.reset();
     }
 
-    final testMode = isTestMode();
-    var isDebugMode = false;
-
-    // NB: Assert statements are stripped from release mode. Clever!
-    // ignore: prefer_asserts_with_message
-    assert(isDebugMode = true);
-
-    final appMode = testMode
-        ? ApplicationMode.test
-        : isDebugMode
-            ? ApplicationMode.debug
-            : ApplicationMode.production;
-
-    find
-      ..registerSingleton(appMode)
-      ..registerSingleton(createLogger(appMode));
-
+    setupPlatformRegistrations(find);
     JobBase.setupRegistration(find);
 
     _setupRoutes(find);

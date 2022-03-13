@@ -28,7 +28,7 @@ jobs:
         run: ./flutterw test
 
       - name: Build the app
-        run: ./flutterw build windows
+        run: ./flutterw build windows --dart-define=SENTRY_DSN='${SENTRY_DSN}'
 
       - name: Copy assets into place
         run: mkdir ./build/windows/runner/Release/assets ; cp ./assets/* ./build/windows/runner/Release/assets

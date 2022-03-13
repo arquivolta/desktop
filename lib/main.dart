@@ -37,11 +37,14 @@ void main() async {
   // ignore: prefer_asserts_with_message
   assert(isDebugMode = true);
 
+  const defaultDsn =
+      'https://e0fa7195269a44e682a2e01d21f8f32d@o1166384.ingest.sentry.io/6256841';
+  const sentryDsn = String.fromEnvironment('SENTRY_DSN');
+
   await SentryFlutter.init(
     (options) {
       options
-        ..dsn =
-            'https://e0fa7195269a44e682a2e01d21f8f32d@o1166384.ingest.sentry.io/6256841'
+        ..dsn = sentryDsn.length > 1 ? sentryDsn : defaultDsn
         ..environment =
             "${isDebugMode ? 'dev' : 'prod'} ${kIsWeb ? 'web' : 'desktop'}"
         ..tracesSampleRate = 1.0;

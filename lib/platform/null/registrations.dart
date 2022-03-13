@@ -22,7 +22,10 @@ class NullArchLinuxInstaller extends ArchLinuxInstaller {
 
   @override
   Future<void> runArchLinuxPostInstall(
-      DistroWorker worker, String username, String password) {
+    DistroWorker worker,
+    String username,
+    String password,
+  ) {
     throw UnimplementedError();
   }
 }

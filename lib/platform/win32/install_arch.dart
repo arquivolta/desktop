@@ -40,14 +40,12 @@ cat /etc/locale.gen | sed -e 's/^#\\($locale.*UTF-8\\)/\\1/g' > /tmp/locale.gen
 mv /tmp/locale.gen /etc/locale.gen
 ''';
 
-String installSystem = r'''
+String installSystem = '''
 #!/bin/bash
 set -eux
 
 pacman --noconfirm -Syu
-pacman --noconfirm -Sy base base-devel \
-  git zsh sudo docker htop tmux go vim zenity \
-  wsl-use-windows-openssh wsl-set-up-wsld wsl-enable-systemd
+pacman --noconfirm -Sy arquivolta-base
 ''';
 
 String addUser(String userName, String password) => '''

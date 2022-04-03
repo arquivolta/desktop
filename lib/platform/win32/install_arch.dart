@@ -45,7 +45,7 @@ String installSystem = '''
 set -eux
 
 pacman --noconfirm -Syu
-pacman --noconfirm -Sy arquivolta-base
+pacman --noconfirm -Sy base base-devel arquivolta-base
 ''';
 
 String addUser(String userName, String password) => '''

@@ -40,12 +40,18 @@ cat /etc/locale.gen | sed -e 's/^#\\($locale.*UTF-8\\)/\\1/g' > /tmp/locale.gen
 mv /tmp/locale.gen /etc/locale.gen
 ''';
 
+// There's no non-crazy way for us to create an optional dependency
+// that gets installed by default. Normally this would be a group, but
+// in order to add stuff to a group, we'd have to fork Arch's repos, and
+// optdepends basically just prints stuff so it's useless
+String optionalDefaultDependencies = 'docker tmux htop vim';
+
 String installSystem = '''
 #!/bin/bash
 set -eux
 
 pacman --noconfirm -Syu
-pacman --noconfirm -Sy base base-devel arquivolta-base
+pacman --noconfirm -Sy base base-devel $optionalDefaultDependencies zenity arquivolta-base
 ''';
 
 String addUser(String userName, String password) => '''

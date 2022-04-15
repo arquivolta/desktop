@@ -21,7 +21,7 @@ packages:
       name: archive
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.2.2"
+    version: "3.3.0"
   args:
     dependency: transitive
     description:
@@ -42,20 +42,24 @@ packages:
       name: beamer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.0+1"
+    version: "1.4.1+1"
   bitsdojo_window:
     dependency: "direct main"
     description:
-      name: bitsdojo_window
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: bitsdojo_window
+      ref: master
+      resolved-ref: "379352c0243de05d74d188db1f99dcf915d3f6fb"
+      url: "https://github.com/anaisbetts/bitsdojo_window"
+    source: git
     version: "0.1.1+1"
   bitsdojo_window_linux:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: bitsdojo_window_linux
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: bitsdojo_window_linux
+      ref: master
+      resolved-ref: "379352c0243de05d74d188db1f99dcf915d3f6fb"
+      url: "https://github.com/anaisbetts/bitsdojo_window"
+    source: git
     version: "0.1.1"
   bitsdojo_window_macos:
     dependency: transitive
@@ -72,11 +76,13 @@ packages:
     source: hosted
     version: "0.1.0"
   bitsdojo_window_windows:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: bitsdojo_window_windows
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: bitsdojo_window_windows
+      ref: master
+      resolved-ref: "379352c0243de05d74d188db1f99dcf915d3f6fb"
+      url: "https://github.com/anaisbetts/bitsdojo_window"
+    source: git
     version: "0.1.0"
   boolean_selector:
     dependency: transitive
@@ -182,7 +188,7 @@ packages:
       name: fluent_ui
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.9.1"
+    version: "3.10.2"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -194,14 +200,19 @@ packages:
       name: flutter_acrylic
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0+1"
+    version: "1.0.0+2"
   flutter_hooks:
     dependency: "direct main"
     description:
       name: flutter_hooks
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.18.2+1"
+    version: "0.18.3"
+  flutter_localizations:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -337,7 +348,7 @@ packages:
       name: msix
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.3.1"
+    version: "3.5.1"
   node_preamble:
     dependency: transitive
     description:
@@ -365,7 +376,7 @@ packages:
       name: package_info_plus_linux
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.3"
+    version: "1.0.5"
   package_info_plus_macos:
     dependency: transitive
     description:
@@ -386,14 +397,14 @@ packages:
       name: package_info_plus_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.4"
+    version: "1.0.5"
   package_info_plus_windows:
     dependency: transitive
     description:
       name: package_info_plus_windows
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.4"
+    version: "1.0.5"
   path:
     dependency: "direct main"
     description:
@@ -519,21 +530,21 @@ packages:
       name: sentry
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.3.0"
+    version: "6.4.0"
   sentry_flutter:
     dependency: "direct main"
     description:
       name: sentry_flutter
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.3.0"
+    version: "6.4.0"
   shelf:
     dependency: transitive
     description:
       name: shelf
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.0"
+    version: "1.3.0"
   shelf_packages_handler:
     dependency: transitive
     description:
@@ -699,7 +710,7 @@ packages:
       name: win32
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.4.1"
+    version: "2.5.1"
   window_manager:
     dependency: "direct main"
     description:
@@ -729,5 +740,5 @@ packages:
     source: hosted
     version: "3.1.0"
 sdks:
-  dart: ">=2.15.1 <3.0.0"
+  dart: ">=2.16.0 <3.0.0"
   flutter: ">=2.8.0"

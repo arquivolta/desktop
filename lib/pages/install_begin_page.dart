@@ -2,14 +2,13 @@ import 'package:arquivolta/actions.dart';
 import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
-import 'package:arquivolta/pages/page_base.dart';
-import 'package:arquivolta/services/job.dart';
-import 'package:beamer/beamer.dart';
+import 'package:arquivolta/pages/install_progress_page.dart';
+import 'package:arquivolta/widgets/paged_view.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class InstallPage extends HookWidget implements Loggable {
-  InstallPage({required Key key}) : super(key: key);
+  const InstallPage({required Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +16,8 @@ class InstallPage extends HookWidget implements Loggable {
     final username = useRef('');
     final password = useRef('');
 
-/*
+    final pageController = useMemoized(() => PagedViewController(2), []);
+
     final installResult = useAction(
       () async {
         n('Clicked Install: ${distroName.value}');
@@ -37,10 +37,30 @@ class InstallPage extends HookWidget implements Loggable {
       },
       [],
     );
-    */
+
+    final content = PagedViewWidget(pageController, (ctx, ctrl) {
+      if (ctrl.page.value == 0) {
+        return InstallPrompt(
+          onPressedInstall: (d, u, p) {
+            distroName.value = d;
+            username.value = u;
+            password.value = p;
+
+            pageController.next();
+            installResult.invoke();
+          },
+        );
+      }
+
+      if (ctrl.page.value == 1) {
+        return const InProgressInstallPage();
+      }
+
+      throw Exception('Wrong page?!?!');
+    });
 
     final style = FluentTheme.of(context);
-    final headerText = false //installResult.isPending
+    final headerText = installResult.isPending
         ? 'Installing Arch Linux to ${distroName.value}'
         : 'Install Arch Linux';
 
@@ -54,14 +74,7 @@ class InstallPage extends HookWidget implements Loggable {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
-              child: InstallPrompt(
-                onPressedInstall: (d, u, p) {
-                  distroName.value = d;
-                  username.value = u;
-                  password.value = p;
-                  //installResult.invoke();
-                },
-              ),
+              child: content,
             ),
           ),
         ],

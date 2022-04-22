@@ -2,7 +2,7 @@ import 'package:arquivolta/actions.dart';
 import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
-import 'package:arquivolta/widgets/page_scaffold.dart';
+import 'package:arquivolta/pages/page_base.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:beamer/beamer.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -59,8 +59,6 @@ class InstallPage extends HookWidget implements Loggable {
                   distroName.value = d;
                   username.value = u;
                   password.value = p;
-
-                  Beamer.of(context).beamToNamed('/debug');
                   //installResult.invoke();
                 },
               ),

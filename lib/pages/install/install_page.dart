@@ -61,7 +61,10 @@ class InstallPage extends HookWidget implements Loggable {
       }
 
       if (ctrl.page.value == 1) {
-        return const InProgressInstall();
+        return InProgressInstall(
+          finished: !installResult.isPending,
+          error: installResult.result.error,
+        );
       }
 
       throw Exception('Wrong page?!?!');

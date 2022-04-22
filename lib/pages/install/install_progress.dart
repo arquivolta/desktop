@@ -4,7 +4,12 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class InProgressInstall extends HookWidget implements Loggable {
+  final bool finished;
+  final Object? error;
+
   const InProgressInstall({
+    required this.finished,
+    this.error,
     Key? key,
   }) : super(key: key);
 
@@ -57,7 +62,7 @@ class InProgressInstall extends HookWidget implements Loggable {
     final selectedJob =
         selectedIndex.value >= 0 ? jobList.value[selectedIndex.value] : null;
 
-    return Flex(
+    final jobListWidget = Flex(
       direction: Axis.horizontal,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -103,7 +108,17 @@ class InProgressInstall extends HookWidget implements Loggable {
               ),
             ],
           ),
-        )
+        ),
+      ],
+    );
+
+    return Flex(
+      direction: Axis.vertical,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: jobListWidget),
+        if (finished) const Text('We did it!!!'),
+        if (error != null) Text('Oh shitttttt ${error.toString()}')
       ],
     );
   }

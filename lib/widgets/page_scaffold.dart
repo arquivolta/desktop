@@ -1,5 +1,5 @@
 import 'package:arquivolta/pages/debug_page.dart';
-import 'package:arquivolta/pages/install_begin_page.dart';
+import 'package:arquivolta/pages/install/install_page.dart';
 import 'package:arquivolta/widgets/window_button.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart'
     show MaximizeIcon, RestoreIcon, appWindow;

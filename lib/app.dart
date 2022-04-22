@@ -1,15 +1,10 @@
-import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
-import 'package:arquivolta/pages/debug_page.dart';
-import 'package:arquivolta/pages/install_begin_page.dart';
-import 'package:arquivolta/pages/install_progress_page.dart';
 import 'package:arquivolta/platform/registrations.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:arquivolta/widgets/page_scaffold.dart';
 import 'package:beamer/beamer.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:get_it/get_it.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 class App {
   static GetIt find = GetIt.instance;
@@ -43,7 +38,7 @@ class MainWindow extends StatelessWidget implements Loggable {
       theme: ThemeData(
         visualDensity: VisualDensity.standard,
       ),
-      home: PageScaffold(),
+      home: const PageScaffold(),
     );
   }
 }

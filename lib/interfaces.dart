@@ -1,10 +1,7 @@
 import 'dart:async';
 
-import 'package:arquivolta/app.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/services/job.dart';
-import 'package:beamer/beamer.dart';
-import 'package:flutter/widgets.dart';
 
 enum ApplicationMode { debug, production, test }
 

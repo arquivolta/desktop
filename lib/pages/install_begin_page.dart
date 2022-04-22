@@ -2,34 +2,14 @@ import 'package:arquivolta/actions.dart';
 import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
-import 'package:arquivolta/pages/page_base.dart';
+import 'package:arquivolta/widgets/page_scaffold.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:beamer/beamer.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-class InstallPage extends HookWidget
-    with PageScaffolder
-    implements RoutablePages, Loggable {
+class InstallPage extends HookWidget implements Loggable {
   InstallPage({required Key key}) : super(key: key);
-
-  @override
-  BeamerRouteList registerRoutes() => {};
-
-  @override
-  List<PageInfo> registerPages() {
-    return [
-      PageInfo(
-        '/install',
-        'Install',
-        () => FluentIcons.download,
-        (ctx, _state, _) => buildScaffoldContent(
-          ctx,
-          InstallPage(key: const Key('install')),
-        ),
-      ),
-    ];
-  }
 
   @override
   Widget build(BuildContext context) {

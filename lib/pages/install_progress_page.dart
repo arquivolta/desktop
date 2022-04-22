@@ -2,27 +2,15 @@ import 'package:arquivolta/actions.dart';
 import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
-import 'package:arquivolta/pages/page_base.dart';
+import 'package:arquivolta/widgets/page_scaffold.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-class InProgressInstallPage extends HookWidget
-    with PageScaffolder
-    implements Routable, Loggable {
+class InProgressInstallPage extends HookWidget implements Loggable {
   const InProgressInstallPage({
     Key? key,
   }) : super(key: key);
-
-  @override
-  BeamerRouteList registerRoutes() {
-    return {
-      '/install/progress': (ctx, state, _o) => buildScaffoldContent(
-            ctx,
-            const InProgressInstallPage(key: Key('InstallProgress')),
-          )
-    };
-  }
 
   @override
   Widget build(BuildContext context) {

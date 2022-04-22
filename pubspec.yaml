@@ -17,7 +17,7 @@ dependencies:
       path: bitsdojo_window
       ref: master
   ffi: ^1.1.2
-  fluent_ui: ^3.9.0
+  fluent_ui: ^3.10.3
   flutter:
     sdk: flutter
   flutter_acrylic: ^1.0.0+1

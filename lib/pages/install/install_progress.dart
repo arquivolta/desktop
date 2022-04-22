@@ -3,8 +3,8 @@ import 'package:arquivolta/services/job.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-class InProgressInstallPage extends HookWidget implements Loggable {
-  const InProgressInstallPage({
+class InProgressInstall extends HookWidget implements Loggable {
+  const InProgressInstall({
     Key? key,
   }) : super(key: key);
 

@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:arquivolta/actions.dart';
 import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/pages/install/install_progress.dart';
 import 'package:arquivolta/pages/install/install_prompt.dart';
+import 'package:arquivolta/util.dart';
 import 'package:arquivolta/widgets/paged_view.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -17,7 +20,7 @@ class InstallPage extends HookWidget implements Loggable {
     final username = useRef('');
     final password = useRef('');
 
-    final pageController = useMemoized(() => PagedViewController(2), []);
+    final pageController = usePagedViewController();
 
     final installResult = useAction(
       () async {
@@ -47,14 +50,18 @@ class InstallPage extends HookWidget implements Loggable {
             username.value = u;
             password.value = p;
 
+            i('Next clicked, moving to install in-progress page');
             pageController.next();
-            installResult.invoke();
+
+            // NB: Without doing this, InProgressInstall will miss the first
+            // job, which is important because it's usually a download
+            delayBeat(installResult.invoke);
           },
         );
       }
 
       if (ctrl.page.value == 1) {
-        return const InProgressInstallPage();
+        return const InProgressInstall();
       }
 
       throw Exception('Wrong page?!?!');

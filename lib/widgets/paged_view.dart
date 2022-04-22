@@ -18,6 +18,16 @@ class PagedViewController {
   }
 }
 
+PagedViewController usePagedViewController() {
+  final pageController = useMemoized(() => PagedViewController(2), []);
+
+  // NB: This is a Hack, make sure that the calling widget will rebuild whenever
+  // the page changes
+  useValueListenable(pageController.page);
+
+  return pageController;
+}
+
 class PagedViewWidget extends HookWidget {
   final PagedViewController controller;
   final Widget Function(BuildContext ctx, PagedViewController controller)

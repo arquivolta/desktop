@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:arquivolta/actions.dart';
 import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';

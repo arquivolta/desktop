@@ -1,5 +1,7 @@
 import 'package:arquivolta/logging.dart';
+import 'package:arquivolta/platform/win32/util.dart';
 import 'package:arquivolta/services/job.dart';
+import 'package:arquivolta/util.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
@@ -117,8 +119,24 @@ class InProgressInstall extends HookWidget implements Loggable {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(child: jobListWidget),
-        if (finished) const Text('We did it!!!'),
-        if (error != null) Text('Oh shitttttt ${error.toString()}')
+        if (finished && error == null)
+          const Text('We did it!!!'), // XXX: Fix me
+        if (error != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Flex(
+              direction: Axis.horizontal,
+              children: [
+                // XXX Fix Me
+                Text('Failed to install: ${error.toString()}'),
+                Expanded(child: Container()),
+                const FilledButton(
+                  onPressed: openLogFileInDefaultEditor,
+                  child: Text('Open Log File'),
+                )
+              ],
+            ),
+          )
       ],
     );
   }

@@ -21,6 +21,10 @@ GetIt setupPlatformRegistrations(GetIt locator) {
     ..registerSingleton(appMode)
     ..registerSingleton(false, instanceName: 'isTestMode')
     ..registerFactory<Logger>(() => _createLogger(appMode))
+    ..registerSingleton<Future<void> Function()>(
+      Future<void>.value,
+      instanceName: 'openLog',
+    )
     ..registerSingleton<ArchLinuxInstaller>(DemoArchLinuxInstaller());
 
   return locator;

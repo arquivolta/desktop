@@ -34,7 +34,7 @@ class PageScaffold extends HookWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
-                'Arquivolta Installer',
+                'Arquivolta Manager',
                 style: style.typography.bodyStrong,
               ),
             ),

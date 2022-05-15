@@ -1,5 +1,4 @@
 import 'package:arquivolta/logging.dart';
-import 'package:arquivolta/platform/win32/util.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:arquivolta/util.dart';
 import 'package:fluent_ui/fluent_ui.dart';

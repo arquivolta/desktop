@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:arquivolta/interfaces.dart';
@@ -7,7 +8,6 @@ import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 
 // ignore: implementation_imports
-import 'package:logger/src/outputs/file_output.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 GetIt setupPlatformRegistrations(GetIt locator) {
@@ -24,41 +24,24 @@ GetIt setupPlatformRegistrations(GetIt locator) {
           ? ApplicationMode.debug
           : ApplicationMode.production;
 
-  locator
-    ..registerSingleton(appMode)
-    ..registerSingleton(isTestMode, instanceName: 'isTestMode')
-    ..registerFactory<Logger>(() => _createLogger(appMode))
-    ..registerSingleton<ArchLinuxInstaller>(WSL2ArchLinuxInstaller());
+  Logger logger;
 
-  return locator;
-}
+  final appData = getLocalAppDataPath();
+  final ourAppDataDir = Directory('$appData/Arquivolta')
+    ..createSync(recursive: true);
 
-Logger _createLogger(ApplicationMode mode) {
-  if (mode == ApplicationMode.production && Platform.isWindows) {
-    final appData = getLocalAppDataPath();
-    final ourAppDataDir = Directory('$appData/Arquivolta')
-      ..createSync(recursive: true);
+  final logFile = File('${ourAppDataDir.path}/log.txt');
+  final fileOut = BetterFileOutput(file: logFile);
 
-    return Logger(
-      output: FileOutput(file: File('${ourAppDataDir.path}/log.txt')),
-      filter: ProductionFilter(),
-      printer: PrettyPrinter(
-        methodCount: 0,
-        errorMethodCount: 4,
-        excludeBox: {
-          Level.debug: true,
-          Level.info: true,
-          Level.verbose: true,
-        },
-        colors: false,
-        printEmojis: false, // NB: We add these in later
-      ),
-      level: Level.info,
-    );
-  }
+  final List<LogOutput> sentryLogging = appMode == ApplicationMode.production
+      ? [SentryOutput(), ConsoleOutput()]
+      : [ConsoleOutput()];
 
-  // NB: filter: ProductionFilter is not a typo :facepalm:
-  return Logger(
+  logger = Logger(
+    output: MultiOutput([
+      ...sentryLogging,
+      fileOut,
+    ]),
     filter: ProductionFilter(),
     printer: PrettyPrinter(
       methodCount: 0,
@@ -71,7 +54,23 @@ Logger _createLogger(ApplicationMode mode) {
       colors: false,
       printEmojis: false, // NB: We add these in later
     ),
+    level: Level.info,
   );
+
+  locator
+    ..registerSingleton(appMode)
+    ..registerSingleton(isTestMode, instanceName: 'isTestMode')
+    ..registerSingleton<Logger>(logger)
+    ..registerSingleton<Future<void> Function()>(
+      () async {
+        await fileOut.close();
+        openFileViaShell(logFile.path);
+      },
+      instanceName: 'openLog',
+    )
+    ..registerSingleton<ArchLinuxInstaller>(WSL2ArchLinuxInstaller());
+
+  return locator;
 }
 
 class SentryOutput implements LogOutput {
@@ -106,5 +105,52 @@ class SentryOutput implements LogOutput {
 
     // ignore: avoid_print
     print(msg);
+  }
+}
+
+class BetterFileOutput extends LogOutput {
+  final File file;
+  final bool overrideExisting;
+  final Encoding encoding;
+  IOSink? _sink;
+
+  BetterFileOutput({
+    required this.file,
+    this.overrideExisting = false,
+    this.encoding = utf8,
+  });
+
+  @override
+  void init() {
+    if (_sink != null) {
+      destroy();
+    }
+
+    _sink = file.openWrite(
+      mode: overrideExisting ? FileMode.writeOnly : FileMode.writeOnlyAppend,
+      encoding: encoding,
+    );
+  }
+
+  @override
+  void output(OutputEvent event) {
+    if (_sink == null) {
+      init();
+    }
+
+    _sink?.writeAll(event.lines, '\n');
+    _sink?.writeln();
+  }
+
+  @override
+  // ignore: avoid_void_async
+  void destroy() {
+    close();
+  }
+
+  Future<void> close() async {
+    await _sink?.flush();
+    await _sink?.close();
+    _sink = null;
   }
 }

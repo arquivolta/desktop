@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/services/job.dart';
@@ -20,6 +21,10 @@ GetIt setupPlatformRegistrations(GetIt locator) {
     ..registerSingleton(appMode)
     ..registerSingleton(false, instanceName: 'isTestMode')
     ..registerFactory<Logger>(() => _createLogger(appMode))
+    ..registerSingleton<Future<void> Function()>(
+      Future<void>.value,
+      instanceName: 'openLog',
+    )
     ..registerSingleton<ArchLinuxInstaller>(DemoArchLinuxInstaller());
 
   return locator;
@@ -50,9 +55,14 @@ class DemoArchLinuxInstaller extends ArchLinuxInstaller {
         'Installing Arch Linux', 'This is just a demo!', (job) async {
       job.i('We would normally download a file here!');
 
-      for (var i = 0; i < 5; i++) {
+      final progressLength =
+          App.find<ApplicationMode>() == ApplicationMode.production ? 5 : 20;
+
+      final progressFactor = 100 / progressLength;
+
+      for (var i = 0; i < progressLength; i++) {
         await Future<void>.delayed(const Duration(milliseconds: 500));
-        job.i('Progress: ${i * 20}%');
+        job.i('Progress: ${i * progressFactor}%');
       }
     });
 

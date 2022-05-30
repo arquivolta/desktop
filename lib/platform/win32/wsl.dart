@@ -176,6 +176,7 @@ class _DistroWorkerJob extends JobBase<ProcessOutput> {
     String? desc,
     this.wd,
     this.user,
+    // ignore: unused_element
     this.logPreExec,
   }) : super(name, desc ?? "$exec ${args.join(' ')}");
 

@@ -211,7 +211,7 @@ class ConsoleOutput extends StatelessWidget implements Loggable {
         .body!
         .copyWith(fontFamily: 'Consolas', color: Colors.grey);
 
-    return Container(
+    return ColoredBox(
       color: Colors.grey[40],
       child: ListView.builder(
         controller: consoleScroll,

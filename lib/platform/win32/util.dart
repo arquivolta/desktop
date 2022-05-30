@@ -54,7 +54,13 @@ void openFileViaShell(String path) {
   final lpPath = path.toNativeUtf16();
 
   win32.ShellExecute(
-      win32.NULL, strNull, lpPath, strNull, strNull, win32.SW_SHOW);
+    win32.NULL,
+    strNull,
+    lpPath,
+    strNull,
+    strNull,
+    win32.SW_SHOW,
+  );
 }
 
 extension ThrowOnProcessErrorExtension on Future<ProcessResult> {

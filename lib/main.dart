@@ -23,7 +23,7 @@ void main() async {
   if (!kIsWeb) {
     unawaited(
       windowManager.waitUntilReadyToShow().then((_) async {
-        await windowManager.setTitleBarStyle('hidden');
+        await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
         await windowManager.setSkipTaskbar(false);
         await windowManager.setMinimumSize(const Size(600, 400));
         await windowManager.show();
@@ -41,14 +41,18 @@ void main() async {
       'https://e0fa7195269a44e682a2e01d21f8f32d@o1166384.ingest.sentry.io/6256841';
   const sentryDsn = String.fromEnvironment('SENTRY_DSN');
 
-  await SentryFlutter.init(
-    (options) {
-      options
-        ..dsn = sentryDsn.length > 1 ? sentryDsn : defaultDsn
-        ..environment =
-            "${isDebugMode ? 'dev' : 'prod'} ${kIsWeb ? 'web' : 'desktop'}"
-        ..tracesSampleRate = 1.0;
-    },
-    appRunner: () => runApp(MainWindow()),
-  );
+  if (isDebugMode) {
+    runApp(MainWindow());
+  } else {
+    await SentryFlutter.init(
+      (options) {
+        options
+          ..dsn = sentryDsn.length > 1 ? sentryDsn : defaultDsn
+          ..environment =
+              "${isDebugMode ? 'dev' : 'prod'} ${kIsWeb ? 'web' : 'desktop'}"
+          ..tracesSampleRate = 1.0;
+      },
+      appRunner: () => runApp(MainWindow()),
+    );
+  }
 }

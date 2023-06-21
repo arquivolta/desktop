@@ -10,7 +10,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class InstallPage extends HookWidget implements Loggable {
-  const InstallPage({required Key key}) : super(key: key);
+  const InstallPage({super.key});
 
   @override
   Widget build(BuildContext context) {

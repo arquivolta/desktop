@@ -171,7 +171,7 @@ class JobListTile extends HookWidget {
       leading = const Icon(FluentIcons.check_mark, size: s);
     }
 
-    return TappableListTile(
+    return ListTile(
       key: Key(job.friendlyName),
       leading: leading,
       tileColor: isSelected ? ButtonState.all(style.accentColor) : null,
@@ -187,7 +187,7 @@ class JobListTile extends HookWidget {
         maxLines: 1,
         overflow: TextOverflow.fade,
       ),
-      onTap: onTap,
+      onPressed: onTap,
     );
   }
 }

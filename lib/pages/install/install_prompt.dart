@@ -42,11 +42,11 @@ class InstallPrompt extends HookWidget implements Loggable {
       children: [
         TextBox(
           controller: distro,
-          header: 'WSL Distro Name',
+          //XXX: header: 'WSL Distro Name',
         ),
         TextBox(
           controller: user,
-          header: 'Linux Username',
+          //XXX: header: 'Linux Username',
         ),
         /*
         TextBox(

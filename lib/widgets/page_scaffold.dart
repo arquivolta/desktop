@@ -1,8 +1,5 @@
 import 'package:arquivolta/pages/debug_page.dart';
 import 'package:arquivolta/pages/install/install_page.dart';
-import 'package:arquivolta/widgets/window_button.dart';
-import 'package:bitsdojo_window/bitsdojo_window.dart'
-    show MaximizeIcon, RestoreIcon, appWindow;
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -16,15 +13,14 @@ final List<Widget Function(Key key)> pageContentGenerator = [
 ];
 
 class PageScaffold extends HookWidget {
-  const PageScaffold({Key? key}) : super(key: key);
+  const PageScaffold({super.key});
 
   @override
   Widget build(BuildContext context) {
     final style = FluentTheme.of(context);
 
     final idx = useState(0);
-    final Widget selectedWidget =
-        pageContentGenerator[idx.value](Key('body_${idx.value}'));
+    //final Widget selectedWidget = Container();
 
     return NavigationView(
       appBar: NavigationAppBar(
@@ -47,8 +43,8 @@ class PageScaffold extends HookWidget {
               Spacer(),
               if (!kIsWeb)
                 WindowButtons(
-                  height: 50,
-                )
+                    //XXX: height: 50,
+                    )
             ],
           ),
         ),
@@ -57,7 +53,6 @@ class PageScaffold extends HookWidget {
       pane: NavigationPane(
         // NB: Auto looks nicer here but it's broken at the moment
         // because when the pane is open the Title gets no padding
-        //displayMode: PaneDisplayMode.auto,
         selected: idx.value,
         /*
         size: const NavigationPaneSize(
@@ -66,23 +61,43 @@ class PageScaffold extends HookWidget {
         ),
         */
         items: [
-          PaneItemAction(
+          PaneItem(
             icon: const Icon(FluentIcons.device_bug),
             title: const Text('Debug'),
             onTap: () => idx.value = 0,
+            body: const DebugPage(),
           ),
-          PaneItemAction(
+          PaneItem(
             icon: const Icon(FluentIcons.download),
             title: const Text('Install'),
             onTap: () => idx.value = 1,
+            body: const InstallPage(),
           ),
         ],
       ),
-      content: selectedWidget,
     );
   }
 }
 
+class WindowButtons extends StatelessWidget {
+  const WindowButtons({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final FluentThemeData theme = FluentTheme.of(context);
+
+    return SizedBox(
+      width: 138,
+      height: 50,
+      child: WindowCaption(
+        brightness: theme.brightness,
+        backgroundColor: Colors.transparent,
+      ),
+    );
+  }
+}
+
+/*
 class WindowButtons extends StatelessWidget {
   final double? height;
   const WindowButtons({Key? key, this.height}) : super(key: key);
@@ -154,3 +169,4 @@ class WindowButtons extends StatelessWidget {
     );
   }
 }
+*/

@@ -71,11 +71,7 @@ abstract class JobBase<T> extends CustomLoggable implements Loggable {
 class FuncJob<T> extends JobBase<T> {
   final Future<T> Function(JobBase<T> job) block;
 
-  FuncJob(String friendlyName, String friendlyDescription, this.block)
-      : super(
-          friendlyName,
-          friendlyDescription,
-        );
+  FuncJob(super.friendlyName, super.friendlyDescription, this.block);
 
   @override
   Future<T> execute() {

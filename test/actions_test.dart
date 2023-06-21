@@ -8,8 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 class FutureWidget extends HookWidget {
   final Future<String> Function() future;
   final String? dep;
-  const FutureWidget({Key? key, this.dep, required this.future})
-      : super(key: key);
+  const FutureWidget({required this.future, super.key, this.dep});
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +28,7 @@ class FutureWidget extends HookWidget {
 class ActionWidget extends HookWidget {
   final Future<String> Function() future;
   final String? dep;
-  const ActionWidget({Key? key, this.dep, required this.future})
-      : super(key: key);
+  const ActionWidget({required this.future, super.key, this.dep});
 
   @override
   Widget build(BuildContext context) {

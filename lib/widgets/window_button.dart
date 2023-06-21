@@ -22,8 +22,8 @@ class WindowButtonContext {
   WindowButtonContext({
     required this.context,
     required this.mouseState,
-    this.backgroundColor,
     required this.iconColor,
+    this.backgroundColor,
   });
 }
 
@@ -70,7 +70,7 @@ class WindowButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
   WindowButton({
-    Key? key,
+    super.key,
     WindowButtonColors? colors,
     this.builder,
     @required this.iconBuilder,
@@ -78,7 +78,7 @@ class WindowButton extends StatelessWidget {
     this.onPressed,
     this.buttonSize,
     this.animate = false,
-  }) : super(key: key) {
+  }) {
     this.colors = colors ?? _defaultButtonColors;
   }
 
@@ -150,16 +150,13 @@ class WindowButton extends StatelessWidget {
 
 class MinimizeWindowButton extends WindowButton {
   MinimizeWindowButton({
-    Key? key,
-    WindowButtonColors? colors,
+    super.key,
+    super.colors,
     VoidCallback? onPressed,
     bool? animate,
-    Size? buttonSize,
+    super.buttonSize,
   }) : super(
-          key: key,
-          colors: colors,
           animate: animate ?? false,
-          buttonSize: buttonSize,
           iconBuilder: (buttonContext) =>
               MinimizeIcon(color: buttonContext.iconColor),
           onPressed: onPressed ?? () => appWindow.minimize(),
@@ -168,16 +165,13 @@ class MinimizeWindowButton extends WindowButton {
 
 class MaximizeWindowButton extends WindowButton {
   MaximizeWindowButton({
-    Key? key,
-    WindowButtonColors? colors,
+    super.key,
+    super.colors,
     VoidCallback? onPressed,
     bool? animate,
-    Size? buttonSize,
+    super.buttonSize,
   }) : super(
-          key: key,
-          colors: colors,
           animate: animate ?? false,
-          buttonSize: buttonSize,
           iconBuilder: (buttonContext) =>
               MaximizeIcon(color: buttonContext.iconColor),
           onPressed: onPressed ?? () => appWindow.maximizeOrRestore(),
@@ -193,16 +187,14 @@ final _defaultCloseButtonColors = WindowButtonColors(
 
 class CloseWindowButton extends WindowButton {
   CloseWindowButton({
-    Key? key,
+    super.key,
     WindowButtonColors? colors,
     VoidCallback? onPressed,
     bool? animate,
-    Size? buttonSize,
+    super.buttonSize,
   }) : super(
-          key: key,
           colors: colors ?? _defaultCloseButtonColors,
           animate: animate ?? false,
-          buttonSize: buttonSize,
           iconBuilder: (buttonContext) =>
               CloseIcon(color: buttonContext.iconColor),
           onPressed: onPressed ?? () => appWindow.close(),

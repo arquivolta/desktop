@@ -11,8 +11,8 @@ class InProgressInstall extends HookWidget implements Loggable {
   const InProgressInstall({
     required this.finished,
     this.error,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -127,7 +127,7 @@ class InProgressInstall extends HookWidget implements Loggable {
               direction: Axis.horizontal,
               children: [
                 // XXX Fix Me
-                Text('Failed to install: ${error.toString()}'),
+                Text('Failed to install: $error'),
                 Expanded(child: Container()),
                 const FilledButton(
                   onPressed: openLogFileInDefaultEditor,
@@ -143,13 +143,13 @@ class InProgressInstall extends HookWidget implements Loggable {
 
 class JobListTile extends HookWidget {
   const JobListTile({
-    Key? key,
     required this.job,
     required this.onTap,
     required this.isSelected,
-  }) : super(key: key);
+    super.key,
+  });
 
-  final JobBase job;
+  final JobBase<dynamic> job;
   final VoidCallback onTap;
   final bool isSelected;
 
@@ -194,11 +194,11 @@ class JobListTile extends HookWidget {
 
 class ConsoleOutput extends StatelessWidget implements Loggable {
   const ConsoleOutput({
-    Key? key,
     required this.consoleScroll,
     required this.selectedIndex,
     required this.lines,
-  }) : super(key: key);
+    super.key,
+  });
 
   final ScrollController consoleScroll;
   final int selectedIndex;

@@ -6,8 +6,7 @@ class InstallPrompt extends HookWidget implements Loggable {
   final void Function(String distro, String user, String password)
       onPressedInstall;
 
-  const InstallPrompt({Key? key, required this.onPressedInstall})
-      : super(key: key);
+  const InstallPrompt({required this.onPressedInstall, super.key});
 
   @override
   Widget build(BuildContext context) {

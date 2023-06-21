@@ -27,7 +27,7 @@ class MainWindow extends StatelessWidget implements Loggable {
   late final RoutesLocationBuilder routesBuilder;
   late final BeamerDelegate delegate;
 
-  MainWindow({Key? key}) : super(key: key) {
+  MainWindow({super.key}) {
     i('Starting Arquivolta!');
   }
 
@@ -35,7 +35,7 @@ class MainWindow extends StatelessWidget implements Loggable {
   Widget build(BuildContext context) {
     return FluentApp(
       color: Colors.blue,
-      theme: ThemeData(
+      theme: FluentThemeData(
         visualDensity: VisualDensity.standard,
       ),
       home: const PageScaffold(),

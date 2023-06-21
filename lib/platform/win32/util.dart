@@ -128,7 +128,7 @@ JobBase<void> downloadUrlToFileJob(
 ) {
   return JobBase.fromBlock<void>(
     friendlyName,
-    'Downloading ${uri.toString()} to $target',
+    'Downloading $uri to $target',
     (job) async {
       final progressSubj = PublishSubject<double>();
       job.i(job.friendlyDescription);

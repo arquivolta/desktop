@@ -13,16 +13,16 @@ extension LoggableMixin on Loggable {
   static Logger? _global;
 
   void d(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    final _klass = runtimeType.toString();
+    final klass = runtimeType.toString();
     _global ??= App.find<Logger>();
 
-    _global!.d('$_klass: $message', error, stackTrace);
+    _global!.d('$klass: $message', error, stackTrace);
     if (this is CustomLoggable) {
       final cl = this as CustomLoggable;
       if (cl.usePrefix) {
         (this as CustomLoggable)
             .logger
-            .d('$_klass: $message', error, stackTrace);
+            .d('$klass: $message', error, stackTrace);
       } else {
         (this as CustomLoggable).logger.d('$message', error, stackTrace);
       }
@@ -30,16 +30,16 @@ extension LoggableMixin on Loggable {
   }
 
   void i(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    final _klass = runtimeType.toString();
+    final klass = runtimeType.toString();
     _global ??= App.find<Logger>();
 
-    _global!.i('$_klass: $message', error, stackTrace);
+    _global!.i('$klass: $message', error, stackTrace);
     if (this is CustomLoggable) {
       final cl = this as CustomLoggable;
       if (cl.usePrefix) {
         (this as CustomLoggable)
             .logger
-            .i('$_klass: $message', error, stackTrace);
+            .i('$klass: $message', error, stackTrace);
       } else {
         (this as CustomLoggable).logger.i('$message', error, stackTrace);
       }
@@ -47,17 +47,17 @@ extension LoggableMixin on Loggable {
   }
 
   void w(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    final _klass = runtimeType.toString();
+    final klass = runtimeType.toString();
     _global ??= App.find<Logger>();
 
-    _global!.w('⚠️ $_klass: $message', error, stackTrace);
+    _global!.w('⚠️ $klass: $message', error, stackTrace);
 
     if (this is CustomLoggable) {
       final cl = this as CustomLoggable;
       if (cl.usePrefix) {
         (this as CustomLoggable)
             .logger
-            .i('⚠️ $_klass: $message', error, stackTrace);
+            .i('⚠️ $klass: $message', error, stackTrace);
       } else {
         (this as CustomLoggable).logger.i('⚠️ $message', error, stackTrace);
       }
@@ -65,26 +65,26 @@ extension LoggableMixin on Loggable {
   }
 
   void e(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    final _klass = runtimeType.toString();
+    final klass = runtimeType.toString();
     _global ??= App.find<Logger>();
 
-    _global!.e('�� $_klass: $message', error, stackTrace);
+    _global!.e('�� $klass: $message', error, stackTrace);
     if (this is CustomLoggable) {
       (this as CustomLoggable)
           .logger
-          .e('�� $_klass: $message', error, stackTrace);
+          .e('�� $klass: $message', error, stackTrace);
     }
   }
 
   void wtf(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    final _klass = runtimeType.toString();
+    final klass = runtimeType.toString();
     _global ??= App.find<Logger>();
 
     _global!.wtf('�� _klass: $message', error, stackTrace);
     if (this is CustomLoggable) {
       (this as CustomLoggable)
           .logger
-          .wtf('�� $_klass: $message', error, stackTrace);
+          .wtf('�� $klass: $message', error, stackTrace);
     }
   }
 

@@ -99,7 +99,7 @@ final arm64ImageUri = Uri.parse(
 final shasumUri =
     Uri.parse('http://mirror.rackspace.com/archlinux/iso/latest/sha1sums.txt');
 
-Future<JobBase> downloadArchLinux(String targetFile) async {
+Future<JobBase<dynamic>> downloadArchLinux(String targetFile) async {
   final log = App.find<Logger>();
 
   if (getOSArchitecture() == OperatingSystemType.aarch64) {
@@ -126,7 +126,7 @@ Future<JobBase> downloadArchLinux(String targetFile) async {
         await File(img.path).openRead().pipe(File(targetFile).openWrite());
         job.i('Copying complete');
       });
-    } catch (_ex) {
+    } catch (ex) {
       log.d("Can't find local image, continuing to download...");
     }
   }

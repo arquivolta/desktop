@@ -33,8 +33,7 @@ class PagedViewWidget extends HookWidget {
   final Widget Function(BuildContext ctx, PagedViewController controller)
       builder;
 
-  const PagedViewWidget(this.controller, this.builder, {Key? key})
-      : super(key: key);
+  const PagedViewWidget(this.controller, this.builder, {super.key});
 
   @override
   Widget build(BuildContext context) {

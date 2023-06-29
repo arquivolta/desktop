@@ -66,14 +66,14 @@ class PageScaffold extends HookWidget {
           PaneItem(
             icon: const Icon(FluentIcons.download),
             title: const Text('Install'),
-            onTap: () => idx.value = 1,
+            onTap: () => idx.value = 0,
             body: const InstallPage(),
           ),
           if (App.find<ApplicationMode>() == ApplicationMode.debug)
             PaneItem(
               icon: const Icon(FluentIcons.device_bug),
               title: const Text('Debug'),
-              onTap: () => idx.value = 0,
+              onTap: () => idx.value = 1,
               body: const DebugPage(),
             ),
         ],

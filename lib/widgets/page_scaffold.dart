@@ -1,3 +1,5 @@
+import 'package:arquivolta/app.dart';
+import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/pages/debug_page.dart';
 import 'package:arquivolta/pages/install/install_page.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -62,17 +64,18 @@ class PageScaffold extends HookWidget {
         */
         items: [
           PaneItem(
-            icon: const Icon(FluentIcons.device_bug),
-            title: const Text('Debug'),
-            onTap: () => idx.value = 0,
-            body: const DebugPage(),
-          ),
-          PaneItem(
             icon: const Icon(FluentIcons.download),
             title: const Text('Install'),
             onTap: () => idx.value = 1,
             body: const InstallPage(),
           ),
+          if (App.find<ApplicationMode>() == ApplicationMode.debug)
+            PaneItem(
+              icon: const Icon(FluentIcons.device_bug),
+              title: const Text('Debug'),
+              onTap: () => idx.value = 0,
+              body: const DebugPage(),
+            ),
         ],
       ),
     );

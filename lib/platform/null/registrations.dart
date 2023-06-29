@@ -25,6 +25,7 @@ class NullArchLinuxInstaller extends ArchLinuxInstaller {
     DistroWorker worker,
     String username,
     String password,
+    String localeCode,
   ) {
     throw UnimplementedError();
   }

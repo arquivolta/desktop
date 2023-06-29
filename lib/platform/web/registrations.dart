@@ -75,6 +75,7 @@ class DemoArchLinuxInstaller extends ArchLinuxInstaller {
     DistroWorker worker,
     String username,
     String password,
+    String localeCode,
   ) async {
     const messages = [
       ["We don't actually install anything", 'This is just a demo'],

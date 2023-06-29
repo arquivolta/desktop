@@ -19,6 +19,8 @@ class InstallPage extends HookWidget implements Loggable {
     final password = useRef('');
 
     final pageController = usePagedViewController();
+    final languageTag =
+        View.of(context).platformDispatcher.locale.toLanguageTag();
 
     final installResult = useAction(
       () async {
@@ -33,6 +35,7 @@ class InstallPage extends HookWidget implements Loggable {
           worker,
           username.value,
           password.value,
+          languageTag,
         );
 
         i('Completed install!');

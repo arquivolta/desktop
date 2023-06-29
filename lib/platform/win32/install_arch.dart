@@ -7,6 +7,7 @@ import 'package:arquivolta/platform/win32/arch_to_rootfs.dart';
 import 'package:arquivolta/platform/win32/util.dart';
 import 'package:arquivolta/platform/win32/wsl.dart';
 import 'package:arquivolta/services/job.dart';
+import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -151,11 +152,8 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
   }
 
   @override
-  Future<void> runArchLinuxPostInstall(
-    DistroWorker worker,
-    String username,
-    String password,
-  ) async {
+  Future<void> runArchLinuxPostInstall(DistroWorker worker, String username,
+      String password, String localeCode) async {
     final jobQueue = <JobBase<ProcessOutput>>[
       await worker.runScriptInDistroAsJob(
         'Set up Pacman',
@@ -166,11 +164,10 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
       ),
       await worker.runScriptInDistroAsJob(
         'Set up locale',
-        configureLocale(ui.window.locale.toLanguageTag().replaceAll('-', '_')),
+        configureLocale(localeCode.replaceAll('-', '_')),
         [],
         "Couldn't set up locale",
-        friendlyDescription:
-            'Set Arch locale to ${ui.window.locale.toLanguageTag()}',
+        friendlyDescription: 'Set Arch locale to $localeCode',
       ),
       await worker.runScriptInDistroAsJob(
         'Install base system',

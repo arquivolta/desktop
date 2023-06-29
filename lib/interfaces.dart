@@ -66,8 +66,5 @@ abstract class DistroWorker implements Loggable {
 abstract class ArchLinuxInstaller {
   Future<DistroWorker> installArchLinux(String distroName);
   Future<void> runArchLinuxPostInstall(
-    DistroWorker worker,
-    String username,
-    String password,
-  );
+      DistroWorker worker, String username, String password, String localeCode);
 }

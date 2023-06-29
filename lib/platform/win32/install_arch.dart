@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
@@ -7,7 +6,6 @@ import 'package:arquivolta/platform/win32/arch_to_rootfs.dart';
 import 'package:arquivolta/platform/win32/util.dart';
 import 'package:arquivolta/platform/win32/wsl.dart';
 import 'package:arquivolta/services/job.dart';
-import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -152,8 +150,12 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
   }
 
   @override
-  Future<void> runArchLinuxPostInstall(DistroWorker worker, String username,
-      String password, String localeCode) async {
+  Future<void> runArchLinuxPostInstall(
+    DistroWorker worker,
+    String username,
+    String password,
+    String localeCode,
+  ) async {
     final jobQueue = <JobBase<ProcessOutput>>[
       await worker.runScriptInDistroAsJob(
         'Set up Pacman',

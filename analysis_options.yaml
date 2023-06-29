@@ -8,3 +8,4 @@ linter:
     public_member_api_docs: false
     sort_constructors_first: false
     omit_local_variable_types: false
+    unnecessary_library_directive: false

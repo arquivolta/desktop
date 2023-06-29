@@ -47,12 +47,12 @@ class ActionWidget extends HookWidget {
     return Flex(
       direction: Axis.horizontal,
       children: [
-        TextButton(
+        HyperlinkButton(
           onPressed: ar.invoke,
           key: const Key('invoke'),
           child: const Text('button'),
         ),
-        TextButton(
+        HyperlinkButton(
           onPressed: ar.reset,
           key: const Key('reset'),
           child: const Text('button2'),

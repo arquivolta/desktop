@@ -11,25 +11,7 @@ import 'package:window_manager/window_manager.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final desktopTasks = !kIsWeb
-      ? [
-          flutter_acrylic.Window.initialize(),
-          WindowManager.instance.ensureInitialized()
-        ]
-      : <Future<void>>[];
-
-  await Future.wait([App.setupRegistration(), ...desktopTasks]);
-
-  if (!kIsWeb) {
-    unawaited(
-      windowManager.waitUntilReadyToShow().then((_) async {
-        await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
-        await windowManager.setSkipTaskbar(false);
-        await windowManager.setMinimumSize(const Size(600, 400));
-        await windowManager.show();
-      }),
-    );
-  }
+  await Future.wait([App.setupRegistration(), initializeDesktopWindow()]);
 
   var isDebugMode = false;
 
@@ -55,4 +37,23 @@ void main() async {
       appRunner: () => runApp(MainWindow()),
     );
   }
+}
+
+Future<void> initializeDesktopWindow() async {
+  await flutter_acrylic.Window.initialize();
+  await flutter_acrylic.Window.hideWindowControls();
+  await WindowManager.instance.ensureInitialized();
+
+  unawaited(
+    windowManager.waitUntilReadyToShow().then((_) async {
+      await windowManager.setTitleBarStyle(
+        TitleBarStyle.hidden,
+        windowButtonVisibility: false,
+      );
+
+      await windowManager.setMinimumSize(const Size(600, 400));
+      await windowManager.show();
+      await windowManager.setSkipTaskbar(false);
+    }),
+  );
 }

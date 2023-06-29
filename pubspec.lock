@@ -49,15 +49,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.5"
-  bitsdojo_window:
-    dependency: "direct main"
-    description:
-      path: bitsdojo_window
-      ref: master
-      resolved-ref: "379352c0243de05d74d188db1f99dcf915d3f6fb"
-      url: "https://github.com/anaisbetts/bitsdojo_window"
-    source: git
-    version: "0.1.1+1"
   bitsdojo_window_linux:
     dependency: "direct overridden"
     description:
@@ -67,14 +58,6 @@ packages:
       url: "https://github.com/anaisbetts/bitsdojo_window"
     source: git
     version: "0.1.1"
-  bitsdojo_window_macos:
-    dependency: transitive
-    description:
-      name: bitsdojo_window_macos
-      sha256: fd2a3068662167bad33ddd2789d1a15c6f6f8d5920bd4f386f5f225385c6a908
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.2"
   bitsdojo_window_platform_interface:
     dependency: transitive
     description:

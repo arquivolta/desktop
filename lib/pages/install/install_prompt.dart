@@ -12,54 +12,63 @@ class InstallPrompt extends HookWidget implements Loggable {
   Widget build(BuildContext context) {
     final distro = useTextEditingController(text: 'arch-foobar');
     final user = useTextEditingController();
-    //final password = useTextEditingController();
-    //final passwordHidden = useState(true);
 
     // Reevaluate shouldEnableButton whenever any of the text changes
     [
       distro,
-      user, /*password*/
+      user,
     ].forEach(useValueListenable);
 
-    final shouldEnableButton = distro.text.length > 1 &&
-        user.text.length > 1; //&& password.text.length > 1;
+    final shouldEnableButton = distro.text.length > 1 && user.text.length > 1;
 
     final onPress = useCallback(
       () => onPressedInstall(
         distro.text,
         user.text,
-        '', //password.text,
+        '',
       ),
       [
         distro,
-        user, /*password*/
+        user,
       ],
     );
 
     return Flex(
       direction: Axis.vertical,
       children: [
-        TextBox(
-          controller: distro,
-          //XXX: header: 'WSL Distro Name',
-        ),
-        TextBox(
-          controller: user,
-          //XXX: header: 'Linux Username',
-        ),
-        /*
-        TextBox(
-          controller: password,
-          header: 'Password',
-          obscureText: passwordHidden.value,
-          suffix: IconButton(
-            icon: Icon(
-              passwordHidden.value ? FluentIcons.lock : FluentIcons.unlock,
+        Flex(
+          direction: Axis.horizontal,
+          children: [
+            SizedBox(
+              width: 160,
+              child: InfoLabel(label: 'WSL Distro Name'),
             ),
-            onPressed: () => passwordHidden.value = !passwordHidden.value,
-          ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextBox(
+                controller: distro,
+              ),
+            ),
+          ],
         ),
-        */
+        const SizedBox(
+          height: 8,
+        ),
+        Flex(
+          direction: Axis.horizontal,
+          children: [
+            SizedBox(
+              width: 160,
+              child: InfoLabel(label: 'Linux Username'),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextBox(
+                controller: user,
+              ),
+            ),
+          ],
+        ),
         Align(
           alignment: Alignment.centerRight,
           child: Padding(

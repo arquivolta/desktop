@@ -56,6 +56,17 @@ class InProgressInstall extends HookWidget implements Loggable {
       [],
     );
 
+    useEffect(
+      () {
+        if (jobList.value.isNotEmpty && selectedIndex.value == -1) {
+          selectedIndex.value = 0;
+        }
+
+        return null;
+      },
+      [jobList.value.length, selectedIndex.value],
+    );
+
     final selectedJobLogOutput = selectedIndex.value >= 0
         ? jobLogOutput.value[jobList.value[selectedIndex.value].hashCode]
         : null;

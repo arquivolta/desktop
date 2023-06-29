@@ -40,6 +40,8 @@ void main() async {
 }
 
 Future<void> initializeDesktopWindow() async {
+  if (kIsWeb) return;
+
   await flutter_acrylic.Window.initialize();
   await flutter_acrylic.Window.hideWindowControls();
   await WindowManager.instance.ensureInitialized();

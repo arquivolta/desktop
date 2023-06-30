@@ -38,6 +38,7 @@ set -eux
 cat /etc/locale.gen | sed -e 's/^#\\($locale.*UTF-8\\)/\\1/g' > /tmp/locale.gen
 mv /tmp/locale.gen /etc/locale.gen
 locale-gen
+echo "LANG=$locale.UTF-8" > /etc/locale.conf
 ''';
 
 // There's no non-crazy way for us to create an optional dependency

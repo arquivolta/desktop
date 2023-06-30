@@ -78,8 +78,11 @@ extension ThrowOnProcessErrorExtension on Future<ProcessResult> {
   }
 }
 
-String getLocalAppDataPath() {
-  final appsFolder = win32.GUIDFromString(win32.FOLDERID_LocalAppData);
+String getLocalAppDataPath() => getKnownFolder(win32.FOLDERID_LocalAppData);
+String getHomeDirectory() => getKnownFolder(win32.FOLDERID_Profile);
+
+String getKnownFolder(String folderId) {
+  final appsFolder = win32.GUIDFromString(folderId);
   final ppszPath = calloc<win32.PWSTR>();
 
   try {
@@ -161,6 +164,13 @@ String escapeStringForBash(String str) {
   }
 
   return ret.toString();
+}
+
+String win32PathToWslPath(String path) {
+  final driveLetter = path[0].toLowerCase();
+  final rest = path.substring(2).replaceAll(r'\', '/');
+
+  return '/mnt/$driveLetter$rest';
 }
 
 extension ProcessOutputMixin on ProcessResult {

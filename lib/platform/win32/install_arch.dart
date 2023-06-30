@@ -77,6 +77,9 @@ String buildYay = '''
 #!/bin/bash
 set -euxo pipefail
 
+## NB: I don't know where to put this, #yolo
+ln -sf ${win32PathToWslPath(getHomeDirectory())} "\$HOME/win"
+
 cd /tmp
 git clone https://aur.archlinux.org/yay.git && cd yay
 makepkg

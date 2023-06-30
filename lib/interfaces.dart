@@ -33,6 +33,8 @@ class ProcessOutput {
 }
 
 abstract class DistroWorker implements Loggable {
+  String get distroName;
+
   Future<ProcessOutput> run(
     String executable,
     List<String> arguments, {

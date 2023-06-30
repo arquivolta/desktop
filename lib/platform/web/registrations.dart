@@ -100,6 +100,9 @@ class DemoArchLinuxInstaller extends ArchLinuxInstaller {
 
 class DemoDistroWorker implements DistroWorker {
   @override
+  String get distroName => 'arch-linux';
+
+  @override
   JobBase<ProcessOutput> asJob(
     String name,
     String executable,

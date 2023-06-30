@@ -78,6 +78,9 @@ class Win32DistroWorker implements DistroWorker {
   final String _distro;
 
   @override
+  String get distroName => _distro;
+
+  @override
   Future<ProcessOutput> run(
     String executable,
     List<String> arguments, {

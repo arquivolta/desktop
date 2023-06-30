@@ -60,7 +60,6 @@ pacman --noconfirm -Sy base base-devel $optionalDefaultDependencies zenity arqui
 # NB: This also runs on initial boot, 
 # but we need to manually invoke it here
 wsl-enable-systemd
-
 ''';
 
 String addUser(String userName, String password) => '''

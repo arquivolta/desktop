@@ -23,13 +23,12 @@ Future<ProcessResult> startProcessWithOutput(
   );
 
   final sb = StringBuffer();
-  Rx.merge([process.stderr, process.stdout])
+  final stream = Rx.merge([process.stderr, process.stdout])
       .map((buf) => utf8.decode(buf, allowMalformed: true))
       .transform(const LineSplitter())
-      .listen((line) {
-    sb.write(line);
-    output?.add(line);
-  });
+      .doOnData(sb.write);
+
+  unawaited(output?.addStream(stream));
 
   return ProcessResult(
     process.pid,
@@ -206,7 +205,11 @@ class _DistroWorkerJob extends JobBase<ProcessOutput> {
       rethrow;
     }
 
-    await out.close();
+    try {
+      await out.close();
+    } catch (_) {
+      d('Failed to close output stream, but we dont care');
+    }
 
     if (result.exitCode != 0) {
       e(failureMessage);

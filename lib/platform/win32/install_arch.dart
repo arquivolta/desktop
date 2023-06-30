@@ -45,7 +45,7 @@ echo "LANG=$locale.UTF-8" > /etc/locale.conf
 // that gets installed by default. Normally this would be a group, but
 // in order to add stuff to a group, we'd have to fork Arch's repos, and
 // optdepends basically just prints stuff so it's useless
-String optionalDefaultDependencies = 'docker tmux htop vim yay';
+String optionalDefaultDependencies = 'docker tmux htop vim yay man-db';
 
 String installSystem = '''
 #!/bin/bash

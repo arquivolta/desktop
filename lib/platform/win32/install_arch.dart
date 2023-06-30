@@ -86,12 +86,15 @@ git clone https://aur.archlinux.org/yay.git && cd yay
 makepkg
 ''';
 
-String installYay = r'''
+String installYay(String distroName) => r'''
 #!/bin/bash
 set -euxo pipefail
 
 cd /tmp/yay
 pacman --noconfirm -U $(ls *.zst)
+
+## NB: We need to reboot our distro to start systemd
+wsl.exe -t $distroName
 ''';
 
 class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
@@ -200,7 +203,7 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
       ),
       await worker.runScriptInDistroAsJob(
         'Install Yay package',
-        installYay,
+        installYay(worker.distroName),
         [],
         "Couldn't install built package for Yay",
         user: 'root',

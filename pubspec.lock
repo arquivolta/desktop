@@ -45,10 +45,10 @@ packages:
     dependency: "direct main"
     description:
       name: beamer
-      sha256: "8bbf46ca033999591b7535228edeaa0bb00b4c5315e03143b0e2250a3b66d650"
+      sha256: "1bd43904b62f322eb40aaa47aac463d7d6dd300cdfb8c71401105362c4501f43"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.5"
+    version: "1.5.6"
   boolean_selector:
     dependency: transitive
     description:
@@ -217,10 +217,10 @@ packages:
     dependency: "direct main"
     description:
       name: http
-      sha256: "5895291c13fa8a3bd82e76d5627f69e0d85ca6a30dcac95c4ea19a5d555879c2"
+      sha256: "759d1a329847dd0f39226c688d3e06a6b8679668e350e2891a6474f8b4bb8525"
       url: "https://pub.dev"
     source: hosted
-    version: "0.13.6"
+    version: "1.1.0"
   http_multi_server:
     dependency: transitive
     description:
@@ -345,10 +345,10 @@ packages:
     dependency: "direct dev"
     description:
       name: msix
-      sha256: bf151b9a1648985e7604672ade54c8df693566099d0731e318548c47d54676e6
+      sha256: c8ebdd4670807904214889c4f9c447492439696814a0189b6a18a4d2f5e1290e
       url: "https://pub.dev"
     source: hosted
-    version: "3.14.2"
+    version: "3.15.0"
   node_preamble:
     dependency: transitive
     description:
@@ -702,10 +702,10 @@ packages:
     dependency: transitive
     description:
       name: vm_service
-      sha256: c620a6f783fa22436da68e42db7ebbf18b8c44b9a46ab911f666ff09ffd9153f
+      sha256: b8c67f5fa3897b122cf60fe9ff314f7b0ef71eab25c5f8b771480bc338f48823
       url: "https://pub.dev"
     source: hosted
-    version: "11.7.1"
+    version: "11.7.2"
   watcher:
     dependency: transitive
     description:

@@ -37,6 +37,7 @@ set -eux
 
 cat /etc/locale.gen | sed -e 's/^#\\($locale.*UTF-8\\)/\\1/g' > /tmp/locale.gen
 mv /tmp/locale.gen /etc/locale.gen
+locale-gen
 ''';
 
 // There's no non-crazy way for us to create an optional dependency
@@ -47,7 +48,7 @@ String optionalDefaultDependencies = 'docker tmux htop vim';
 
 String installSystem = '''
 #!/bin/bash
-set -eux
+set -euxo pipefail
 
 pacman --noconfirm -Syu
 pacman --noconfirm -Sy base base-devel $optionalDefaultDependencies zenity arquivolta-base
@@ -55,7 +56,7 @@ pacman --noconfirm -Sy base base-devel $optionalDefaultDependencies zenity arqui
 
 String addUser(String userName, String password) => '''
 #!/bin/bash
-set -eux
+set -euxo pipefail
 
 useradd -m -G wheel -s /bin/zsh '$userName'
 
@@ -74,7 +75,7 @@ echo 'default=$userName' >> /etc/wsl.conf
 
 String buildYay = '''
 #!/bin/bash
-set -eux
+set -euxo pipefail
 
 cd /tmp
 git clone https://aur.archlinux.org/yay.git && cd yay
@@ -83,7 +84,7 @@ makepkg
 
 String installYay = r'''
 #!/bin/bash
-set -eux
+set -euxo pipefail
 
 cd /tmp/yay
 pacman --noconfirm -U $(ls *.zst)

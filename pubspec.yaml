@@ -11,6 +11,7 @@ environment:
 dependencies:
   archive: ^3.3.7
   beamer: ^1.5.6
+  dcache: ^0.4.0
   ffi: ^2.0.2
   fluent_ui: ^4.6.2
   flutter:

@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/services/job.dart';
+import 'package:dcache/dcache.dart';
 import 'package:ffi/ffi.dart';
 import 'package:path/path.dart';
 import 'package:rxdart/rxdart.dart';
@@ -80,8 +81,14 @@ extension ThrowOnProcessErrorExtension on Future<ProcessResult> {
 
 String getLocalAppDataPath() => getKnownFolder(win32.FOLDERID_LocalAppData);
 String getHomeDirectory() => getKnownFolder(win32.FOLDERID_Profile);
+String getUsername() => getHomeDirectory().split(r'\').last;
 
-String getKnownFolder(String folderId) {
+final _kfCache = SimpleCache<String, String>(storage: InMemoryStorage(32))
+  ..loader = (key, oldValue) => _getKnownFolder(key);
+
+String getKnownFolder(String folderId) => _kfCache.get(folderId)!;
+
+String _getKnownFolder(String folderId) {
   final appsFolder = win32.GUIDFromString(folderId);
   final ppszPath = calloc<win32.PWSTR>();
 

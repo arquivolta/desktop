@@ -1,4 +1,7 @@
+import 'package:arquivolta/app.dart';
+import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
+import 'package:arquivolta/platform/win32/util.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
@@ -10,8 +13,12 @@ class InstallPrompt extends HookWidget implements Loggable {
 
   @override
   Widget build(BuildContext context) {
-    final distro = useTextEditingController(text: 'arch-foobar');
-    final user = useTextEditingController();
+    final distro = useTextEditingController(
+      text: App.find<ApplicationMode>() == ApplicationMode.production
+          ? 'arquivolta'
+          : 'arch-dev',
+    );
+    final user = useTextEditingController(text: getUsername());
 
     // Reevaluate shouldEnableButton whenever any of the text changes
     [

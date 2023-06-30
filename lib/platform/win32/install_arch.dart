@@ -21,7 +21,7 @@ pacman-key --populate archlinux
 pacman-key --recv-keys $arquivoltaRepoKey
 pacman-key --lsign-key $arquivoltaRepoKey
 
-## NB: The first few items are always the main repo
+# NB: The first few items are always the main repo
 cat /etc/pacman.d/mirrorlist | sed -e 's/^#//g' | head -n 8 | grep -v 'http:' > /tmp/mirrorlist
 mv /tmp/mirrorlist /etc/pacman.d/
 
@@ -45,17 +45,20 @@ echo "LANG=$locale.UTF-8" > /etc/locale.conf
 // that gets installed by default. Normally this would be a group, but
 // in order to add stuff to a group, we'd have to fork Arch's repos, and
 // optdepends basically just prints stuff so it's useless
-String optionalDefaultDependencies = 'docker tmux htop vim';
+String optionalDefaultDependencies = 'docker tmux htop vim yay';
 
 String installSystem = '''
 #!/bin/bash
 set -euxo pipefail
 
+# NB: We hard-require zenity to be installed in order 
+# to prompt for a password, but if a user wants to uninstall
+# it later, that's fine 
 pacman --noconfirm -Syu
 pacman --noconfirm -Sy base base-devel $optionalDefaultDependencies zenity arquivolta-base
 
-## NB: This also runs on initial boot, 
-## but we need to manually invoke it here
+# NB: This also runs on initial boot, 
+# but we need to manually invoke it here
 wsl-enable-systemd
 
 # Disable systemd services that don't make sense under WSL
@@ -71,37 +74,29 @@ useradd -m -G wheel -s /bin/zsh '$userName'
 
 echo "$userName:\$(zenity --password --title 'Enter a new password for $userName')" | chpasswd
 
-## Set up sudo
+# Set up sudo
 echo '%wheel ALL=(ALL:ALL) ALL' > /etc/sudoers.d/00-enable-wheel
 echo '' >> /etc/sudoers.d/00-enable-wheel
 chmod 644 /etc/sudoers.d/00-enable-wheel
 
-## Set our user
+# Set our user
 echo '' >> /etc/wsl.conf
 echo '[user]' >> /etc/wsl.conf
 echo 'default=$userName' >> /etc/wsl.conf
 ''';
 
-String buildYay = '''
+String installWinSymlink = '''
 #!/bin/bash
 set -euxo pipefail
 
-## NB: I don't know where to put this, #yolo
 ln -sf ${win32PathToWslPath(getHomeDirectory())} "\$HOME/win"
-
-cd /tmp
-git clone https://aur.archlinux.org/yay.git && cd yay
-makepkg
 ''';
 
-String installYay(String distroName) => '''
+String rebootDistro(String distroName) => '''
 #!/bin/bash
 set -euxo pipefail
 
-cd /tmp/yay
-pacman --noconfirm -U \$(ls *.zst)
-
-## NB: We need to reboot our distro to start systemd
+# NB: We need to reboot our distro to start systemd
 wsl.exe -t '$distroName'
 ''';
 
@@ -202,20 +197,20 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
         friendlyDescription: 'Setting up user and sudo access',
       ),
       await worker.runScriptInDistroAsJob(
-        'Build Yay package',
-        buildYay,
+        'Set up symlink to Windows home directory',
+        installWinSymlink,
         [],
-        "Couldn't build package for Yay",
+        "Couldn't set up symlink to Windows home directory",
         user: username,
-        friendlyDescription: 'Building Yay, a tool to install packages',
+        friendlyDescription: 'Setting up ~/win => /mnt/c/Users/$username',
       ),
       await worker.runScriptInDistroAsJob(
-        'Install Yay package',
-        installYay(worker.distroName),
+        'Restart Arquivolta',
+        rebootDistro(worker.distroName),
         [],
-        "Couldn't install built package for Yay",
+        "Couldn't restart Arch Linux",
         user: 'root',
-        friendlyDescription: 'Installing Yay, a tool to install packages',
+        friendlyDescription: 'Restart Arquivolta in order to kick off systemd',
       ),
     ];
 

@@ -53,6 +53,10 @@ set -euxo pipefail
 
 pacman --noconfirm -Syu
 pacman --noconfirm -Sy base base-devel $optionalDefaultDependencies zenity arquivolta-base
+
+## NB: This also runs on initial boot, 
+## but we need to manually invoke it here
+wsl-enable-systemd
 ''';
 
 String addUser(String userName, String password) => '''
@@ -86,15 +90,15 @@ git clone https://aur.archlinux.org/yay.git && cd yay
 makepkg
 ''';
 
-String installYay(String distroName) => r'''
+String installYay(String distroName) => '''
 #!/bin/bash
 set -euxo pipefail
 
 cd /tmp/yay
-pacman --noconfirm -U $(ls *.zst)
+pacman --noconfirm -U \$(ls *.zst)
 
 ## NB: We need to reboot our distro to start systemd
-wsl.exe -t $distroName
+wsl.exe -t '$distroName'
 ''';
 
 class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {

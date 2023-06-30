@@ -61,9 +61,6 @@ pacman --noconfirm -Sy base base-devel $optionalDefaultDependencies zenity arqui
 # but we need to manually invoke it here
 wsl-enable-systemd
 
-# Disable systemd services that don't make sense under WSL
-systemctl disable systemd-homed systemd-homed-activate systemd-resolved
-systemctl enable systemd-tmpfiles-clean.timer docker
 ''';
 
 String addUser(String userName, String password) => '''
@@ -95,6 +92,10 @@ ln -sf ${win32PathToWslPath(getHomeDirectory())} "\$HOME/win"
 String rebootDistro(String distroName) => '''
 #!/bin/bash
 set -euxo pipefail
+
+# Disable systemd services that don't make sense under WSL
+systemctl mask systemd-homed systemd-homed-activate systemd-resolved
+systemctl enable systemd-tmpfiles-clean.timer docker
 
 # NB: We need to reboot our distro to start systemd
 wsl.exe -t '$distroName'

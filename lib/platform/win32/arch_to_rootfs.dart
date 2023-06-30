@@ -96,8 +96,9 @@ final arm64ImageUri = Uri.parse(
   'http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz',
 );
 
-final shasumUri =
-    Uri.parse('http://mirror.rackspace.com/archlinux/iso/latest/sha1sums.txt');
+final shasumUri = Uri.parse(
+  'http://mirror.rackspace.com/archlinux/iso/latest/sha256sums.txt',
+);
 
 Future<JobBase<dynamic>> downloadArchLinux(String targetFile) async {
   final log = App.find<Logger>();
@@ -140,7 +141,7 @@ Future<JobBase<dynamic>> downloadArchLinux(String targetFile) async {
 
   return downloadUrlToFileJob(
     'Downloading Arch Linux x86_64',
-    Uri.parse('http://mirror.rackspace.com/archlinux/iso/latest/$imageName'),
+    Uri.parse('https://mirror.rackspace.com/archlinux/iso/latest/$imageName'),
     targetFile,
   );
 }

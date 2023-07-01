@@ -143,10 +143,10 @@ class InProgressInstall extends HookWidget implements Loggable {
                 const FilledButton(
                   onPressed: openLogFileInDefaultEditor,
                   child: Text('Open Log File'),
-                )
+                ),
               ],
             ),
-          )
+          ),
       ],
     );
   }

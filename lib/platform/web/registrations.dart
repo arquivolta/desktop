@@ -79,7 +79,7 @@ class DemoArchLinuxInstaller extends ArchLinuxInstaller {
   ) async {
     const messages = [
       ["We don't actually install anything", 'This is just a demo'],
-      ['Go install the app', "It's Free!"]
+      ['Go install the app', "It's Free!"],
     ];
 
     final jobs = messages

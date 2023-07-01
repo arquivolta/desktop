@@ -46,7 +46,7 @@ class PageScaffold extends HookWidget {
               if (!kIsWeb)
                 WindowButtons(
                     //XXX: height: 50,
-                    )
+                    ),
             ],
           ),
         ),

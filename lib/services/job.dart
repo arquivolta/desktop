@@ -78,7 +78,10 @@ class FuncJob<T> extends JobBase<T> {
     jobStatus.value = JobStatus.running;
 
     try {
-      final ret = block(this);
+      final ret = block(this).catchError((Object e, StackTrace? st) {
+        jobStatus.value = JobStatus.error;
+        return Future<T>.error(e, st);
+      });
 
       jobStatus.value = JobStatus.success;
       return ret;

@@ -97,7 +97,7 @@ class Win32DistroWorker implements DistroWorker {
       output: output,
     );
 
-    return ret.toProcessOutput();
+    return processResultToOutput(ret);
   }
 
   @override

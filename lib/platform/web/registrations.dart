@@ -56,7 +56,7 @@ class DemoArchLinuxInstaller extends ArchLinuxInstaller {
       job.i('We would normally download a file here!');
 
       final progressLength =
-          App.find<ApplicationMode>() == ApplicationMode.production ? 5 : 20;
+          App.find<ApplicationMode>() == ApplicationMode.production ? 20 : 5;
 
       final progressFactor = 100 / progressLength;
 

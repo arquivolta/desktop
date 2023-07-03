@@ -73,4 +73,5 @@ abstract class ArchLinuxInstaller {
     String password,
     String localeCode,
   );
+  String getDefaultUsername();
 }

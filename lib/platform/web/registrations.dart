@@ -96,6 +96,9 @@ class DemoArchLinuxInstaller extends ArchLinuxInstaller {
       await job.execute();
     }
   }
+
+  @override
+  String getDefaultUsername() => 'new-user';
 }
 
 class DemoDistroWorker implements DistroWorker {

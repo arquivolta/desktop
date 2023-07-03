@@ -92,7 +92,7 @@ class Win32DistroWorker implements DistroWorker {
 
     final ret = await startProcessWithOutput(
       'wsl.exe',
-      ['-d', _distro, ...userArgs, executable, ...arguments],
+      ['-d', _distro, ...userArgs, '-e', executable, ...arguments],
       workingDirectory: workingDirectory,
       output: output,
     );

@@ -29,4 +29,9 @@ class NullArchLinuxInstaller extends ArchLinuxInstaller {
   ) {
     throw UnimplementedError();
   }
+
+  @override
+  String getDefaultUsername() {
+    throw UnimplementedError();
+  }
 }

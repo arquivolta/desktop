@@ -222,4 +222,7 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
     // restart the distro, so terminate it off now
     await worker.terminate();
   }
+
+  @override
+  String getDefaultUsername() => getUsername();
 }

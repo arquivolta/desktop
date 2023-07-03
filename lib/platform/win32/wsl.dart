@@ -14,6 +14,7 @@ Future<ProcessResult> startProcessWithOutput(
   String executable,
   List<String> arguments, {
   String? workingDirectory,
+  Encoding? encoding,
   StreamSink<String>? output,
 }) async {
   final process = await Process.start(
@@ -23,16 +24,24 @@ Future<ProcessResult> startProcessWithOutput(
   );
 
   final sb = StringBuffer();
+  final subj = PublishSubject<String>();
   final stream = Rx.merge([process.stderr, process.stdout])
-      .map((buf) => utf8.decode(buf, allowMalformed: true))
-      .transform(const LineSplitter())
-      .doOnData(sb.write);
+      .map(
+        (buf) => encoding != null
+            ? encoding.decode(buf)
+            : utf8.decode(buf, allowMalformed: true),
+      )
+      .transform(const LineSplitter());
 
-  unawaited(output?.addStream(stream));
+  subj.listen(sb.writeln);
+  unawaited(subj.sink.addStream(stream));
+  unawaited(output?.addStream(subj));
+
+  final ec = await process.exitCode;
 
   return ProcessResult(
     process.pid,
-    await process.exitCode,
+    ec,
     sb.toString(),
     '',
   );

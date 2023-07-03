@@ -56,7 +56,7 @@ jobs:
 
       - name: Deploy to Vercel
         if: github.ref == 'refs/heads/main'
-        run: cd build/web ; mkdir ".vercel"; New-Item -Type file -Value "${{ secrets.VERCEL_PROJECT_JSON }}" -Path .vercel/project.json ; npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --yes
+        run: cd build/web ; mkdir '.vercel'; New-Item -Type file -Value '${{ secrets.VERCEL_PROJECT_JSON }}' -Path '.vercel/project.json' ; npx vercel --prod --token '${{ secrets.VERCEL_TOKEN }}' --yes
 
       - uses: actions/upload-artifact@v2
         with:

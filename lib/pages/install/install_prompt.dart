@@ -1,3 +1,4 @@
+import 'package:arquivolta/actions.dart';
 import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
@@ -9,10 +10,12 @@ class InstallPrompt extends HookWidget implements Loggable {
       onPressedInstall;
 
   final String defaultUserName;
+  final ArchLinuxInstaller installer;
 
   const InstallPrompt({
     required this.onPressedInstall,
     required this.defaultUserName,
+    required this.installer,
     super.key,
   });
 
@@ -23,7 +26,13 @@ class InstallPrompt extends HookWidget implements Loggable {
           ? 'arquivolta'
           : 'arch-dev',
     );
+
     final user = useTextEditingController(text: defaultUserName);
+
+    final distroError = useFutureEffect(
+      () => installer.errorMessageForProposedDistroName(distro.text),
+      [distro.text],
+    );
 
     // Reevaluate shouldEnableButton whenever any of the text changes
     [
@@ -31,7 +40,9 @@ class InstallPrompt extends HookWidget implements Loggable {
       user,
     ].forEach(useValueListenable);
 
-    final shouldEnableButton = distro.text.length > 1 && user.text.length > 1;
+    final shouldEnableButton = distro.text.length > 1 &&
+        user.text.length > 1 &&
+        distroError.data == null;
 
     final onPress = useCallback(
       () => onPressedInstall(
@@ -53,7 +64,7 @@ class InstallPrompt extends HookWidget implements Loggable {
           children: [
             SizedBox(
               width: 160,
-              child: InfoLabel(label: 'WSL Distro Name'),
+              child: InfoLabel(label: distroError.data ?? 'WSL Distro Name'),
             ),
             const SizedBox(width: 8),
             Expanded(

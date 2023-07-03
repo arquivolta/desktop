@@ -47,6 +47,7 @@ class InstallPage extends HookWidget implements Loggable {
       if (ctrl.page.value == 0) {
         return InstallPrompt(
           defaultUserName: installer.value.getDefaultUsername(),
+          installer: installer.value,
           onPressedInstall: (d, u, p) {
             distroName.value = d;
             username.value = u;

@@ -7,6 +7,7 @@ import 'package:arquivolta/platform/win32/util.dart';
 import 'package:arquivolta/platform/win32/wsl.dart';
 import 'package:arquivolta/services/async_memoize.dart';
 import 'package:arquivolta/services/job.dart';
+import 'package:arquivolta/services/utf16.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -247,9 +248,22 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
   Future<List<String>> _getDistroNames() => _distroNamesMemoized.value;
 
   static Future<List<String>> _getDistroNamesDirect() async {
-    final result = await startProcessWithOutput('wsl.exe', ['--list']);
+    final utf16 = Utf16();
+
+    final result = await startProcessWithOutput(
+      'wsl.exe',
+      ['--list'],
+      encoding: utf16,
+    );
+
     final lines = (result.stdout as String).split('\n');
 
-    return lines.skip(1).map((line) => line.split(' ').first).toList();
+    final ret = lines
+        .skip(1)
+        .map((line) => line.split(' ').first)
+        .where((x) => x.isNotEmpty)
+        .toList();
+
+    return ret;
   }
 }

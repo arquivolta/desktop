@@ -225,4 +225,15 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
 
   @override
   String getDefaultUsername() => getUsername();
+
+  @override
+  Future<String?> errorMessageForProposedDistroName(String proposedName) async {
+    final re = RegExp(r'^[a-zA-Z0-9_-]+$');
+
+    if (!re.hasMatch(proposedName)) {
+      return 'Distro name has invalid characters';
+    }
+
+    return null;
+  }
 }

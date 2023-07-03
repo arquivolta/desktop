@@ -34,4 +34,9 @@ class NullArchLinuxInstaller extends ArchLinuxInstaller {
   String getDefaultUsername() {
     throw UnimplementedError();
   }
+
+  @override
+  Future<String> errorMessageForProposedDistroName(String proposedName) {
+    throw UnimplementedError();
+  }
 }

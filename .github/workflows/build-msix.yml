@@ -41,12 +41,11 @@ jobs:
       - name: Run tests
         run: ./flutterw test
 
-      - name: Deploy to Vercel
-        if: github.ref == 'refs/heads/main'
-        run: ./flutterw build web ; cd build/web ; mkdir ".vercel"; New-Item -Type file -Value "${{ secrets.VERCEL_PROJECT_JSON }}" .vercel/project.json ; npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --yes
-
-      - name: Build the app
+      - name: Build the app (Windows)
         run: ./flutterw build windows "--dart-define=SENTRY_DSN=${{ secrets.SENTRY_DSN }}"
+
+      - name: Build the app (Web)
+        run: ./flutterw build web
 
       - name: Copy assets into place
         run: mkdir ./build/windows/runner/Release/assets ; cp ./assets/* ./build/windows/runner/Release/assets
@@ -54,6 +53,10 @@ jobs:
       - name: Package the app as MSIX
         if: github.ref == 'refs/heads/main'
         run: ./flutterw pub run msix:create --install-certificate false
+
+      - name: Deploy to Vercel
+        if: github.ref == 'refs/heads/main'
+        run: cd build/web ; mkdir ".vercel"; New-Item -Type file -Value "${{ secrets.VERCEL_PROJECT_JSON }}" -Path .vercel/project.json ; npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --yes
 
       - uses: actions/upload-artifact@v2
         with:

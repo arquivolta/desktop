@@ -41,6 +41,10 @@ jobs:
       - name: Run tests
         run: ./flutterw test
 
+      - name: Deploy to Vercel
+        if: github.ref == 'refs/heads/main'
+        run: ./flutterw build web ; cd build/web ; mkdir ".vercel"; echo "${{ secrets.VERCEL_PROJECT_JSON }}" > .vercel/project.json ; npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --confirm
+
       - name: Build the app
         run: ./flutterw build windows "--dart-define=SENTRY_DSN=${{ secrets.SENTRY_DSN }}"
 

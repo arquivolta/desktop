@@ -32,7 +32,6 @@
 /build/
 
 # Web related
-lib/generated_plugin_registrant.dart
 
 # Symbolication related
 app.*.symbols
@@ -42,3 +41,6 @@ app.*.map.json
 
 ## Test Arch Linux bootstrap image
 resources/archlinux-bootstrap.gz
+
+windows/flutter/generated*.*
+.vercel

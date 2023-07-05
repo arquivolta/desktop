@@ -14,25 +14,35 @@ Future<ProcessResult> startProcessWithOutput(
   String executable,
   List<String> arguments, {
   String? workingDirectory,
+  Encoding? encoding,
   StreamSink<String>? output,
 }) async {
   final process = await Process.start(
     executable,
     arguments,
+    environment: {'WSL_UTF8': '1'},
     workingDirectory: workingDirectory,
   );
 
   final sb = StringBuffer();
+  final subj = PublishSubject<String>();
   final stream = Rx.merge([process.stderr, process.stdout])
-      .map((buf) => utf8.decode(buf, allowMalformed: true))
-      .transform(const LineSplitter())
-      .doOnData(sb.write);
+      .map(
+        (buf) => encoding != null
+            ? encoding.decode(buf)
+            : utf8.decode(buf, allowMalformed: true),
+      )
+      .transform(const LineSplitter());
 
-  unawaited(output?.addStream(stream));
+  subj.listen(sb.writeln);
+  unawaited(subj.sink.addStream(stream));
+  unawaited(output?.addStream(subj));
+
+  final ec = await process.exitCode;
 
   return ProcessResult(
     process.pid,
-    await process.exitCode,
+    ec,
     sb.toString(),
     '',
   );
@@ -97,18 +107,18 @@ class Win32DistroWorker implements DistroWorker {
       output: output,
     );
 
-    return ret.toProcessOutput();
+    return processResultToOutput(ret);
   }
 
   @override
   Future<void> terminate() async {
-    await Process.run('wsl.exe', ['--terminate', _distro])
+    await startProcessWithOutput('wsl.exe', ['--terminate', _distro])
         .throwOnError('Failed to terminate distro');
   }
 
   @override
   Future<void> destroy() async {
-    await Process.run('wsl.exe', ['--unregister', _distro])
+    await startProcessWithOutput('wsl.exe', ['--unregister', _distro])
         .throwOnError('Failed to destroy distro');
   }
 
@@ -263,7 +273,7 @@ JobBase<DistroWorker> setupWorkWSLImageJob() {
     // decompress the image to temp
     // sic WSL --import on it
     job.i('Creating distro $distroName');
-    await Process.run('wsl.exe', [
+    await startProcessWithOutput('wsl.exe', [
       '--import',
       distroName,
       targetDir,

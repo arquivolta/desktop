@@ -180,13 +180,13 @@ String win32PathToWslPath(String path) {
   return '/mnt/$driveLetter$rest';
 }
 
-extension ProcessOutputMixin on ProcessResult {
-  ProcessOutput toProcessOutput() {
-    return ProcessOutput(
-      pid,
-      exitCode,
-      stdout,
-      stderr,
-    );
-  }
+ProcessOutput processResultToOutput(ProcessResult pr) {
+  final ret = ProcessOutput(
+    pr.pid,
+    pr.exitCode,
+    pr.stdout,
+    pr.stderr,
+  );
+
+  return ret;
 }

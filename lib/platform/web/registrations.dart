@@ -56,7 +56,7 @@ class DemoArchLinuxInstaller extends ArchLinuxInstaller {
       job.i('We would normally download a file here!');
 
       final progressLength =
-          App.find<ApplicationMode>() == ApplicationMode.production ? 5 : 20;
+          App.find<ApplicationMode>() == ApplicationMode.production ? 20 : 5;
 
       final progressFactor = 100 / progressLength;
 
@@ -99,6 +99,15 @@ class DemoArchLinuxInstaller extends ArchLinuxInstaller {
 
   @override
   String getDefaultUsername() => 'new-user';
+
+  @override
+  Future<String?> errorMessageForProposedDistroName(String proposedName) {
+    final re = RegExp(r'^[a-zA-Z0-9_-]+$');
+
+    return re.hasMatch(proposedName)
+        ? Future<String?>.value()
+        : Future<String?>.value('Distro name has invalid characters');
+  }
 }
 
 class DemoDistroWorker implements DistroWorker {

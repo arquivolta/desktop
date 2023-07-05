@@ -5,6 +5,7 @@ import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/platform/win32/arch_to_rootfs.dart';
 import 'package:arquivolta/platform/win32/util.dart';
 import 'package:arquivolta/platform/win32/wsl.dart';
+import 'package:arquivolta/services/async_memoize.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -135,7 +136,7 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
           ..i('wsl.exe ${importArgs.join(' ')}');
 
         try {
-          final result = await Process.run(
+          final result = await startProcessWithOutput(
             'wsl.exe',
             importArgs,
           );
@@ -225,4 +226,40 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
 
   @override
   String getDefaultUsername() => getUsername();
+
+  @override
+  Future<String?> errorMessageForProposedDistroName(String proposedName) async {
+    final re = RegExp(r'^[a-zA-Z0-9_-]+$');
+
+    if (!re.hasMatch(proposedName)) {
+      return 'Distro name has invalid characters';
+    }
+
+    final distroList = await _getDistroNames();
+    return distroList.contains(proposedName)
+        ? 'Distro name is already being used'
+        : null;
+  }
+
+  final AsyncMemoize<List<String>> _distroNamesMemoized =
+      AsyncMemoize(_getDistroNamesDirect, const Duration(seconds: 5));
+
+  Future<List<String>> _getDistroNames() => _distroNamesMemoized.value;
+
+  static Future<List<String>> _getDistroNamesDirect() async {
+    final result = await startProcessWithOutput(
+      'wsl.exe',
+      ['--list'],
+    );
+
+    final lines = (result.stdout as String).split('\n');
+
+    final ret = lines
+        .skip(1)
+        .map((line) => line.split(' ').first)
+        .where((x) => x.isNotEmpty)
+        .toList();
+
+    return ret;
+  }
 }

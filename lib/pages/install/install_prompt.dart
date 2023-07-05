@@ -2,8 +2,11 @@ import 'package:arquivolta/actions.dart';
 import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
+import 'package:arquivolta/util.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+
+final RegExp userRegex = RegExp(r'^[a-z_][a-z0-9_-]*[$]?$');
 
 class InstallPrompt extends HookWidget implements Loggable {
   final void Function(String distro, String user, String password)
@@ -29,8 +32,17 @@ class InstallPrompt extends HookWidget implements Loggable {
 
     final user = useTextEditingController(text: defaultUserName);
 
+    final redraw = useState(0);
     final distroError = useFutureEffect(
-      () => installer.errorMessageForProposedDistroName(distro.text),
+      () async {
+        final ret =
+            await installer.errorMessageForProposedDistroName(distro.text);
+
+        // NB: If we don't do this insanely gross hack, the form error message
+        // will always be one character behind
+        delayBeat(() => redraw.value++);
+        return ret;
+      },
       [distro.text],
     );
 
@@ -56,53 +68,45 @@ class InstallPrompt extends HookWidget implements Loggable {
       ],
     );
 
-    return Flex(
-      direction: Axis.vertical,
-      children: [
-        Flex(
-          direction: Axis.horizontal,
-          children: [
-            SizedBox(
-              width: 160,
-              child: InfoLabel(label: distroError.data ?? 'WSL Distro Name'),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextBox(
-                controller: distro,
+    final distroPrompt = InfoLabel(
+      label: 'WSL Distro Name',
+      child: TextFormBox(
+        controller: distro,
+        validator: (_) => distroError.data,
+      ),
+    );
+
+    final userPrompt = InfoLabel(
+      label: 'Linux Username',
+      child: TextFormBox(
+        controller: user,
+        validator: (s) =>
+            userRegex.hasMatch(s ?? '') ? null : 'Invalid username',
+      ),
+    );
+
+    return Form(
+      autovalidateMode: AutovalidateMode.always,
+      child: Flex(
+        direction: Axis.vertical,
+        children: [
+          distroPrompt,
+          const SizedBox(
+            height: 8,
+          ),
+          userPrompt,
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: FilledButton(
+                onPressed: shouldEnableButton ? onPress : null,
+                child: const Text('Install'),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(
-          height: 8,
-        ),
-        Flex(
-          direction: Axis.horizontal,
-          children: [
-            SizedBox(
-              width: 160,
-              child: InfoLabel(label: 'Linux Username'),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextBox(
-                controller: user,
-              ),
-            ),
-          ],
-        ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: FilledButton(
-              onPressed: shouldEnableButton ? onPress : null,
-              child: const Text('Install'),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

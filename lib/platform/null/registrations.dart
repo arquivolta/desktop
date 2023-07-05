@@ -39,4 +39,9 @@ class NullArchLinuxInstaller extends ArchLinuxInstaller {
   Future<String> errorMessageForProposedDistroName(String proposedName) {
     throw UnimplementedError();
   }
+
+  @override
+  void openTerminalWindow() {
+    throw UnimplementedError();
+  }
 }

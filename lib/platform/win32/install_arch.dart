@@ -266,4 +266,9 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
 
     return ret;
   }
+
+  @override
+  void openTerminalWindow() {
+    openAppXByModelId('Microsoft.WindowsTerminal_8wekyb3d8bbwe');
+  }
 }

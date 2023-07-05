@@ -4,6 +4,7 @@ import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/pages/install/install_progress.dart';
 import 'package:arquivolta/pages/install/install_prompt.dart';
+import 'package:arquivolta/platform/win32/util.dart';
 import 'package:arquivolta/util.dart';
 import 'package:arquivolta/widgets/paged_view.dart';
 import 'package:fluent_ui/fluent_ui.dart';

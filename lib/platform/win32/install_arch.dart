@@ -69,11 +69,15 @@ systemctl enable systemd-tmpfiles-clean.timer docker
 
 String addUser(String userName, String password) => '''
 #!/bin/bash
-set -euxo pipefail
+set -euo pipefail
 
 useradd -m -G wheel -s /bin/zsh '$userName'
 
-echo "$userName:\$(zenity --password --title 'Enter a new password for $userName')" | chpasswd
+echo "$userName:\$(zenity --password --title 'Enter a new WSL password for $userName')" | chpasswd
+
+## NB: We suppress the output of the previous commands so that we
+## don't leak passwords into the logs
+set -x
 
 # Set up sudo
 echo '%wheel ALL=(ALL:ALL) ALL' > /etc/sudoers.d/00-enable-wheel

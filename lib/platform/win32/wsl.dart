@@ -20,6 +20,7 @@ Future<ProcessResult> startProcessWithOutput(
   final process = await Process.start(
     executable,
     arguments,
+    environment: {'WSL_UTF8': '1'},
     workingDirectory: workingDirectory,
   );
 
@@ -111,13 +112,13 @@ class Win32DistroWorker implements DistroWorker {
 
   @override
   Future<void> terminate() async {
-    await Process.run('wsl.exe', ['--terminate', _distro])
+    await startProcessWithOutput('wsl.exe', ['--terminate', _distro])
         .throwOnError('Failed to terminate distro');
   }
 
   @override
   Future<void> destroy() async {
-    await Process.run('wsl.exe', ['--unregister', _distro])
+    await startProcessWithOutput('wsl.exe', ['--unregister', _distro])
         .throwOnError('Failed to destroy distro');
   }
 
@@ -272,7 +273,7 @@ JobBase<DistroWorker> setupWorkWSLImageJob() {
     // decompress the image to temp
     // sic WSL --import on it
     job.i('Creating distro $distroName');
-    await Process.run('wsl.exe', [
+    await startProcessWithOutput('wsl.exe', [
       '--import',
       distroName,
       targetDir,

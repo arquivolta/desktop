@@ -1,7 +1,6 @@
 // ignore_for_file: constant_identifier_names
 
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 class Utf16 extends Encoding {

@@ -76,8 +76,7 @@ class InProgressInstall extends HookWidget implements Loggable {
     final selectedJob =
         selectedIndex.value >= 0 ? jobList.value[selectedIndex.value] : null;
 
-    final jobListWidget = Flex(
-      direction: Axis.horizontal,
+    final jobListWidget = Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
@@ -97,8 +96,7 @@ class InProgressInstall extends HookWidget implements Loggable {
           ),
         ),
         Expanded(
-          child: Flex(
-            direction: Axis.vertical,
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -126,8 +124,7 @@ class InProgressInstall extends HookWidget implements Loggable {
       ],
     );
 
-    return Flex(
-      direction: Axis.vertical,
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(child: jobListWidget),
@@ -145,8 +142,7 @@ class InProgressInstall extends HookWidget implements Loggable {
         if (error != null)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Flex(
-              direction: Axis.horizontal,
+            child: Row(
               children: [
                 // XXX Fix Me
                 Text('Failed to install: $error'),

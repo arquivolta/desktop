@@ -85,8 +85,7 @@ class InstallPage extends HookWidget implements Loggable {
 
     return Padding(
       padding: const EdgeInsets.all(32),
-      child: Flex(
-        direction: Axis.vertical,
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(headerText, style: style.typography.titleLarge),

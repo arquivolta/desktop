@@ -86,8 +86,7 @@ class InstallPrompt extends HookWidget implements Loggable {
 
     return Form(
       autovalidateMode: AutovalidateMode.always,
-      child: Flex(
-        direction: Axis.vertical,
+      child: Column(
         children: [
           distroPrompt,
           const SizedBox(

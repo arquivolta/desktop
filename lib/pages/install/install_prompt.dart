@@ -3,6 +3,7 @@ import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/util.dart';
+import 'package:arquivolta/widgets/hooks.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
@@ -31,8 +32,7 @@ class InstallPrompt extends HookWidget implements Loggable {
     );
 
     final user = useTextEditingController(text: defaultUserName);
-
-    final redraw = useState(0);
+    final queueRedraw = useExplicitRedraw();
     final distroError = useFutureEffect(
       () async {
         final ret =
@@ -40,7 +40,7 @@ class InstallPrompt extends HookWidget implements Loggable {
 
         // NB: If we don't do this insanely gross hack, the form error message
         // will always be one character behind
-        delayBeat(() => redraw.value++);
+        queueRedraw();
         return ret;
       },
       [distro.text],
@@ -95,6 +95,9 @@ class InstallPrompt extends HookWidget implements Loggable {
             height: 8,
           ),
           userPrompt,
+          const Expanded(
+            child: SizedBox(),
+          ),
           Align(
             alignment: Alignment.centerRight,
             child: Padding(

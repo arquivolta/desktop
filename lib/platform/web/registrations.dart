@@ -108,6 +108,9 @@ class DemoArchLinuxInstaller extends ArchLinuxInstaller {
         ? Future<String?>.value()
         : Future<String?>.value('Distro name has invalid characters');
   }
+
+  @override
+  void openTerminalWindow() {}
 }
 
 class DemoDistroWorker implements DistroWorker {

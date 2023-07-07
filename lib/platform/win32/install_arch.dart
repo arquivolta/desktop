@@ -97,14 +97,6 @@ set -euxo pipefail
 ln -sf ${win32PathToWslPath(getHomeDirectory())} "\$HOME/win"
 ''';
 
-String rebootDistro(String distroName) => '''
-#!/bin/bash
-set -euxo pipefail
-
-# NB: We need to reboot our distro to start systemd
-wsl.exe -t '$distroName'
-''';
-
 class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
   @override
   Future<DistroWorker> installArchLinux(String distroName) async {
@@ -209,14 +201,6 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
         user: username,
         friendlyDescription: 'Setting up ~/win => /mnt/c/Users/$username',
       ),
-      await worker.runScriptInDistroAsJob(
-        'Restart Arquivolta',
-        rebootDistro(worker.distroName),
-        [],
-        "Couldn't restart Arch Linux",
-        user: 'root',
-        friendlyDescription: 'Restart Arquivolta in order to kick off systemd',
-      ),
     ];
 
     for (final job in jobQueue) {
@@ -225,6 +209,8 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
 
     // NB: The user that we set up to run via /etc/wsl.conf won't apply until we
     // restart the distro, so terminate it off now
+    worker
+        .i('Restarting Arquivolta distro to start systemd as the correct user');
     await worker.terminate();
   }
 
@@ -265,5 +251,10 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
         .toList();
 
     return ret;
+  }
+
+  @override
+  void openTerminalWindow() {
+    openAppXByModelId('Microsoft.WindowsTerminal_8wekyb3d8bbwe');
   }
 }

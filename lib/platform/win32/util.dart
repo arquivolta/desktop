@@ -10,6 +10,7 @@ import 'package:ffi/ffi.dart';
 import 'package:path/path.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:win32/win32.dart' as win32;
+import 'package:win32/win32.dart';
 
 enum OperatingSystemType { amd64, aarch64, dunnoButItsNotGonnaWork }
 
@@ -62,6 +63,31 @@ void openFileViaShell(String path) {
     strNull,
     win32.SW_SHOW,
   );
+}
+
+void openAppXByModelId(String appModelId) {
+  final aam = IApplicationActivationManager(
+    COMObject.createFromID(
+      CLSID_ApplicationActivationManager,
+      IID_IApplicationActivationManager,
+    ),
+  );
+
+  try {
+    final dontcare = calloc<win32.DWORD>();
+    final hr = aam.activateApplication(
+      '$appModelId!App'.toNativeUtf16(),
+      ''.toNativeUtf16(),
+      0,
+      dontcare,
+    );
+
+    if (win32.FAILED(hr)) {
+      throw win32.WindowsException(hr);
+    }
+  } finally {
+    aam.release();
+  }
 }
 
 extension ThrowOnProcessErrorExtension on Future<ProcessResult> {

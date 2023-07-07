@@ -76,4 +76,5 @@ abstract class ArchLinuxInstaller {
 
   String getDefaultUsername();
   Future<String?> errorMessageForProposedDistroName(String proposedName);
+  void openTerminalWindow();
 }

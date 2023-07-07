@@ -4,6 +4,10 @@ import 'dart:io';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/platform/win32/install_arch.dart';
 import 'package:arquivolta/platform/win32/util.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
+import 'package:flutter_acrylic/window_effect.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 
@@ -31,10 +35,10 @@ GetIt setupPlatformRegistrations(GetIt locator) {
     ..createSync(recursive: true);
 
   final logFile = File('${ourAppDataDir.path}/log.txt');
-  final fileOut = BetterFileOutput(file: logFile);
+  final fileOut = _BetterFileOutput(file: logFile);
 
   final List<LogOutput> sentryLogging = appMode == ApplicationMode.production
-      ? [SentryOutput(), ConsoleOutput()]
+      ? [_SentryOutput(), ConsoleOutput()]
       : [ConsoleOutput()];
 
   logger = Logger(
@@ -68,12 +72,13 @@ GetIt setupPlatformRegistrations(GetIt locator) {
       },
       instanceName: 'openLog',
     )
-    ..registerSingleton<ArchLinuxInstaller>(WSL2ArchLinuxInstaller());
+    ..registerSingleton<ArchLinuxInstaller>(WSL2ArchLinuxInstaller())
+    ..registerSingleton<PlatformUtilities>(Win32PlatformUtilities());
 
   return locator;
 }
 
-class SentryOutput implements LogOutput {
+class _SentryOutput implements LogOutput {
   @override
   void destroy() {}
 
@@ -108,13 +113,13 @@ class SentryOutput implements LogOutput {
   }
 }
 
-class BetterFileOutput extends LogOutput {
+class _BetterFileOutput extends LogOutput {
   final File file;
   final bool overrideExisting;
   final Encoding encoding;
   IOSink? _sink;
 
-  BetterFileOutput({
+  _BetterFileOutput({
     required this.file,
     this.overrideExisting = false,
     this.encoding = utf8,
@@ -152,5 +157,24 @@ class BetterFileOutput extends LogOutput {
     await _sink?.flush();
     await _sink?.close();
     _sink = null;
+  }
+}
+
+class Win32PlatformUtilities extends PlatformUtilities {
+  @override
+  void openTerminalWindow() {
+    openAppXByModelId('Microsoft.WindowsTerminal_8wekyb3d8bbwe');
+  }
+
+  @override
+  Future<void> setupTransparentBackgroundWindow({
+    required bool isDark,
+    Color? color,
+  }) {
+    return flutter_acrylic.Window.setEffect(
+      effect: WindowEffect.mica,
+      dark: isDark,
+      color: color ?? Colors.transparent,
+    );
   }
 }

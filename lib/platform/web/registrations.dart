@@ -4,6 +4,7 @@ import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/services/job.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 
@@ -25,7 +26,8 @@ GetIt setupPlatformRegistrations(GetIt locator) {
       Future<void>.value,
       instanceName: 'openLog',
     )
-    ..registerSingleton<ArchLinuxInstaller>(DemoArchLinuxInstaller());
+    ..registerSingleton<ArchLinuxInstaller>(_DemoArchLinuxInstaller())
+    ..registerSingleton<PlatformUtilities>(_DemoPlatformUtilities());
 
   return locator;
 }
@@ -48,7 +50,7 @@ Logger _createLogger(ApplicationMode mode) {
   );
 }
 
-class DemoArchLinuxInstaller extends ArchLinuxInstaller {
+class _DemoArchLinuxInstaller extends ArchLinuxInstaller {
   @override
   Future<DistroWorker> installArchLinux(String distroName) async {
     final job = JobBase.fromBlock<void>(
@@ -108,9 +110,6 @@ class DemoArchLinuxInstaller extends ArchLinuxInstaller {
         ? Future<String?>.value()
         : Future<String?>.value('Distro name has invalid characters');
   }
-
-  @override
-  void openTerminalWindow() {}
 }
 
 class DemoDistroWorker implements DistroWorker {
@@ -160,4 +159,15 @@ class DemoDistroWorker implements DistroWorker {
   Future<void> terminate() {
     throw UnimplementedError();
   }
+}
+
+class _DemoPlatformUtilities extends PlatformUtilities {
+  @override
+  void openTerminalWindow() {}
+
+  @override
+  Future<void> setupTransparentBackgroundWindow({
+    required bool isDark,
+    Color? color,
+  }) async {}
 }

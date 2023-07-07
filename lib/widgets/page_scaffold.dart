@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:arquivolta/app.dart';
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/pages/debug_page.dart';
@@ -20,9 +22,24 @@ class PageScaffold extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final style = FluentTheme.of(context);
+    final isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
+    final platformUtils = App.find<PlatformUtilities>();
+    final color = style.micaBackgroundColor.withAlpha(13);
+
+    useEffect(
+      () {
+        unawaited(
+          platformUtils.setupTransparentBackgroundWindow(
+            isDark: isDark,
+            color: color,
+          ),
+        );
+        return null;
+      },
+      [isDark, color],
+    );
 
     final idx = useState(0);
-    //final Widget selectedWidget = Container();
 
     return NavigationView(
       appBar: NavigationAppBar(
@@ -41,13 +58,7 @@ class PageScaffold extends HookWidget {
         actions: DragToMoveArea(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: const [
-              Spacer(),
-              if (!kIsWeb)
-                WindowButtons(
-                    //XXX: height: 50,
-                    )
-            ],
+            children: const [Spacer(), if (!kIsWeb) WindowButtons()],
           ),
         ),
         automaticallyImplyLeading: false,
@@ -56,12 +67,6 @@ class PageScaffold extends HookWidget {
         // NB: Auto looks nicer here but it's broken at the moment
         // because when the pane is open the Title gets no padding
         selected: idx.value,
-        /*
-        size: const NavigationPaneSize(
-          openMinWidth: 250,
-          openMaxWidth: 320,
-        ),
-        */
         items: [
           PaneItem(
             icon: const Icon(FluentIcons.download),

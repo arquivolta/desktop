@@ -18,7 +18,8 @@ class InstallPage extends HookWidget implements Loggable {
     final distroName = useRef('');
     final username = useRef('');
     final password = useRef('');
-    final installer = useState(App.find<ArchLinuxInstaller>());
+    final installer = App.find<ArchLinuxInstaller>();
+    final platformUtils = App.find<PlatformUtilities>();
 
     final pageController = usePagedViewController(3);
     final languageTag =
@@ -29,10 +30,10 @@ class InstallPage extends HookWidget implements Loggable {
         n('Clicked Install: ${distroName.value}');
 
         d('Starting Phase 1');
-        final worker = await installer.value.installArchLinux(distroName.value);
+        final worker = await installer.installArchLinux(distroName.value);
 
         d('Starting Phase 2');
-        await installer.value.runArchLinuxPostInstall(
+        await installer.runArchLinuxPostInstall(
           worker,
           username.value,
           password.value,
@@ -48,8 +49,8 @@ class InstallPage extends HookWidget implements Loggable {
       pageController,
       (ctx, ctrl) => switch (ctrl.page.value) {
         0 => InstallPrompt(
-            defaultUserName: installer.value.getDefaultUsername(),
-            installer: installer.value,
+            defaultUserName: installer.getDefaultUsername(),
+            installer: installer,
             onPressedInstall: (d, u, p) {
               distroName.value = d;
               username.value = u;
@@ -72,7 +73,7 @@ class InstallPage extends HookWidget implements Loggable {
             },
           ),
         2 => InstallFinishedPage(
-            onWindowsTerminalOpen: installer.value.openTerminalWindow,
+            onWindowsTerminalOpen: platformUtils.openTerminalWindow,
           ),
         _ => throw Exception('Wrong page?!?!')
       },

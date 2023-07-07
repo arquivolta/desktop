@@ -50,6 +50,8 @@ msix_config:
 # The following section is specific to Flutter.
 flutter:
   uses-material-design: true
+assets:
+  - assets/finished.webp
 # To add assets to your application, add an assets section, like this:
 # assets:
 #   - images/a_dot_burr.jpeg

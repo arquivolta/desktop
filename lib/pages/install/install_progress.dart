@@ -6,10 +6,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 class InProgressInstall extends HookWidget implements Loggable {
   final bool finished;
+  final VoidCallback onPressedFinish;
   final Object? error;
 
   const InProgressInstall({
     required this.finished,
+    required this.onPressedFinish,
     this.error,
     super.key,
   });
@@ -129,8 +131,17 @@ class InProgressInstall extends HookWidget implements Loggable {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(child: jobListWidget),
-        if (finished && error == null)
-          const Text('We did it!!!'), // XXX: Fix me
+        if (error == null)
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: FilledButton(
+                onPressed: finished ? onPressedFinish : null,
+                child: const Text('Finish'),
+              ),
+            ),
+          ),
         if (error != null)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),

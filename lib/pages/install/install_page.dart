@@ -4,6 +4,7 @@ import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/pages/install/install_progress.dart';
 import 'package:arquivolta/pages/install/install_prompt.dart';
+import 'package:arquivolta/pages/install/install_success.dart';
 import 'package:arquivolta/util.dart';
 import 'package:arquivolta/widgets/paged_view.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -19,7 +20,7 @@ class InstallPage extends HookWidget implements Loggable {
     final password = useRef('');
     final installer = useState(App.find<ArchLinuxInstaller>());
 
-    final pageController = usePagedViewController();
+    final pageController = usePagedViewController(3);
     final languageTag =
         View.of(context).platformDispatcher.locale.toLanguageTag();
 
@@ -65,6 +66,13 @@ class InstallPage extends HookWidget implements Loggable {
         1 => InProgressInstall(
             finished: !installResult.isPending,
             error: installResult.result.error,
+            onPressedFinish: () {
+              i('Finished install, now showing Whats Next page');
+              pageController.next();
+            },
+          ),
+        2 => InstallFinishedPage(
+            onWindowsTerminalOpen: installer.value.openTerminalWindow,
           ),
         _ => throw Exception('Wrong page?!?!')
       },

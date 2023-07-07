@@ -81,16 +81,19 @@ class InProgressInstall extends HookWidget implements Loggable {
       children: [
         Padding(
           padding: const EdgeInsets.only(right: 16),
-          child: SizedBox(
-            width: 350,
-            height: 200,
-            child: ListView.builder(
-              itemCount: jobList.value.length,
-              controller: listScroll,
-              itemBuilder: (ctx, i) => JobListTile(
-                job: jobList.value[i],
-                isSelected: selectedIndex.value == i,
-                onTap: () => selectedIndex.value = i,
+          child: Card(
+            padding: EdgeInsets.all(4),
+            child: SizedBox(
+              width: 350,
+              height: 200,
+              child: ListView.builder(
+                itemCount: jobList.value.length,
+                controller: listScroll,
+                itemBuilder: (ctx, i) => JobListTile(
+                  job: jobList.value[i],
+                  isSelected: selectedIndex.value == i,
+                  onTap: () => selectedIndex.value = i,
+                ),
               ),
             ),
           ),
@@ -192,7 +195,7 @@ class JobListTile extends HookWidget {
     return ListTile(
       key: Key(job.friendlyName),
       leading: leading,
-      tileColor: isSelected ? ButtonState.all(style.accentColor) : null,
+      tileColor: isSelected ? ButtonState.all(style.menuColor) : null,
       title: Text(
         job.friendlyName,
         style: style.typography.bodyStrong,

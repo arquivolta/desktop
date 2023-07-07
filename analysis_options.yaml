@@ -9,3 +9,4 @@ linter:
     sort_constructors_first: false
     omit_local_variable_types: false
     unnecessary_library_directive: false
+    lines_longer_than_80_chars: false

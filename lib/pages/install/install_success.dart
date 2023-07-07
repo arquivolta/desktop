@@ -10,15 +10,20 @@ class InstallFinishedPage extends HookWidget implements Loggable {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(
+        const Text(
+          'Installation Complete! Open Windows Terminal to start using Arquivolta',
+        ),
+        const Expanded(
           child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Image.asset('finished.webp'),
+            padding: EdgeInsets.all(8),
+            child: Image(
+              image: AssetImage('assets/finished.webp'),
+            ),
           ),
         ),
         Center(
           child: FilledButton(
-            onPressed: () => onWindowsTerminalOpen,
+            onPressed: onWindowsTerminalOpen,
             child: const Text('Open Windows Terminal'),
           ),
         )

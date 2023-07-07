@@ -9,15 +9,18 @@ class InstallFinishedPage extends HookWidget implements Loggable {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
           'Installation Complete! Open Windows Terminal to start using Arquivolta',
         ),
         const Expanded(
-          child: Padding(
-            padding: EdgeInsets.all(8),
-            child: Image(
-              image: AssetImage('assets/finished.webp'),
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Image(
+                image: AssetImage('assets/finished.webp'),
+              ),
             ),
           ),
         ),

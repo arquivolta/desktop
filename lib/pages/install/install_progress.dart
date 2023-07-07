@@ -82,7 +82,7 @@ class InProgressInstall extends HookWidget implements Loggable {
         Padding(
           padding: const EdgeInsets.only(right: 16),
           child: Card(
-            padding: EdgeInsets.all(4),
+            padding: const EdgeInsets.all(4),
             child: SizedBox(
               width: 350,
               height: 200,

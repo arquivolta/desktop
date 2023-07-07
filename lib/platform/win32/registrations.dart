@@ -5,7 +5,6 @@ import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/platform/win32/install_arch.dart';
 import 'package:arquivolta/platform/win32/util.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 import 'package:flutter_acrylic/window_effect.dart';
 import 'package:get_it/get_it.dart';
@@ -121,7 +120,9 @@ class _BetterFileOutput extends LogOutput {
 
   _BetterFileOutput({
     required this.file,
+    // ignore: unused_element
     this.overrideExisting = false,
+    // ignore: unused_element
     this.encoding = utf8,
   });
 

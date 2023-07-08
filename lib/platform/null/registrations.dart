@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:arquivolta/interfaces.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
@@ -9,12 +11,13 @@ GetIt setupPlatformRegistrations(GetIt locator) {
     ..registerFactory<Logger>(
       Logger.new,
     )
-    ..registerSingleton<ArchLinuxInstaller>(NullArchLinuxInstaller());
+    ..registerSingleton<ArchLinuxInstaller>(_NullArchLinuxInstaller())
+    ..registerSingleton<PlatformUtilities>(_NullPlatformUtilities());
 
   return locator;
 }
 
-class NullArchLinuxInstaller extends ArchLinuxInstaller {
+class _NullArchLinuxInstaller extends ArchLinuxInstaller {
   @override
   Future<DistroWorker> installArchLinux(String distroName) {
     throw UnimplementedError();
@@ -39,9 +42,19 @@ class NullArchLinuxInstaller extends ArchLinuxInstaller {
   Future<String> errorMessageForProposedDistroName(String proposedName) {
     throw UnimplementedError();
   }
+}
 
+class _NullPlatformUtilities extends PlatformUtilities {
   @override
   void openTerminalWindow() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> setupTransparentBackgroundWindow({
+    required bool isDark,
+    Color? color,
+  }) {
     throw UnimplementedError();
   }
 }

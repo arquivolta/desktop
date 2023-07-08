@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/platform/registrations.dart';
 import 'package:arquivolta/services/job.dart';
@@ -33,11 +35,18 @@ class MainWindow extends StatelessWidget implements Loggable {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
+
     return FluentApp(
-      color: Colors.blue,
       theme: FluentThemeData(
+        brightness: Brightness.light,
         visualDensity: VisualDensity.standard,
       ),
+      darkTheme: FluentThemeData(
+        brightness: Brightness.dark,
+        visualDensity: VisualDensity.standard,
+      ),
+      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
       home: const PageScaffold(),
     );
   }

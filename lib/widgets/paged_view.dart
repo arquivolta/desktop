@@ -19,7 +19,8 @@ class PagedViewController {
 }
 
 PagedViewController usePagedViewController(int pageCount) {
-  final pageController = useMemoized(() => PagedViewController(pageCount), []);
+  final pageController =
+      useMemoized(() => PagedViewController(pageCount), [pageCount]);
 
   // NB: This is a Hack, make sure that the calling widget will rebuild whenever
   // the page changes

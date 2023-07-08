@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/services/job.dart';
+import 'package:flutter/widgets.dart';
 
 enum ApplicationMode { debug, production, test }
 
@@ -76,5 +77,13 @@ abstract class ArchLinuxInstaller {
 
   String getDefaultUsername();
   Future<String?> errorMessageForProposedDistroName(String proposedName);
+}
+
+// ignore: one_member_abstracts
+abstract class PlatformUtilities {
+  Future<void> setupTransparentBackgroundWindow({
+    required bool isDark,
+    Color? color,
+  });
   void openTerminalWindow();
 }

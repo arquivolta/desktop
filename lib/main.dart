@@ -42,8 +42,8 @@ void main() async {
 Future<void> initializeDesktopWindow() async {
   if (kIsWeb) return;
 
-  await flutter_acrylic.Window.initialize();
-  await flutter_acrylic.Window.hideWindowControls();
+  WidgetsFlutterBinding.ensureInitialized();
+
   await WindowManager.instance.ensureInitialized();
 
   unawaited(
@@ -52,8 +52,11 @@ Future<void> initializeDesktopWindow() async {
         TitleBarStyle.hidden,
         windowButtonVisibility: false,
       );
-
+      await flutter_acrylic.Window.initialize();
+      await flutter_acrylic.Window.hideWindowControls();
+      await flutter_acrylic.Window.setWindowBackgroundColorToClear();
       await windowManager.setMinimumSize(const Size(600, 400));
+      await windowManager.center();
       await windowManager.show();
       await windowManager.setSkipTaskbar(false);
     }),

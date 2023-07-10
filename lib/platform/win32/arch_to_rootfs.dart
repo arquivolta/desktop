@@ -92,12 +92,13 @@ JobBase<void> convertArchBootstrapToWSLRootFsJob(
   });
 }
 
+// https://github.com/arquivolta/website/blob/main/app/api/redirect/route.ts
 final arm64ImageUri = Uri.parse(
-  'http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz',
+  'https://arquivolta.dev/api/redirect?q=arch-arm64-image',
 );
 
 final shasumUri = Uri.parse(
-  'http://mirror.rackspace.com/archlinux/iso/latest/sha256sums.txt',
+  'https://arquivolta.dev/api/redirect?q=arch-shasums-x8664',
 );
 
 Future<JobBase<dynamic>> downloadArchLinux(String targetFile) async {

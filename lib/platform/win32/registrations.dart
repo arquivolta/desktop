@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:arquivolta/interfaces.dart';
+import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/platform/win32/install_arch.dart';
 import 'package:arquivolta/platform/win32/util.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -161,10 +162,21 @@ class _BetterFileOutput extends LogOutput {
   }
 }
 
-class Win32PlatformUtilities extends PlatformUtilities {
+class Win32PlatformUtilities extends PlatformUtilities implements Loggable {
   @override
   void openTerminalWindow() {
-    openAppXByModelId('Microsoft.WindowsTerminal_8wekyb3d8bbwe');
+    // NB: Try to open the Preview version first, then the stable version
+    try {
+      openAppXByModelId('Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe');
+    } catch (e) {
+      d('Failed to open preview Terminal, opening regular Terminal instead');
+    }
+
+    try {
+      openAppXByModelId('Microsoft.WindowsTerminal_8wekyb3d8bbwe');
+    } catch (e, st) {
+      i('Failed to open Terminal', e, st);
+    }
   }
 
   @override

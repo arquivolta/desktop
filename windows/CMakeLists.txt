@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
-project(desktop LANGUAGES CXX)
+project(arquivolta LANGUAGES CXX)
 
-set(BINARY_NAME "desktop")
+set(BINARY_NAME "arquivolta")
 
 cmake_policy(SET CMP0063 NEW)
 

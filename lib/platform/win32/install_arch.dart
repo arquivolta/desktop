@@ -88,6 +88,8 @@ chmod 644 /etc/sudoers.d/00-enable-wheel
 echo '' >> /etc/wsl.conf
 echo '[user]' >> /etc/wsl.conf
 echo 'default=$userName' >> /etc/wsl.conf
+echo '[interop]' >> /etc/wsl.conf
+echo 'appendWindowsPath=true' >> /etc/wsl.conf
 ''';
 
 String installWinSymlink = '''

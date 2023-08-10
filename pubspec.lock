@@ -611,13 +611,13 @@ packages:
     source: hosted
     version: "1.9.1"
   squirrel:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: squirrel
-      sha256: aeefbaaade0d18e9d91fc2c35475023c0a92c8fc741a9b0fb0fa0ac603811d33
+      sha256: "7b762a569a31afcd36d329775b08a8ffeb826ffa8bb0f221679f4a5f0ca2e82d"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.0"
+    version: "0.2.0"
   stack_trace:
     dependency: transitive
     description:

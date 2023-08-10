@@ -1,9 +1,10 @@
 name: arquivolta
 description: Desktop installer / updater for the Arquivolta project
+authors: Ani Betts <support@arquivolta.dev>
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 0.4.0+1
+version: 0.5.0+1
 
 environment:
   sdk: ">=3.0.0 <=9.0.0"
@@ -27,7 +28,6 @@ dependencies:
   path_provider: ^2.0.15
   rxdart: ^0.27.7
   sentry_flutter: ^7.8.0
-  squirrel: ^0.1.0
   very_good_analysis: ^5.0.0+1
   win32: ^5.0.5
   window_manager: ^0.3.4
@@ -36,16 +36,32 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   msix: ^3.15.0
+  squirrel: ^0.2.0
   test: ^1.10.1
 
 msix_config:
   display_name: Arquivolta
   publisher_display_name: Arquivolta
   identity_name: dev.arquivolta.desktop
-  msix_version: 0.4.0.0
+  msix_version: 0.5.0.0
   logo_path: resources/logo-msix.png
+  trim_logo: false
+  languages: en-us
   build_windows: false
   capabilities: "runFullTrust"
+
+squirrel:
+  windows:
+    certificateFile: ""
+    overrideSigningParameters: ""
+    appIcon: "blamf"
+    uninstallIconPngUrl: "blahhgh"
+    appFriendlyName: "arquivolta"
+    appDescription: "Arquivolta installer for Windows"
+    setupIcon: "Backup4Professionals_2021!$23.bamf"
+    releaseDirectory: "./build/squirrel"
+    buildEnterpriseMsiPackage: false
+    dontBuildDeltas: false
 
 # The following section is specific to Flutter.
 flutter:

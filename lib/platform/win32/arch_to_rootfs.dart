@@ -92,6 +92,12 @@ JobBase<void> convertArchBootstrapToWSLRootFsJob(
   });
 }
 
+// NB: We do all of these redirects rather than accessing the URLs directly in
+// case something goes Bad with the original URLs - either Arch ships a bad
+// bootstrap version, or the shasums file format changes (which already
+// happened once!), or or or.
+//
+// The current redirect list can be found at:
 // https://github.com/arquivolta/website/blob/main/app/api/redirect/route.ts
 final arm64ImageUri = Uri.parse(
   'https://arquivolta.dev/api/redirect?q=arch-arm64-image',
@@ -140,9 +146,12 @@ Future<JobBase<dynamic>> downloadArchLinux(String targetFile) async {
 
   final imageName = imageLine.split(RegExp(r'\s+'))[1];
 
+  // NB: See above for where this link goes
   return downloadUrlToFileJob(
     'Downloading Arch Linux x86_64',
-    Uri.parse('https://mirror.rackspace.com/archlinux/iso/latest/$imageName'),
+    Uri.parse(
+      'https://arquivolta.dev/api/redirect?q=arch-x8664-image&tgt=$imageName',
+    ),
     targetFile,
   );
 }

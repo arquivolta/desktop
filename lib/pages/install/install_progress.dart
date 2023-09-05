@@ -154,9 +154,9 @@ class InProgressInstall extends HookWidget implements Loggable {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                  child: const FilledButton(
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(8, 0, 0, 0),
+                  child: FilledButton(
                     onPressed: openLogFileInDefaultEditor,
                     child: Text('Open Log File'),
                   ),

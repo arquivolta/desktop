@@ -148,11 +148,18 @@ class InProgressInstall extends HookWidget implements Loggable {
             child: Row(
               children: [
                 // XXX Fix Me
-                Text('Failed to install: $error'),
-                Expanded(child: Container()),
-                const FilledButton(
-                  onPressed: openLogFileInDefaultEditor,
-                  child: Text('Open Log File'),
+                Expanded(
+                  child: Text(
+                    'Failed to install: $error',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                  child: const FilledButton(
+                    onPressed: openLogFileInDefaultEditor,
+                    child: Text('Open Log File'),
+                  ),
                 )
               ],
             ),

@@ -278,7 +278,7 @@ JobBase<DistroWorker> setupWorkWSLImageJob() {
       distroName,
       targetDir,
       targetRootFs,
-    ]);
+    ]).throwOnError('Failed to import work distro, is WSL installed?');
 
     // NB: WSL2 has a race condition where if you create a distro then
     // immediately try to run a command on it, it will report that it doesn't

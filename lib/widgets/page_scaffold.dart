@@ -6,7 +6,6 @@ import 'package:arquivolta/pages/debug_page.dart';
 import 'package:arquivolta/pages/docs_page.dart';
 import 'package:arquivolta/pages/install/install_page.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -36,23 +35,28 @@ class PageScaffold extends HookWidget {
     final idx = useState(0);
 
     return NavigationView(
-      appBar: NavigationAppBar(
+      appBar: const NavigationAppBar(
         title: DragToMoveArea(
-          child: Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                'Arquivolta Manager',
-                style: style.typography.bodyStrong,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    'Arquivolta Manager',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ),
         actions: DragToMoveArea(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: const [Spacer(), if (!kIsWeb) WindowButtons()],
+            children: [Spacer(), WindowButtons()],
           ),
         ),
         automaticallyImplyLeading: false,

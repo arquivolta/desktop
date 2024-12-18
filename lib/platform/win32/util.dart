@@ -39,12 +39,12 @@ OperatingSystemType getOSArchitecture() {
   win32.GetSystemInfo(sysInfo);
 
   if (sysInfo.ref.wProcessorArchitecture ==
-      win32.PROCESSOR_ARCHITECTURE_AMD64) {
+      win32.PROCESSOR_ARCHITECTURE.PROCESSOR_ARCHITECTURE_AMD64) {
     return OperatingSystemType.amd64;
   }
 
   if (sysInfo.ref.wProcessorArchitecture ==
-      win32.PROCESSOR_ARCHITECTURE_ARM64) {
+      win32.PROCESSOR_ARCHITECTURE.PROCESSOR_ARCHITECTURE_ARM64) {
     return OperatingSystemType.aarch64;
   }
 
@@ -61,7 +61,7 @@ void openFileViaShell(String path) {
     lpPath,
     strNull,
     strNull,
-    win32.SW_SHOW,
+    win32.SHOW_WINDOW_CMD.SW_SHOW,
   );
 }
 
@@ -121,7 +121,7 @@ String _getKnownFolder(String folderId) {
   try {
     final hr = win32.SHGetKnownFolderPath(
       appsFolder,
-      win32.KF_FLAG_DEFAULT,
+      win32.KNOWN_FOLDER_FLAG.KF_FLAG_DEFAULT,
       win32.NULL,
       ppszPath,
     );

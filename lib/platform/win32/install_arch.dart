@@ -122,7 +122,7 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
       targetPath,
       rootfsPath,
       '--version',
-      '2'
+      '2',
     ];
 
     final importJob = JobBase.fromBlock<void>(

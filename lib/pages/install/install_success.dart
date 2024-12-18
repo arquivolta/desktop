@@ -29,7 +29,7 @@ class InstallFinishedPage extends HookWidget implements Loggable {
             onPressed: onWindowsTerminalOpen,
             child: const Text('Open Windows Terminal'),
           ),
-        )
+        ),
       ],
     );
   }

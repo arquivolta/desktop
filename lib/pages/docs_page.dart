@@ -26,7 +26,7 @@ class DocsPage extends HookWidget implements Loggable {
             'Learn More About Arquivolta',
             style: style.typography.titleLarge,
           ),
-          Text(
+          const Text(
             '',
           ),
         ],

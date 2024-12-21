@@ -35,7 +35,8 @@ GetIt setupPlatformRegistrations(GetIt locator) {
     ..createSync(recursive: true);
 
   final logFile = File('${ourAppDataDir.path}/log.txt');
-  final fileOut = _BetterFileOutput(file: logFile);
+  final fileOut =
+      _BetterFileOutput(file: logFile, overrideExisting: false, encoding: utf8);
 
   final List<LogOutput> sentryLogging = appMode == ApplicationMode.production
       ? [_SentryOutput(), ConsoleOutput()]
@@ -121,8 +122,8 @@ class _BetterFileOutput extends LogOutput {
 
   _BetterFileOutput({
     required this.file,
-    this.overrideExisting = false,
-    this.encoding = utf8,
+    required this.overrideExisting,
+    required this.encoding,
   });
 
   @override

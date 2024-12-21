@@ -13,6 +13,12 @@ import 'package:path_provider/path_provider.dart';
 // XXX: This Feels Bad?
 const arquivoltaRepoKey = '8C23AC40F9AC3CD756ADBB240D3678F5DF8F474D';
 
+String earlyEnableSystemd = '''
+#!/bin/bash
+echo "[boot]" > /etc/wsl.conf
+echo "systemd=true" >> /etc/wsl.conf
+''';
+
 String setUpPacman(String architecture) => '''
 #!/bin/bash
 set -eux
@@ -204,6 +210,17 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
         friendlyDescription: 'Setting up ~/win => /mnt/c/Users/$username',
       ),
     ];
+
+    final job = await worker.runScriptInDistroAsJob(
+      'Early-enable systemd for networking',
+      earlyEnableSystemd,
+      [],
+      'Cannot enable systemd',
+      friendlyDescription: 'Enable systemd for networking',
+    );
+
+    await job.execute();
+    await worker.terminate();
 
     for (final job in jobQueue) {
       await job.execute();

@@ -21,9 +21,10 @@ bool isDevMode() {
 
 String rootAppDir() {
   if (isDevMode()) {
-    // C:\Users\ani\code\arquivolta\desktop\build\windows\runner\Debug\desktop.exe
+    // C:\Users\ani\code\arquivolta\desktop\build\windows\x64\runner\Debug\desktop.exe
     return absolute(
       dirname(Platform.resolvedExecutable),
+      '..',
       '..',
       '..',
       '..',

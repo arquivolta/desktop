@@ -1,6 +1,7 @@
 import 'package:arquivolta/logging.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DocsPage extends HookWidget implements Loggable {
   const DocsPage({super.key});
@@ -9,27 +10,97 @@ class DocsPage extends HookWidget implements Loggable {
   Widget build(BuildContext context) {
     final style = FluentTheme.of(context);
 
-    // Things that should be on this page
-    //
-    // * Link to main documentation site
-    // * Maybe some helpful other pages like yay cheatsheet?
-    // * Discord join link
-    // * Patreon / GitHub Sponsors link
-    // * Version Info / Link to Changelog
-
-    return Padding(
+    return ScaffoldPage(
       padding: const EdgeInsets.all(32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Learn More About Arquivolta',
-            style: style.typography.titleLarge,
-          ),
-          const Text(
-            '',
-          ),
-        ],
+      header: const PageHeader(
+        title: Text('Documentation & Support'),
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Documentation',
+              style: style.typography.subtitle,
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: ListTile(
+                leading: const Icon(FluentIcons.document),
+                title: const Text('Documentation Site'),
+                subtitle: const Text('Learn how to use Arquivolta'),
+                trailing: const Icon(FluentIcons.open_file),
+                onPressed: () =>
+                    launchUrl(Uri.parse('https://arquivolta.dev/docs')),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: ListTile(
+                leading: const Icon(FluentIcons.education),
+                title: const Text('Yay Package Manager Guide'),
+                subtitle: const Text('Learn about the Yay package manager'),
+                trailing: const Icon(FluentIcons.open_file),
+                onPressed: () =>
+                    launchUrl(Uri.parse('https://github.com/Jguer/yay#usage')),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Community & Support',
+              style: style.typography.subtitle,
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: ListTile(
+                leading: const Icon(FluentIcons.open_file),
+                title: const Text('Join Discord'),
+                subtitle: const Text('Get help and chat with the community'),
+                trailing: const Icon(FluentIcons.open_file),
+                onPressed: () =>
+                    launchUrl(Uri.parse('https://discord.gg/arquivolta')),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: ListTile(
+                leading: const Icon(FluentIcons.heart),
+                title: const Text('Support Development'),
+                subtitle: const Text('Support Arquivolta via GitHub Sponsors'),
+                trailing: const Icon(FluentIcons.open_file),
+                onPressed: () => launchUrl(
+                    Uri.parse('https://github.com/sponsors/arquivolta')),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'About',
+              style: style.typography.subtitle,
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: ListTile(
+                leading: const Icon(FluentIcons.history),
+                title: const Text('Changelog'),
+                subtitle: const Text("See what's new in Arquivolta"),
+                trailing: const Icon(FluentIcons.open_file),
+                onPressed: () => launchUrl(Uri.parse(
+                    'https://github.com/arquivolta/desktop/releases')),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: ListTile(
+                leading: const Icon(FluentIcons.code),
+                title: const Text('Source Code'),
+                subtitle: const Text('View the project on GitHub'),
+                trailing: const Icon(FluentIcons.open_file),
+                onPressed: () => launchUrl(
+                    Uri.parse('https://github.com/arquivolta/desktop')),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

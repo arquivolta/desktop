@@ -1,4 +1,4 @@
-library actions;
+library;
 
 import 'dart:async';
 import 'dart:core';

@@ -110,7 +110,7 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
   Future<DistroWorker> installArchLinux(String distroName) async {
     final targetPath = join(getLocalAppDataPath(), distroName);
     final tmpDir = (await getTemporaryDirectory()).path;
-    final archLinuxPath = join(tmpDir, 'archlinux.tar.gz');
+    final archLinuxPath = join(tmpDir, 'archlinux.tar.zst');
     final rootfsPath = join(tmpDir, 'rootfs-arch.tar');
 
     await Directory(targetPath).create();

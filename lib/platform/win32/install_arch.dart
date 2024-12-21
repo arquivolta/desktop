@@ -221,6 +221,8 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
 
     await job.execute();
     await worker.terminate();
+    // Run any command to wake up the distro
+    await worker.run('ls', []);
 
     for (final job in jobQueue) {
       await job.execute();

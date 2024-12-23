@@ -56,9 +56,27 @@ JobBase<void> convertArchBootstrapToWSLRootFsJob(
 
     await worker
         .asJob(
+          'Updating package index',
+          '/sbin/apk',
+          ['update'],
+          'Failed to update package index',
+        )
+        .execute();
+
+    await worker
+        .asJob(
+          'Installing zstd',
+          '/sbin/apk',
+          ['add', 'zstd'],
+          'Failed to install zstd',
+        )
+        .execute();
+
+    await worker
+        .asJob(
           'Extracting Arch Linux image',
-          'tar',
-          ['-C', '/tmp', '-xzpf', basename(archImage)],
+          'sh',
+          ['-c', 'zstd -d < "${basename(archImage)}" | tar -C /tmp -xf -'],
           'Failed to extract image',
           workingDirectory: dirname(archImage),
         )

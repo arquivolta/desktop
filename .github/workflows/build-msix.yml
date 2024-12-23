@@ -18,7 +18,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Checkout Submodules
         run: git submodule update --init --recursive
@@ -27,7 +27,7 @@ jobs:
         run: mkdir "${{env.PUB_CACHE}}"
 
       - name: Cache Flutter deps
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{env.PUB_CACHE}}
           key: ${{ hashFiles('pubspec.lock')}}
@@ -48,7 +48,7 @@ jobs:
         run: ./flutterw build web
 
       - name: Copy assets into place
-        run: mkdir ./build/windows/runner/Release/assets ; cp ./assets/* ./build/windows/runner/Release/assets
+        run: mkdir ./build/windows/x64/runner/Release/assets ; cp ./assets/* ./build/windows/x64/runner/Release/assets
 
       - name: Package the app as MSIX
         if: github.ref == 'refs/heads/main'
@@ -58,7 +58,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: cd build/web ; mkdir '.vercel'; New-Item -Type file -Value '${{ secrets.VERCEL_PROJECT_JSON }}' -Path '.vercel/project.json' ; npx vercel --prod --token '${{ secrets.VERCEL_TOKEN }}' --yes
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: build
-          path: build/windows/runner/Release
+          path: build/windows/x64/runner/Release

@@ -1,4 +1,4 @@
-library actions;
+library;
 
 import 'dart:async';
 import 'dart:core';
@@ -21,16 +21,16 @@ ActionResult<T> useAction<T>(
   List<Object?> keys, {
   bool runOnStart = false,
 }) {
-  final mounted = useIsMounted();
+  final context = useContext();
   final current = useState(AsyncSnapshot<T>.nothing());
 
   final reset = useCallback(
     () {
-      if (mounted()) {
+      if (context.mounted) {
         current.value = const AsyncSnapshot.nothing();
       }
     },
-    [mounted],
+    [context],
   );
 
   final invokeCommand = useAsyncCallbackDedup(
@@ -38,13 +38,13 @@ ActionResult<T> useAction<T>(
       try {
         current.value = AsyncSnapshot<T>.waiting();
         final ret = await block();
-        if (mounted()) {
+        if (context.mounted) {
           current.value = AsyncSnapshot.withData(ConnectionState.done, ret);
         }
 
         return ret;
       } catch (e) {
-        if (mounted()) {
+        if (context.mounted) {
           current.value = AsyncSnapshot.withError(ConnectionState.done, e);
         }
 

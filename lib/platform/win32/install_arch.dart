@@ -13,6 +13,12 @@ import 'package:path_provider/path_provider.dart';
 // XXX: This Feels Bad?
 const arquivoltaRepoKey = '8C23AC40F9AC3CD756ADBB240D3678F5DF8F474D';
 
+String earlyEnableSystemd = '''
+#!/bin/bash
+echo "[boot]" > /etc/wsl.conf
+echo "systemd=true" >> /etc/wsl.conf
+''';
+
 String setUpPacman(String architecture) => '''
 #!/bin/bash
 set -eux
@@ -104,7 +110,7 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
   Future<DistroWorker> installArchLinux(String distroName) async {
     final targetPath = join(getLocalAppDataPath(), distroName);
     final tmpDir = (await getTemporaryDirectory()).path;
-    final archLinuxPath = join(tmpDir, 'archlinux.tar.gz');
+    final archLinuxPath = join(tmpDir, 'archlinux.tar.zst');
     final rootfsPath = join(tmpDir, 'rootfs-arch.tar');
 
     await Directory(targetPath).create();
@@ -122,7 +128,7 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
       targetPath,
       rootfsPath,
       '--version',
-      '2'
+      '2',
     ];
 
     final importJob = JobBase.fromBlock<void>(
@@ -166,6 +172,17 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
     String password,
     String localeCode,
   ) async {
+    final job = await worker.runScriptInDistroAsJob(
+      'Early-enable systemd for networking',
+      earlyEnableSystemd,
+      [],
+      'Cannot enable systemd',
+      friendlyDescription: 'Enable systemd for networking',
+    );
+
+    await job.execute();
+    await worker.terminate();
+
     final jobQueue = <JobBase<ProcessOutput>>[
       await worker.runScriptInDistroAsJob(
         'Set up Pacman',
@@ -204,6 +221,7 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
         friendlyDescription: 'Setting up ~/win => /mnt/c/Users/$username',
       ),
     ];
+
 
     for (final job in jobQueue) {
       await job.execute();

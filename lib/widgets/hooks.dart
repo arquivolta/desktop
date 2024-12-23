@@ -4,10 +4,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 VoidCallback useExplicitRedraw({bool delay = true}) {
   final redraw = useState(0);
-  final mounted = useIsMounted();
+  final context = useContext();
 
   void redrawNow() {
-    if (mounted()) redraw.value++;
+    if (context.mounted) redraw.value++;
   }
 
   return delay ? () => delayBeat(redrawNow) : redrawNow;

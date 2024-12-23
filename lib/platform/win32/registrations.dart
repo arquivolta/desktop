@@ -35,7 +35,8 @@ GetIt setupPlatformRegistrations(GetIt locator) {
     ..createSync(recursive: true);
 
   final logFile = File('${ourAppDataDir.path}/log.txt');
-  final fileOut = _BetterFileOutput(file: logFile);
+  final fileOut =
+      _BetterFileOutput(file: logFile, overrideExisting: false, encoding: utf8);
 
   final List<LogOutput> sentryLogging = appMode == ApplicationMode.production
       ? [_SentryOutput(), ConsoleOutput()]
@@ -53,6 +54,7 @@ GetIt setupPlatformRegistrations(GetIt locator) {
       excludeBox: {
         Level.debug: true,
         Level.info: true,
+        // ignore: deprecated_member_use
         Level.verbose: true,
       },
       colors: false,
@@ -80,15 +82,15 @@ GetIt setupPlatformRegistrations(GetIt locator) {
 
 class _SentryOutput implements LogOutput {
   @override
-  void destroy() {}
+  Future<void> destroy() async {}
 
   @override
-  void init() {}
+  Future<void> init() async {}
 
   @override
   void output(OutputEvent event) {
     final msg = event.lines.join('\n');
-    if (event.level == Level.error || event.level == Level.wtf) {
+    if (event.level == Level.error || event.level == Level.fatal) {
       Sentry.captureEvent(
         SentryEvent(
           message: SentryMessage(msg),
@@ -121,16 +123,14 @@ class _BetterFileOutput extends LogOutput {
 
   _BetterFileOutput({
     required this.file,
-    // ignore: unused_element
-    this.overrideExisting = false,
-    // ignore: unused_element
-    this.encoding = utf8,
+    required this.overrideExisting,
+    required this.encoding,
   });
 
   @override
-  void init() {
+  Future<void> init() async {
     if (_sink != null) {
-      destroy();
+      await destroy();
     }
 
     _sink = file.openWrite(
@@ -150,9 +150,8 @@ class _BetterFileOutput extends LogOutput {
   }
 
   @override
-  // ignore: avoid_void_async
-  void destroy() {
-    close();
+  Future<void> destroy() async {
+    await close();
   }
 
   Future<void> close() async {

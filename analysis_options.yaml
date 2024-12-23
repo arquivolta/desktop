@@ -10,3 +10,5 @@ linter:
     omit_local_variable_types: false
     unnecessary_library_directive: false
     lines_longer_than_80_chars: false
+    document_ignores: false
+    avoid_catches_without_on_clauses: false

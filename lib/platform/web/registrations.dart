@@ -42,7 +42,7 @@ Logger _createLogger(ApplicationMode mode) {
       excludeBox: {
         Level.debug: true,
         Level.info: true,
-        Level.verbose: true,
+        Level.trace: true,
       },
       colors: false,
       printEmojis: false, // NB: We add these in later
@@ -81,7 +81,7 @@ class _DemoArchLinuxInstaller extends ArchLinuxInstaller {
   ) async {
     const messages = [
       ["We don't actually install anything", 'This is just a demo'],
-      ['Go install the app', "It's Free!"]
+      ['Go install the app', "It's Free!"],
     ];
 
     final jobs = messages

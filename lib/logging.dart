@@ -16,15 +16,15 @@ extension LoggableMixin on Loggable {
     final klass = runtimeType.toString();
     _global ??= App.find<Logger>();
 
-    _global!.d('$klass: $message', error, stackTrace);
+    _global!.d('$klass: $message');
     if (this is CustomLoggable) {
       final cl = this as CustomLoggable;
       if (cl.usePrefix) {
         (this as CustomLoggable)
             .logger
-            .d('$klass: $message', error, stackTrace);
+            .d('$klass: $message');
       } else {
-        (this as CustomLoggable).logger.d('$message', error, stackTrace);
+        (this as CustomLoggable).logger.d('$message');
       }
     }
   }
@@ -33,15 +33,15 @@ extension LoggableMixin on Loggable {
     final klass = runtimeType.toString();
     _global ??= App.find<Logger>();
 
-    _global!.i('$klass: $message', error, stackTrace);
+    _global!.i('$klass: $message');
     if (this is CustomLoggable) {
       final cl = this as CustomLoggable;
       if (cl.usePrefix) {
         (this as CustomLoggable)
             .logger
-            .i('$klass: $message', error, stackTrace);
+            .i('$klass: $message');
       } else {
-        (this as CustomLoggable).logger.i('$message', error, stackTrace);
+        (this as CustomLoggable).logger.i('$message');
       }
     }
   }
@@ -50,16 +50,16 @@ extension LoggableMixin on Loggable {
     final klass = runtimeType.toString();
     _global ??= App.find<Logger>();
 
-    _global!.w('⚠️ $klass: $message', error, stackTrace);
+    _global!.w('⚠️ $klass: $message');
 
     if (this is CustomLoggable) {
       final cl = this as CustomLoggable;
       if (cl.usePrefix) {
         (this as CustomLoggable)
             .logger
-            .i('⚠️ $klass: $message', error, stackTrace);
+            .w('⚠️ $klass: $message');
       } else {
-        (this as CustomLoggable).logger.i('⚠️ $message', error, stackTrace);
+        (this as CustomLoggable).logger.w('⚠️ $message');
       }
     }
   }
@@ -68,23 +68,23 @@ extension LoggableMixin on Loggable {
     final klass = runtimeType.toString();
     _global ??= App.find<Logger>();
 
-    _global!.e('�� $klass: $message', error, stackTrace);
+    _global!.e('�� $klass: $message');
     if (this is CustomLoggable) {
       (this as CustomLoggable)
           .logger
-          .e('�� $klass: $message', error, stackTrace);
+          .e('�� $klass: $message');
     }
   }
 
-  void wtf(dynamic message, [dynamic error, StackTrace? stackTrace]) {
+  void f(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     final klass = runtimeType.toString();
     _global ??= App.find<Logger>();
 
-    _global!.wtf('�� _klass: $message', error, stackTrace);
+    _global!.f('�� $klass: $message');
     if (this is CustomLoggable) {
       (this as CustomLoggable)
           .logger
-          .wtf('�� $klass: $message', error, stackTrace);
+          .f('�� $klass: $message');
     }
   }
 

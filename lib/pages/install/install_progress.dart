@@ -160,10 +160,10 @@ class InProgressInstall extends HookWidget implements Loggable {
                     onPressed: openLogFileInDefaultEditor,
                     child: Text('Open Log File'),
                   ),
-                )
+                ),
               ],
             ),
-          )
+          ),
       ],
     );
   }
@@ -202,7 +202,7 @@ class JobListTile extends HookWidget {
     return ListTile(
       key: Key(job.friendlyName),
       leading: leading,
-      tileColor: isSelected ? ButtonState.all(style.menuColor) : null,
+      tileColor: isSelected ? WidgetStateProperty.all(style.menuColor) : null,
       title: Text(
         job.friendlyName,
         style: style.typography.bodyStrong,

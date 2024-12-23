@@ -89,7 +89,7 @@ class DocsPage extends HookWidget implements Loggable {
                 subtitle: const Text('View the project on GitHub'),
                 trailing: const Icon(FluentIcons.link),
                 onPressed: () => launchUrl(
-                    Uri.parse('https://github.com/arquivolta/desktop')),
+                    Uri.parse('https://github.com/arquivolta/desktop'),),
               ),
             ),
           ],

@@ -54,6 +54,7 @@ GetIt setupPlatformRegistrations(GetIt locator) {
       excludeBox: {
         Level.debug: true,
         Level.info: true,
+        // ignore: deprecated_member_use
         Level.verbose: true,
       },
       colors: false,

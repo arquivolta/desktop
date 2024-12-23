@@ -172,6 +172,17 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
     String password,
     String localeCode,
   ) async {
+    final job = await worker.runScriptInDistroAsJob(
+      'Early-enable systemd for networking',
+      earlyEnableSystemd,
+      [],
+      'Cannot enable systemd',
+      friendlyDescription: 'Enable systemd for networking',
+    );
+
+    await job.execute();
+    await worker.terminate();
+
     final jobQueue = <JobBase<ProcessOutput>>[
       await worker.runScriptInDistroAsJob(
         'Set up Pacman',
@@ -211,18 +222,6 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
       ),
     ];
 
-    final job = await worker.runScriptInDistroAsJob(
-      'Early-enable systemd for networking',
-      earlyEnableSystemd,
-      [],
-      'Cannot enable systemd',
-      friendlyDescription: 'Enable systemd for networking',
-    );
-
-    await job.execute();
-    await worker.terminate();
-    // Run any command to wake up the distro
-    await worker.run('ls', []);
 
     for (final job in jobQueue) {
       await job.execute();

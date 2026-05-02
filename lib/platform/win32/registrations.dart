@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -10,8 +11,6 @@ import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 import 'package:flutter_acrylic/window_effect.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
-
-// ignore: implementation_imports
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 GetIt setupPlatformRegistrations(GetIt locator) {
@@ -25,8 +24,8 @@ GetIt setupPlatformRegistrations(GetIt locator) {
   final appMode = isTestMode
       ? ApplicationMode.test
       : isDebugMode
-          ? ApplicationMode.debug
-          : ApplicationMode.production;
+      ? ApplicationMode.debug
+      : ApplicationMode.production;
 
   Logger logger;
 
@@ -35,8 +34,11 @@ GetIt setupPlatformRegistrations(GetIt locator) {
     ..createSync(recursive: true);
 
   final logFile = File('${ourAppDataDir.path}/log.txt');
-  final fileOut =
-      _BetterFileOutput(file: logFile, overrideExisting: false, encoding: utf8);
+  final fileOut = _BetterFileOutput(
+    file: logFile,
+    overrideExisting: false,
+    encoding: utf8,
+  );
 
   final List<LogOutput> sentryLogging = appMode == ApplicationMode.production
       ? [_SentryOutput(), ConsoleOutput()]
@@ -91,21 +93,25 @@ class _SentryOutput implements LogOutput {
   void output(OutputEvent event) {
     final msg = event.lines.join('\n');
     if (event.level == Level.error || event.level == Level.fatal) {
-      Sentry.captureEvent(
-        SentryEvent(
-          message: SentryMessage(msg),
-          level: SentryLevel.error,
+      unawaited(
+        Sentry.captureEvent(
+          SentryEvent(
+            message: SentryMessage(msg),
+            level: SentryLevel.error,
+          ),
         ),
       );
     }
 
     if (event.level == Level.info || event.level == Level.warning) {
-      Sentry.addBreadcrumb(
-        Breadcrumb(
-          message: msg,
-          level: event.level == Level.info
-              ? SentryLevel.info
-              : SentryLevel.warning,
+      unawaited(
+        Sentry.addBreadcrumb(
+          Breadcrumb(
+            message: msg,
+            level: event.level == Level.info
+                ? SentryLevel.info
+                : SentryLevel.warning,
+          ),
         ),
       );
     }
@@ -142,7 +148,7 @@ class _BetterFileOutput extends LogOutput {
   @override
   void output(OutputEvent event) {
     if (_sink == null) {
-      init();
+      unawaited(init());
     }
 
     _sink?.writeAll(event.lines, '\n');

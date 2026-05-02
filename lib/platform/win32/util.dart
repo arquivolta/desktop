@@ -10,7 +10,6 @@ import 'package:ffi/ffi.dart';
 import 'package:path/path.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:win32/win32.dart' as win32;
-import 'package:win32/win32.dart';
 
 enum OperatingSystemType { amd64, aarch64, dunnoButItsNotGonnaWork }
 
@@ -37,55 +36,53 @@ String rootAppDir() {
 
 OperatingSystemType getOSArchitecture() {
   final sysInfo = calloc<win32.SYSTEM_INFO>();
-  win32.GetSystemInfo(sysInfo);
+  try {
+    win32.GetSystemInfo(sysInfo);
 
-  if (sysInfo.ref.wProcessorArchitecture ==
-      win32.PROCESSOR_ARCHITECTURE.PROCESSOR_ARCHITECTURE_AMD64) {
-    return OperatingSystemType.amd64;
+    if (sysInfo.ref.wProcessorArchitecture ==
+        win32.PROCESSOR_ARCHITECTURE_AMD64) {
+      return OperatingSystemType.amd64;
+    }
+
+    if (sysInfo.ref.wProcessorArchitecture ==
+        win32.PROCESSOR_ARCHITECTURE_ARM64) {
+      return OperatingSystemType.aarch64;
+    }
+
+    return OperatingSystemType.dunnoButItsNotGonnaWork;
+  } finally {
+    calloc.free(sysInfo);
   }
-
-  if (sysInfo.ref.wProcessorArchitecture ==
-      win32.PROCESSOR_ARCHITECTURE.PROCESSOR_ARCHITECTURE_ARM64) {
-    return OperatingSystemType.aarch64;
-  }
-
-  return OperatingSystemType.dunnoButItsNotGonnaWork;
 }
 
-final strNull = Pointer<Utf16>.fromAddress(0);
 void openFileViaShell(String path) {
-  final lpPath = path.toNativeUtf16();
+  using((arena) {
+    final lpPath = path.toNativeUtf16(allocator: arena);
 
-  win32.ShellExecute(
-    win32.NULL,
-    strNull,
-    lpPath,
-    strNull,
-    strNull,
-    win32.SHOW_WINDOW_CMD.SW_SHOW,
-  );
+    win32.ShellExecute(
+      null,
+      null,
+      win32.PCWSTR(lpPath),
+      null,
+      null,
+      win32.SW_SHOW,
+    );
+  });
 }
 
 void openAppXByModelId(String appModelId) {
-  final aam = IApplicationActivationManager(
-    COMObject.createFromID(
-      CLSID_ApplicationActivationManager,
-      IID_IApplicationActivationManager,
-    ),
+  final aam = win32.createInstance<win32.IApplicationActivationManager>(
+    win32.ApplicationActivationManager,
   );
 
   try {
-    final dontcare = calloc<win32.DWORD>();
-    final hr = aam.activateApplication(
-      '$appModelId!App'.toNativeUtf16(),
-      ''.toNativeUtf16(),
-      0,
-      dontcare,
-    );
-
-    if (win32.FAILED(hr)) {
-      throw win32.WindowsException(hr);
-    }
+    using((arena) {
+      aam.activateApplication(
+        win32.PCWSTR('$appModelId!App'.toNativeUtf16(allocator: arena)),
+        win32.PCWSTR(''.toNativeUtf16(allocator: arena)),
+        win32.AO_NONE,
+      );
+    });
   } finally {
     aam.release();
   }
@@ -113,30 +110,25 @@ String getUsername() => getHomeDirectory().split(r'\').last;
 final _kfCache = SimpleCache<String, String>(storage: InMemoryStorage(32))
   ..loader = (key, oldValue) => _getKnownFolder(key);
 
-String getKnownFolder(String folderId) => _kfCache.get(folderId)!;
+String getKnownFolder(win32.GUID folderId) =>
+    _kfCache.get(folderId.toString())!;
 
 String _getKnownFolder(String folderId) {
-  final appsFolder = win32.GUIDFromString(folderId);
-  final ppszPath = calloc<win32.PWSTR>();
+  final knownFolderId = win32.GUID(folderId);
 
-  try {
-    final hr = win32.SHGetKnownFolderPath(
-      appsFolder,
-      win32.KNOWN_FOLDER_FLAG.KF_FLAG_DEFAULT,
-      win32.NULL,
-      ppszPath,
+  return using((arena) {
+    final path = win32.SHGetKnownFolderPath(
+      knownFolderId.toNative(allocator: arena),
+      win32.KF_FLAG_DEFAULT,
+      null,
     );
 
-    if (win32.FAILED(hr)) {
-      throw win32.WindowsException(hr);
+    try {
+      return path.toDartString();
+    } finally {
+      win32.CoTaskMemFree(path);
     }
-
-    final path = ppszPath.value.toDartString();
-    return path;
-  } finally {
-    win32.free(appsFolder);
-    win32.free(ppszPath);
-  }
+  });
 }
 
 Future<void> downloadUrlToFile(

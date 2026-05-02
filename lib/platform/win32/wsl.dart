@@ -56,30 +56,33 @@ JobBase<ProcessResult> startProcessAsJob(
   String? workingDirectory,
 }) {
   return JobBase.fromBlock<ProcessResult>(
-      name, "$executable ${arguments.join(' ')}", (job) async {
-    final out = PublishSubject<String>();
-    out.stream.listen(job.i);
+    name,
+    "$executable ${arguments.join(' ')}",
+    (job) async {
+      final out = PublishSubject<String>();
+      out.stream.listen(job.i);
 
-    try {
-      final ret = await startProcessWithOutput(
-        executable,
-        arguments,
-        workingDirectory: workingDirectory,
-        output: out.sink,
-      );
+      try {
+        final ret = await startProcessWithOutput(
+          executable,
+          arguments,
+          workingDirectory: workingDirectory,
+          output: out.sink,
+        );
 
-      if (ret.exitCode != 0) {
-        job
-          ..e(failureMessage)
-          ..e('Process $executable exited with code ${ret.exitCode}');
+        if (ret.exitCode != 0) {
+          job
+            ..e(failureMessage)
+            ..e('Process $executable exited with code ${ret.exitCode}');
+        }
+
+        return ret;
+      } catch (ex, st) {
+        job.e(failureMessage, ex, st);
+        rethrow;
       }
-
-      return ret;
-    } catch (ex, st) {
-      job.e(failureMessage, ex, st);
-      rethrow;
-    }
-  });
+    },
+  );
 }
 
 class Win32DistroWorker implements DistroWorker {
@@ -112,14 +115,18 @@ class Win32DistroWorker implements DistroWorker {
 
   @override
   Future<void> terminate() async {
-    await startProcessWithOutput('wsl.exe', ['--terminate', _distro])
-        .throwOnError('Failed to terminate distro');
+    await startProcessWithOutput('wsl.exe', [
+      '--terminate',
+      _distro,
+    ]).throwOnError('Failed to terminate distro');
   }
 
   @override
   Future<void> destroy() async {
-    await startProcessWithOutput('wsl.exe', ['--unregister', _distro])
-        .throwOnError('Failed to destroy distro');
+    await startProcessWithOutput('wsl.exe', [
+      '--unregister',
+      _distro,
+    ]).throwOnError('Failed to destroy distro');
   }
 
   @override
@@ -177,7 +184,6 @@ class _DistroWorkerJob extends JobBase<ProcessOutput> {
   final List<String> args;
   final String? wd;
   final String? user;
-  final String? logPreExec;
 
   _DistroWorkerJob(
     this.worker,
@@ -188,8 +194,6 @@ class _DistroWorkerJob extends JobBase<ProcessOutput> {
     String? desc,
     this.wd,
     this.user,
-    // ignore: unused_element
-    this.logPreExec,
   }) : super(name, desc ?? "$exec ${args.join(' ')}");
 
   @override
@@ -202,8 +206,6 @@ class _DistroWorkerJob extends JobBase<ProcessOutput> {
 
     ProcessOutput result;
     try {
-      if (logPreExec != null) i(logPreExec);
-
       result = await worker.run(
         exec,
         args,
@@ -246,46 +248,47 @@ String getArchitecturePrefix() {
 }
 
 JobBase<DistroWorker> setupWorkWSLImageJob() {
-  return JobBase.fromBlock('Setting up worker WSL installation',
-      'Installing temporary Alpine Linux install to fixup Arch Linux tarball',
-      (job) async {
-    final arch = getArchitecturePrefix();
+  return JobBase.fromBlock(
+    'Setting up worker WSL installation',
+    'Installing temporary Alpine Linux install to fixup Arch Linux tarball',
+    (job) async {
+      final arch = getArchitecturePrefix();
 
-    final tempDir = (await getTemporaryDirectory()).path;
-    final suffix = DateTime.now().toIso8601String().replaceAll(':', '-');
-    final alpineImage = absolute(rootAppDir(), 'assets/alpine-$arch.tar.gz');
-    final targetRootFs = join(tempDir, 'rootfs-$suffix.tar');
+      final tempDir = (await getTemporaryDirectory()).path;
+      final suffix = DateTime.now().toIso8601String().replaceAll(':', '-');
+      final alpineImage = absolute(rootAppDir(), 'assets/alpine-$arch.tar.gz');
+      final targetRootFs = join(tempDir, 'rootfs-$suffix.tar');
 
-    job
-      ..i('Decompressing Alpine Linux')
-      ..d('$alpineImage => $targetRootFs');
+      job
+        ..i('Decompressing Alpine Linux')
+        ..d('$alpineImage => $targetRootFs');
 
-    await File(alpineImage)
-        .openRead()
-        .transform(gzip.decoder)
-        .pipe(File(targetRootFs).openWrite());
+      await File(
+        alpineImage,
+      ).openRead().transform(gzip.decoder).pipe(File(targetRootFs).openWrite());
 
-    final targetDir = join(tempDir, 'alpine-$suffix');
-    await Directory(targetDir).create();
+      final targetDir = join(tempDir, 'alpine-$suffix');
+      await Directory(targetDir).create();
 
-    final distroName = 'arquivolta-$suffix';
+      final distroName = 'arquivolta-$suffix';
 
-    // decompress the image to temp
-    // sic WSL --import on it
-    job.i('Creating distro $distroName');
-    await startProcessWithOutput('wsl.exe', [
-      '--import',
-      distroName,
-      targetDir,
-      targetRootFs,
-    ]).throwOnError('Failed to import work distro, is WSL installed?');
+      // decompress the image to temp
+      // sic WSL --import on it
+      job.i('Creating distro $distroName');
+      await startProcessWithOutput('wsl.exe', [
+        '--import',
+        distroName,
+        targetDir,
+        targetRootFs,
+      ]).throwOnError('Failed to import work distro, is WSL installed?');
 
-    // NB: WSL2 has a race condition where if you create a distro then
-    // immediately try to run a command on it, it will report that it doesn't
-    // exist
-    await Future<void>.delayed(const Duration(milliseconds: 2500));
-    return Win32DistroWorker(distroName);
-  });
+      // NB: WSL2 has a race condition where if you create a distro then
+      // immediately try to run a command on it, it will report that it doesn't
+      // exist
+      await Future<void>.delayed(const Duration(milliseconds: 2500));
+      return Win32DistroWorker(distroName);
+    },
+  );
 }
 
 String getLinuxArchitectureForOS() {

@@ -79,7 +79,6 @@ abstract class ArchLinuxInstaller {
   Future<String?> errorMessageForProposedDistroName(String proposedName);
 }
 
-// ignore: one_member_abstracts
 abstract class PlatformUtilities {
   Future<void> setupTransparentBackgroundWindow({
     required bool isDark,

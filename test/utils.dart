@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:arquivolta/app.dart';
 import 'package:get_it/get_it.dart';
 
@@ -7,7 +9,7 @@ Future<void> setupForTest({
 }) async {
   GetIt.instance.pushNewScope(
     init: (g) {
-      App.setupRegistration(g);
+      unawaited(App.setupRegistration(g));
 
       if (setup != null) {
         setup(g);

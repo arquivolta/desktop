@@ -21,8 +21,9 @@ abstract class JobBase<T> extends CustomLoggable implements Loggable {
 
   final String friendlyName;
   final String friendlyDescription;
-  final ValueNotifier<JobStatus> jobStatus =
-      ValueNotifier<JobStatus>(JobStatus.idle);
+  final ValueNotifier<JobStatus> jobStatus = ValueNotifier<JobStatus>(
+    JobStatus.idle,
+  );
 
   @override
   Logger get logger => _logger;
@@ -40,8 +41,9 @@ abstract class JobBase<T> extends CustomLoggable implements Loggable {
           : Level.debug,
     );
 
-    App.find<PublishSubject<JobBase<dynamic>>>(instanceName: 'jobSubject')
-        .add(this);
+    App.find<PublishSubject<JobBase<dynamic>>>(
+      instanceName: 'jobSubject',
+    ).add(this);
   }
 
   static GetIt setupRegistration(GetIt locator) {
@@ -54,8 +56,9 @@ abstract class JobBase<T> extends CustomLoggable implements Loggable {
   }
 
   static Stream<JobBase<dynamic>> get jobStream =>
-      App.find<PublishSubject<JobBase<dynamic>>>(instanceName: 'jobSubject')
-          .stream;
+      App.find<PublishSubject<JobBase<dynamic>>>(
+        instanceName: 'jobSubject',
+      ).stream;
 
   Future<T> execute();
 

@@ -35,9 +35,11 @@ class PageScaffold extends HookWidget {
     final idx = useState(0);
 
     return NavigationView(
-      appBar: const NavigationAppBar(
-        title: DragToMoveArea(
-          child: Column(
+      titleBar: const DragToMoveArea(
+        child: TitleBar(
+          height: 50,
+          isBackButtonVisible: false,
+          title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Align(
@@ -52,14 +54,8 @@ class PageScaffold extends HookWidget {
               ),
             ],
           ),
+          captionControls: WindowButtons(),
         ),
-        actions: DragToMoveArea(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [Spacer(), WindowButtons()],
-          ),
-        ),
-        automaticallyImplyLeading: false,
       ),
       pane: NavigationPane(
         // NB: Auto looks nicer here but it's broken at the moment

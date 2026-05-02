@@ -29,85 +29,81 @@ JobBase<void> convertArchBootstrapToWSLRootFsJob(
   String archImage,
   String targetRootfsFile,
 ) {
-  return JobBase.fromBlock('Converting Arch Linux image to WSL format',
-      'Converting Arch Linux Bootstrap image to be usable via WSL2',
-      (job) async {
-    if (getOSArchitecture() == OperatingSystemType.aarch64) {
-      // NB: Arch Linux ARM images aren't brain-damaged like x86_64, so we can
-      // just unzip it and be done
+  return JobBase.fromBlock(
+    'Converting Arch Linux image to WSL format',
+    'Converting Arch Linux Bootstrap image to be usable via WSL2',
+    (job) async {
+      if (getOSArchitecture() == OperatingSystemType.aarch64) {
+        // NB: Arch Linux ARM images aren't brain-damaged like x86_64, so we can
+        // just unzip it and be done
 
-      job.i('Decompressing $archImage to $targetRootfsFile');
-      await File(archImage)
-          .openRead()
-          .transform(gzip.decoder)
-          .pipe(File(targetRootfsFile).openWrite());
+        job.i('Decompressing $archImage to $targetRootfsFile');
+        await File(archImage)
+            .openRead()
+            .transform(gzip.decoder)
+            .pipe(File(targetRootfsFile).openWrite());
 
-      return;
-    }
+        return;
+      }
 
-    final worker = await setupWorkWSLImageJob().execute();
+      final worker = await setupWorkWSLImageJob().execute();
 
-    // NB: We do this just to make sure the machine is actually working
-    await retry(
-      () => worker.run('uname', ['-a']),
-      count: 5,
-      delay: const Duration(seconds: 1),
-    );
+      // NB: We do this just to make sure the machine is actually working
+      await retry(
+        () => worker.run('uname', ['-a']),
+        count: 5,
+        delay: const Duration(seconds: 1),
+      );
 
-    await worker
-        .asJob(
-          'Updating package index',
-          '/sbin/apk',
-          ['update'],
-          'Failed to update package index',
-        )
-        .execute();
+      await worker.asJob(
+        'Updating package index',
+        '/sbin/apk',
+        ['update'],
+        'Failed to update package index',
+      ).execute();
 
-    await worker
-        .asJob(
-          'Installing zstd',
-          '/sbin/apk',
-          ['add', 'zstd'],
-          'Failed to install zstd',
-        )
-        .execute();
+      await worker.asJob(
+        'Installing zstd',
+        '/sbin/apk',
+        ['add', 'zstd'],
+        'Failed to install zstd',
+      ).execute();
 
-    await worker
-        .asJob(
-          'Extracting Arch Linux image',
-          'sh',
-          ['-c', 'zstd -d < "${basename(archImage)}" | tar -C /tmp -xf -'],
-          'Failed to extract image',
-          workingDirectory: dirname(archImage),
-        )
-        .execute();
+      await worker
+          .asJob(
+            'Extracting Arch Linux image',
+            'sh',
+            ['-c', 'zstd -d < "${basename(archImage)}" | tar -C /tmp -xf -'],
+            'Failed to extract image',
+            workingDirectory: dirname(archImage),
+          )
+          .execute();
 
-    final rootfsName = basename(targetRootfsFile);
-    final arch = getArchitecturePrefix();
+      final rootfsName = basename(targetRootfsFile);
+      final arch = getArchitecturePrefix();
 
-    await worker
-        .asJob(
-          'Recompressing Arch Linux image in WSL2 format',
-          'sh',
-          ['-c', 'cd /tmp/root.$arch && tar -cpf ../$rootfsName *'],
-          'Failed to create rootfs image',
-        )
-        .execute();
+      await worker.asJob(
+        'Recompressing Arch Linux image in WSL2 format',
+        'sh',
+        ['-c', 'cd /tmp/root.$arch && tar -cpf ../$rootfsName *'],
+        'Failed to create rootfs image',
+      ).execute();
 
-    await worker
-        .asJob(
-          'Moving Image back into Windows',
-          'mv',
-          ['/tmp/$rootfsName', '.'],
-          'Failed to move rootfs image',
-          workingDirectory: dirname(targetRootfsFile),
-        )
-        .execute();
+      await worker
+          .asJob(
+            'Moving Image back into Windows',
+            'mv',
+            ['/tmp/$rootfsName', '.'],
+            'Failed to move rootfs image',
+            workingDirectory: dirname(targetRootfsFile),
+          )
+          .execute();
 
-    job.i('Cleaning up');
-    await Future<void>.delayed(const Duration(milliseconds: 1500));
-    await worker.destroy();
-  });
+      job.i('Cleaning up');
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      await worker.destroy();
+    },
+  );
 }
 
 // NB: We do all of these redirects rather than accessing the URLs directly in
@@ -117,11 +113,11 @@ JobBase<void> convertArchBootstrapToWSLRootFsJob(
 //
 // The current redirect list can be found at:
 // https://github.com/arquivolta/website/blob/main/app/api/redirect/route.ts
-final arm64ImageUri = Uri.parse(
+final Uri arm64ImageUri = Uri.parse(
   'https://arquivolta.dev/api/redirect?q=arch-arm64-image',
 );
 
-final shasumUri = Uri.parse(
+final Uri shasumUri = Uri.parse(
   'https://arquivolta.dev/api/redirect?q=arch-shasums-x8664',
 );
 
@@ -139,19 +135,23 @@ Future<JobBase<dynamic>> downloadArchLinux(String targetFile) async {
   // NB: In Debug mode, try to find our local copy of the image so we're not
   // abusing Arch Linux mirrors all the time
   if (App.find<ApplicationMode>() == ApplicationMode.debug) {
-    final dirents =
-        await Directory(absolute(rootAppDir(), 'resources')).list().toList();
+    final dirents = await Directory(
+      absolute(rootAppDir(), 'resources'),
+    ).list().toList();
     try {
-      final img =
-          dirents.firstWhere((x) => x.path.contains('archlinux-bootstrap'));
+      final img = dirents.firstWhere(
+        (x) => x.path.contains('archlinux-bootstrap'),
+      );
 
       return JobBase.fromBlock<void>(
-          'Using local Arch image', 'Copying ${img.path} into place',
-          (job) async {
-        job.i('Using local image ${img.path}');
-        await File(img.path).openRead().pipe(File(targetFile).openWrite());
-        job.i('Copying complete');
-      });
+        'Using local Arch image',
+        'Copying ${img.path} into place',
+        (job) async {
+          job.i('Using local image ${img.path}');
+          await File(img.path).openRead().pipe(File(targetFile).openWrite());
+          job.i('Copying complete');
+        },
+      );
     } catch (ex) {
       log.d("Can't find local image, continuing to download...");
     }
@@ -159,8 +159,9 @@ Future<JobBase<dynamic>> downloadArchLinux(String targetFile) async {
 
   final shaText = (await http.get(shasumUri)).body;
 
-  final imageLine =
-      shaText.split('\n').firstWhere((l) => l.contains('bootstrap'));
+  final imageLine = shaText
+      .split('\n')
+      .firstWhere((l) => l.contains('bootstrap'));
 
   final imageName = imageLine.split(RegExp(r'\s+'))[1];
 

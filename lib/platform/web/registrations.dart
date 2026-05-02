@@ -15,8 +15,9 @@ GetIt setupPlatformRegistrations(GetIt locator) {
   // ignore: prefer_asserts_with_message
   assert(isDebugMode = true);
 
-  final appMode =
-      isDebugMode ? ApplicationMode.debug : ApplicationMode.production;
+  final appMode = isDebugMode
+      ? ApplicationMode.debug
+      : ApplicationMode.production;
 
   locator
     ..registerSingleton(appMode)
@@ -54,19 +55,22 @@ class _DemoArchLinuxInstaller extends ArchLinuxInstaller {
   @override
   Future<DistroWorker> installArchLinux(String distroName) async {
     final job = JobBase.fromBlock<void>(
-        'Installing Arch Linux', 'This is just a demo!', (job) async {
-      job.i('We would normally download a file here!');
+      'Installing Arch Linux',
+      'This is just a demo!',
+      (job) async {
+        job.i('We would normally download a file here!');
 
-      final progressLength =
-          App.find<ApplicationMode>() == ApplicationMode.production ? 20 : 5;
+        final progressLength =
+            App.find<ApplicationMode>() == ApplicationMode.production ? 20 : 5;
 
-      final progressFactor = 100 / progressLength;
+        final progressFactor = 100 / progressLength;
 
-      for (var i = 0; i < progressLength; i++) {
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        job.i('Progress: ${i * progressFactor}%');
-      }
-    });
+        for (var i = 0; i < progressLength; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 500));
+          job.i('Progress: ${i * progressFactor}%');
+        }
+      },
+    );
 
     await job.execute();
     return DemoDistroWorker();

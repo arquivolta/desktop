@@ -10,7 +10,7 @@ final RegExp userRegex = RegExp(r'^[a-z_][a-z0-9_-]*[$]?$');
 
 class InstallPrompt extends HookWidget implements Loggable {
   final void Function(String distro, String user, String password)
-      onPressedInstall;
+  onPressedInstall;
 
   final String defaultUserName;
   final ArchLinuxInstaller installer;
@@ -34,8 +34,9 @@ class InstallPrompt extends HookWidget implements Loggable {
     final queueRedraw = useExplicitRedraw();
     final distroError = useFutureEffect(
       () async {
-        final ret =
-            await installer.errorMessageForProposedDistroName(distro.text);
+        final ret = await installer.errorMessageForProposedDistroName(
+          distro.text,
+        );
 
         // NB: If we don't do this insanely gross hack, the form error message
         // will always be one character behind
@@ -51,7 +52,8 @@ class InstallPrompt extends HookWidget implements Loggable {
       user,
     ].forEach(useValueListenable);
 
-    final shouldEnableButton = distro.text.length > 1 &&
+    final shouldEnableButton =
+        distro.text.length > 1 &&
         user.text.length > 1 &&
         distroError.data == null;
 

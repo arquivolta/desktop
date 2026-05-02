@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:arquivolta/app.dart';
 import 'package:logger/logger.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -20,9 +22,7 @@ extension LoggableMixin on Loggable {
     if (this is CustomLoggable) {
       final cl = this as CustomLoggable;
       if (cl.usePrefix) {
-        (this as CustomLoggable)
-            .logger
-            .d('$klass: $message');
+        (this as CustomLoggable).logger.d('$klass: $message');
       } else {
         (this as CustomLoggable).logger.d('$message');
       }
@@ -37,9 +37,7 @@ extension LoggableMixin on Loggable {
     if (this is CustomLoggable) {
       final cl = this as CustomLoggable;
       if (cl.usePrefix) {
-        (this as CustomLoggable)
-            .logger
-            .i('$klass: $message');
+        (this as CustomLoggable).logger.i('$klass: $message');
       } else {
         (this as CustomLoggable).logger.i('$message');
       }
@@ -55,9 +53,7 @@ extension LoggableMixin on Loggable {
     if (this is CustomLoggable) {
       final cl = this as CustomLoggable;
       if (cl.usePrefix) {
-        (this as CustomLoggable)
-            .logger
-            .w('⚠️ $klass: $message');
+        (this as CustomLoggable).logger.w('⚠️ $klass: $message');
       } else {
         (this as CustomLoggable).logger.w('⚠️ $message');
       }
@@ -70,9 +66,7 @@ extension LoggableMixin on Loggable {
 
     _global!.e('�� $klass: $message');
     if (this is CustomLoggable) {
-      (this as CustomLoggable)
-          .logger
-          .e('�� $klass: $message');
+      (this as CustomLoggable).logger.e('�� $klass: $message');
     }
   }
 
@@ -82,14 +76,14 @@ extension LoggableMixin on Loggable {
 
     _global!.f('�� $klass: $message');
     if (this is CustomLoggable) {
-      (this as CustomLoggable)
-          .logger
-          .f('�� $klass: $message');
+      (this as CustomLoggable).logger.f('�� $klass: $message');
     }
   }
 
   void n(String message) {
-    Sentry.addBreadcrumb(Breadcrumb(message: message, type: 'navigation'));
+    unawaited(
+      Sentry.addBreadcrumb(Breadcrumb(message: message, type: 'navigation')),
+    );
     i(message);
   }
 }

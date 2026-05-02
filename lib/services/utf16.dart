@@ -103,9 +103,11 @@ List<int> codepointsToUtf16CodeUnits(
     } else if (value > _UNICODE_PLANE_ONE_MAX &&
         value <= _UNICODE_VALID_RANGE_MAX) {
       final base = value - _UNICODE_UTF16_OFFSET;
-      codeUnitsBuffer[j++] = _UNICODE_UTF16_SURROGATE_UNIT_0_BASE +
+      codeUnitsBuffer[j++] =
+          _UNICODE_UTF16_SURROGATE_UNIT_0_BASE +
           ((base & _UNICODE_UTF16_HI_MASK) >> 10);
-      codeUnitsBuffer[j++] = _UNICODE_UTF16_SURROGATE_UNIT_1_BASE +
+      codeUnitsBuffer[j++] =
+          _UNICODE_UTF16_SURROGATE_UNIT_1_BASE +
           (base & _UNICODE_UTF16_LO_MASK);
     } else {
       codeUnitsBuffer[j++] = replacementCodepoint;

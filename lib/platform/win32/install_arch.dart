@@ -19,7 +19,8 @@ echo "[boot]" > /etc/wsl.conf
 echo "systemd=true" >> /etc/wsl.conf
 ''';
 
-String setUpPacman(String architecture) => '''
+String setUpPacman(String architecture) =>
+    '''
 #!/bin/bash
 set -eux
 
@@ -38,7 +39,8 @@ echo '[arquivolta-extras]' >> /etc/pacman.conf
 echo 'Server = https://$architecture.repo-extras.arquivolta.dev' >> /etc/pacman.conf
 ''';
 
-String configureLocale(String locale) => '''
+String configureLocale(String locale) =>
+    '''
 #!/bin/bash
 set -eux
 
@@ -54,7 +56,8 @@ echo "LANG=$locale.UTF-8" > /etc/locale.conf
 // optdepends basically just prints stuff so it's useless
 String optionalDefaultDependencies = 'docker tmux htop vim yay man-db';
 
-String installSystem = '''
+String installSystem =
+    '''
 #!/bin/bash
 set -euxo pipefail
 
@@ -73,7 +76,8 @@ systemctl mask systemd-homed systemd-homed-activate systemd-resolved systemd-fir
 systemctl enable systemd-tmpfiles-clean.timer docker
 ''';
 
-String addUser(String userName, String password) => '''
+String addUser(String userName, String password) =>
+    '''
 #!/bin/bash
 set -euo pipefail
 
@@ -98,7 +102,8 @@ echo '[interop]' >> /etc/wsl.conf
 echo 'appendWindowsPath=true' >> /etc/wsl.conf
 ''';
 
-String installWinSymlink = '''
+String installWinSymlink =
+    '''
 #!/bin/bash
 set -euxo pipefail
 
@@ -116,8 +121,10 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
     await Directory(targetPath).create();
 
     final downloadJob = await downloadArchLinux(archLinuxPath);
-    final convertJob =
-        convertArchBootstrapToWSLRootFsJob(archLinuxPath, rootfsPath);
+    final convertJob = convertArchBootstrapToWSLRootFsJob(
+      archLinuxPath,
+      rootfsPath,
+    );
 
     await downloadJob.execute();
     await convertJob.execute();
@@ -222,15 +229,15 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
       ),
     ];
 
-
     for (final job in jobQueue) {
       await job.execute();
     }
 
     // NB: The user that we set up to run via /etc/wsl.conf won't apply until we
     // restart the distro, so terminate it off now
-    worker
-        .i('Restarting Arquivolta distro to start systemd as the correct user');
+    worker.i(
+      'Restarting Arquivolta distro to start systemd as the correct user',
+    );
     await worker.terminate();
   }
 
@@ -251,8 +258,10 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
         : null;
   }
 
-  final AsyncMemoize<List<String>> _distroNamesMemoized =
-      AsyncMemoize(_getDistroNamesDirect, const Duration(seconds: 5));
+  final AsyncMemoize<List<String>> _distroNamesMemoized = AsyncMemoize(
+    _getDistroNamesDirect,
+    const Duration(seconds: 5),
+  );
 
   Future<List<String>> _getDistroNames() => _distroNamesMemoized.value;
 

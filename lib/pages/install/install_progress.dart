@@ -73,8 +73,9 @@ class InProgressInstall extends HookWidget implements Loggable {
         ? jobLogOutput.value[jobList.value[selectedIndex.value].hashCode]
         : null;
 
-    final selectedJob =
-        selectedIndex.value >= 0 ? jobList.value[selectedIndex.value] : null;
+    final selectedJob = selectedIndex.value >= 0
+        ? jobList.value[selectedIndex.value]
+        : null;
 
     final jobListWidget = Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -202,7 +203,9 @@ class JobListTile extends HookWidget {
     return ListTile(
       key: Key(job.friendlyName),
       leading: leading,
-      tileColor: isSelected ? WidgetStateProperty.all(style.menuColor) : null,
+      tileColor: isSelected
+          ? WidgetStateColor.resolveWith((states) => style.menuColor)
+          : null,
       title: Text(
         job.friendlyName,
         style: style.typography.bodyStrong,
@@ -234,10 +237,9 @@ class ConsoleOutput extends StatelessWidget implements Loggable {
 
   @override
   Widget build(BuildContext context) {
-    final consoleFont = FluentTheme.of(context)
-        .typography
-        .body!
-        .copyWith(fontFamily: 'Consolas', color: Colors.grey);
+    final consoleFont = FluentTheme.of(
+      context,
+    ).typography.body!.copyWith(fontFamily: 'Consolas', color: Colors.grey);
 
     return ColoredBox(
       color: Colors.grey[40],

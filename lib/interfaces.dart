@@ -4,6 +4,8 @@ import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/services/job.dart';
 import 'package:flutter/widgets.dart';
 
+const officialArchLinuxDistroName = 'archlinux';
+
 enum ApplicationMode { debug, production, test }
 
 // NB: This is dart:io's ProcessResult copied verbatim, but so that we can use

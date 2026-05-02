@@ -60,8 +60,8 @@ class InstallPage extends HookWidget implements Loggable {
             i('Next clicked, moving to install in-progress page');
             pageController.next();
 
-            // NB: Without doing this, InProgressInstall will miss the first
-            // job, which is important because it's usually a download
+            // NB: Without doing this, InProgressInstall will miss the WSL
+            // install job that starts immediately after this page transition.
             delayBeat(installResult.invoke);
           },
         ),
@@ -82,7 +82,7 @@ class InstallPage extends HookWidget implements Loggable {
 
     final style = FluentTheme.of(context);
     final headerText = installResult.isPending
-        ? 'Installing Arch Linux to ${distroName.value}'
+        ? 'Installing Arch Linux as ${distroName.value}'
         : 'Install Arch Linux';
 
     return Padding(

@@ -70,7 +70,7 @@ class InstallPrompt extends HookWidget implements Loggable {
     );
 
     final distroPrompt = InfoLabel(
-      label: 'WSL Distro Name',
+      label: 'WSL Local Distro Name',
       child: TextFormBox(
         controller: distro,
         validator: (_) => distroError.data,
@@ -90,6 +90,12 @@ class InstallPrompt extends HookWidget implements Loggable {
       autovalidateMode: AutovalidateMode.always,
       child: Column(
         children: [
+          const Text(
+            'Arquivolta installs the official $officialArchLinuxDistroName WSL distro under this local name.',
+          ),
+          const SizedBox(
+            height: 12,
+          ),
           distroPrompt,
           const SizedBox(
             height: 8,

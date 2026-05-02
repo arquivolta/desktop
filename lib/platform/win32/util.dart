@@ -1,38 +1,12 @@
-import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 
 import 'package:arquivolta/interfaces.dart';
-import 'package:arquivolta/logging.dart';
-import 'package:arquivolta/services/job.dart';
 import 'package:dcache/dcache.dart';
 import 'package:ffi/ffi.dart';
-import 'package:path/path.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:win32/win32.dart' as win32;
 
 enum OperatingSystemType { amd64, aarch64, dunnoButItsNotGonnaWork }
-
-final RegExp _devModePath = RegExp('runner.Debug');
-bool isDevMode() {
-  return _devModePath.hasMatch(Platform.resolvedExecutable);
-}
-
-String rootAppDir() {
-  if (isDevMode()) {
-    // C:\Users\ani\code\arquivolta\desktop\build\windows\x64\runner\Debug\desktop.exe
-    return absolute(
-      dirname(Platform.resolvedExecutable),
-      '..',
-      '..',
-      '..',
-      '..',
-      '..',
-    );
-  } else {
-    return dirname(Platform.resolvedExecutable);
-  }
-}
 
 OperatingSystemType getOSArchitecture() {
   final sysInfo = calloc<win32.SYSTEM_INFO>();
@@ -129,51 +103,6 @@ String _getKnownFolder(String folderId) {
       win32.CoTaskMemFree(path);
     }
   });
-}
-
-Future<void> downloadUrlToFile(
-  Uri url,
-  String target,
-  StreamSink<double> progress,
-) async {
-  final client = HttpClient();
-  final rq = await client.getUrl(url);
-  final resp = await rq.close();
-  final bytes = PublishSubject<int>();
-
-  bytes.stream
-      .scan<double>((acc, x, _) => acc + (x / resp.contentLength * 100), 0)
-      .listen(progress.add);
-
-  await resp
-      .doOnData((buf) => bytes.add(buf.length))
-      .pipe(File(target).openWrite());
-}
-
-JobBase<void> downloadUrlToFileJob(
-  String friendlyName,
-  Uri uri,
-  String target,
-) {
-  return JobBase.fromBlock<void>(
-    friendlyName,
-    'Downloading $uri to $target',
-    (job) async {
-      final progressSubj = PublishSubject<double>();
-      job.i(job.friendlyDescription);
-
-      progressSubj
-          .sampleTime(const Duration(seconds: 2))
-          .listen((x) => job.i('Progress: ${x.toStringAsFixed(2)}%'));
-
-      try {
-        await downloadUrlToFile(uri, target, progressSubj.sink);
-      } catch (ex, st) {
-        job.e('Failed to download file', ex, st);
-        rethrow;
-      }
-    },
-  );
 }
 
 final re = RegExp('[a-zA-Z0-9,._+:@%/-]');

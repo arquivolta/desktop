@@ -6,7 +6,6 @@ import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
 import 'package:arquivolta/platform/win32/util.dart';
 import 'package:arquivolta/services/job.dart';
-import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -239,56 +238,6 @@ class _DistroWorkerJob extends JobBase<ProcessOutput> {
 
     return result;
   }
-}
-
-String getArchitecturePrefix() {
-  return getOSArchitecture() == OperatingSystemType.amd64
-      ? 'x86_64'
-      : 'aarch64';
-}
-
-JobBase<DistroWorker> setupWorkWSLImageJob() {
-  return JobBase.fromBlock(
-    'Setting up worker WSL installation',
-    'Installing temporary Alpine Linux install to fixup Arch Linux tarball',
-    (job) async {
-      final arch = getArchitecturePrefix();
-
-      final tempDir = (await getTemporaryDirectory()).path;
-      final suffix = DateTime.now().toIso8601String().replaceAll(':', '-');
-      final alpineImage = absolute(rootAppDir(), 'assets/alpine-$arch.tar.gz');
-      final targetRootFs = join(tempDir, 'rootfs-$suffix.tar');
-
-      job
-        ..i('Decompressing Alpine Linux')
-        ..d('$alpineImage => $targetRootFs');
-
-      await File(
-        alpineImage,
-      ).openRead().transform(gzip.decoder).pipe(File(targetRootFs).openWrite());
-
-      final targetDir = join(tempDir, 'alpine-$suffix');
-      await Directory(targetDir).create();
-
-      final distroName = 'arquivolta-$suffix';
-
-      // decompress the image to temp
-      // sic WSL --import on it
-      job.i('Creating distro $distroName');
-      await startProcessWithOutput('wsl.exe', [
-        '--import',
-        distroName,
-        targetDir,
-        targetRootFs,
-      ]).throwOnError('Failed to import work distro, is WSL installed?');
-
-      // NB: WSL2 has a race condition where if you create a distro then
-      // immediately try to run a command on it, it will report that it doesn't
-      // exist
-      await Future<void>.delayed(const Duration(milliseconds: 2500));
-      return Win32DistroWorker(distroName);
-    },
-  );
 }
 
 String getLinuxArchitectureForOS() {

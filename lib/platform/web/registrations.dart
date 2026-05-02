@@ -58,7 +58,9 @@ class _DemoArchLinuxInstaller extends ArchLinuxInstaller {
       'Installing Arch Linux',
       'This is just a demo!',
       (job) async {
-        job.i('We would normally download a file here!');
+        job.i(
+          'We would normally install $officialArchLinuxDistroName as $distroName here!',
+        );
 
         final progressLength =
             App.find<ApplicationMode>() == ApplicationMode.production ? 20 : 5;
@@ -73,7 +75,7 @@ class _DemoArchLinuxInstaller extends ArchLinuxInstaller {
     );
 
     await job.execute();
-    return DemoDistroWorker();
+    return DemoDistroWorker(distroName);
   }
 
   @override
@@ -117,8 +119,12 @@ class _DemoArchLinuxInstaller extends ArchLinuxInstaller {
 }
 
 class DemoDistroWorker implements DistroWorker {
+  DemoDistroWorker(this._distroName);
+
+  final String _distroName;
+
   @override
-  String get distroName => 'arch-linux';
+  String get distroName => _distroName;
 
   @override
   JobBase<ProcessOutput> asJob(

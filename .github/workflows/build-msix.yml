@@ -47,6 +47,9 @@ jobs:
       - name: Build the app (Web)
         run: ./flutterw build web
 
+      - name: Copy assets into place
+        run: mkdir ./build/windows/x64/runner/Release/assets ; cp ./assets/* ./build/windows/x64/runner/Release/assets
+
       - name: Package the app as MSIX
         if: github.ref == 'refs/heads/main'
         run: ./flutterw pub run msix:create --install-certificate false

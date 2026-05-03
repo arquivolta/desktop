@@ -1,91 +1,62 @@
-import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 
 import 'package:arquivolta/interfaces.dart';
-import 'package:arquivolta/logging.dart';
-import 'package:arquivolta/services/job.dart';
 import 'package:dcache/dcache.dart';
 import 'package:ffi/ffi.dart';
-import 'package:path/path.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:win32/win32.dart' as win32;
-import 'package:win32/win32.dart';
 
 enum OperatingSystemType { amd64, aarch64, dunnoButItsNotGonnaWork }
 
-final RegExp _devModePath = RegExp('runner.Debug');
-bool isDevMode() {
-  return _devModePath.hasMatch(Platform.resolvedExecutable);
-}
-
-String rootAppDir() {
-  if (isDevMode()) {
-    // C:\Users\ani\code\arquivolta\desktop\build\windows\x64\runner\Debug\desktop.exe
-    return absolute(
-      dirname(Platform.resolvedExecutable),
-      '..',
-      '..',
-      '..',
-      '..',
-      '..',
-    );
-  } else {
-    return dirname(Platform.resolvedExecutable);
-  }
-}
-
 OperatingSystemType getOSArchitecture() {
   final sysInfo = calloc<win32.SYSTEM_INFO>();
-  win32.GetSystemInfo(sysInfo);
+  try {
+    win32.GetSystemInfo(sysInfo);
 
-  if (sysInfo.ref.wProcessorArchitecture ==
-      win32.PROCESSOR_ARCHITECTURE.PROCESSOR_ARCHITECTURE_AMD64) {
-    return OperatingSystemType.amd64;
+    if (sysInfo.ref.wProcessorArchitecture ==
+        win32.PROCESSOR_ARCHITECTURE_AMD64) {
+      return OperatingSystemType.amd64;
+    }
+
+    if (sysInfo.ref.wProcessorArchitecture ==
+        win32.PROCESSOR_ARCHITECTURE_ARM64) {
+      return OperatingSystemType.aarch64;
+    }
+
+    return OperatingSystemType.dunnoButItsNotGonnaWork;
+  } finally {
+    calloc.free(sysInfo);
   }
-
-  if (sysInfo.ref.wProcessorArchitecture ==
-      win32.PROCESSOR_ARCHITECTURE.PROCESSOR_ARCHITECTURE_ARM64) {
-    return OperatingSystemType.aarch64;
-  }
-
-  return OperatingSystemType.dunnoButItsNotGonnaWork;
 }
 
-final strNull = Pointer<Utf16>.fromAddress(0);
 void openFileViaShell(String path) {
-  final lpPath = path.toNativeUtf16();
+  using((arena) {
+    final lpPath = path.toNativeUtf16(allocator: arena);
 
-  win32.ShellExecute(
-    win32.NULL,
-    strNull,
-    lpPath,
-    strNull,
-    strNull,
-    win32.SHOW_WINDOW_CMD.SW_SHOW,
-  );
+    win32.ShellExecute(
+      null,
+      null,
+      win32.PCWSTR(lpPath),
+      null,
+      null,
+      win32.SW_SHOW,
+    );
+  });
 }
 
 void openAppXByModelId(String appModelId) {
-  final aam = IApplicationActivationManager(
-    COMObject.createFromID(
-      CLSID_ApplicationActivationManager,
-      IID_IApplicationActivationManager,
-    ),
+  final aam = win32.createInstance<win32.IApplicationActivationManager>(
+    win32.ApplicationActivationManager,
   );
 
   try {
-    final dontcare = calloc<win32.DWORD>();
-    final hr = aam.activateApplication(
-      '$appModelId!App'.toNativeUtf16(),
-      ''.toNativeUtf16(),
-      0,
-      dontcare,
-    );
-
-    if (win32.FAILED(hr)) {
-      throw win32.WindowsException(hr);
-    }
+    using((arena) {
+      aam.activateApplication(
+        win32.PCWSTR('$appModelId!App'.toNativeUtf16(allocator: arena)),
+        win32.PCWSTR(''.toNativeUtf16(allocator: arena)),
+        win32.AO_NONE,
+      );
+    });
   } finally {
     aam.release();
   }
@@ -113,75 +84,25 @@ String getUsername() => getHomeDirectory().split(r'\').last;
 final _kfCache = SimpleCache<String, String>(storage: InMemoryStorage(32))
   ..loader = (key, oldValue) => _getKnownFolder(key);
 
-String getKnownFolder(String folderId) => _kfCache.get(folderId)!;
+String getKnownFolder(win32.GUID folderId) =>
+    _kfCache.get(folderId.toString())!;
 
 String _getKnownFolder(String folderId) {
-  final appsFolder = win32.GUIDFromString(folderId);
-  final ppszPath = calloc<win32.PWSTR>();
+  final knownFolderId = win32.GUID(folderId);
 
-  try {
-    final hr = win32.SHGetKnownFolderPath(
-      appsFolder,
-      win32.KNOWN_FOLDER_FLAG.KF_FLAG_DEFAULT,
-      win32.NULL,
-      ppszPath,
+  return using((arena) {
+    final path = win32.SHGetKnownFolderPath(
+      knownFolderId.toNative(allocator: arena),
+      win32.KF_FLAG_DEFAULT,
+      null,
     );
 
-    if (win32.FAILED(hr)) {
-      throw win32.WindowsException(hr);
+    try {
+      return path.toDartString();
+    } finally {
+      win32.CoTaskMemFree(path);
     }
-
-    final path = ppszPath.value.toDartString();
-    return path;
-  } finally {
-    win32.free(appsFolder);
-    win32.free(ppszPath);
-  }
-}
-
-Future<void> downloadUrlToFile(
-  Uri url,
-  String target,
-  StreamSink<double> progress,
-) async {
-  final client = HttpClient();
-  final rq = await client.getUrl(url);
-  final resp = await rq.close();
-  final bytes = PublishSubject<int>();
-
-  bytes.stream
-      .scan<double>((acc, x, _) => acc + (x / resp.contentLength * 100), 0)
-      .listen(progress.add);
-
-  await resp
-      .doOnData((buf) => bytes.add(buf.length))
-      .pipe(File(target).openWrite());
-}
-
-JobBase<void> downloadUrlToFileJob(
-  String friendlyName,
-  Uri uri,
-  String target,
-) {
-  return JobBase.fromBlock<void>(
-    friendlyName,
-    'Downloading $uri to $target',
-    (job) async {
-      final progressSubj = PublishSubject<double>();
-      job.i(job.friendlyDescription);
-
-      progressSubj
-          .sampleTime(const Duration(seconds: 2))
-          .listen((x) => job.i('Progress: ${x.toStringAsFixed(2)}%'));
-
-      try {
-        await downloadUrlToFile(uri, target, progressSubj.sink);
-      } catch (ex, st) {
-        job.e('Failed to download file', ex, st);
-        rethrow;
-      }
-    },
-  );
+  });
 }
 
 final re = RegExp('[a-zA-Z0-9,._+:@%/-]');

@@ -19,8 +19,9 @@ class PagedViewController {
 }
 
 PagedViewController usePagedViewController(int pageCount) {
-  final pageController =
-      useMemoized(() => PagedViewController(pageCount), [pageCount]);
+  final pageController = useMemoized(() => PagedViewController(pageCount), [
+    pageCount,
+  ]);
 
   // NB: This is a Hack, make sure that the calling widget will rebuild whenever
   // the page changes
@@ -32,7 +33,7 @@ PagedViewController usePagedViewController(int pageCount) {
 class PagedViewWidget extends HookWidget {
   final PagedViewController controller;
   final Widget Function(BuildContext ctx, PagedViewController controller)
-      builder;
+  builder;
 
   const PagedViewWidget(this.controller, this.builder, {super.key});
 

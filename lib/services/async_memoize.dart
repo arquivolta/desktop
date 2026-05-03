@@ -8,11 +8,12 @@ class AsyncMemoize<T> {
   AsyncMemoize(this._computation, this._ttl);
 
   Future<T> get value {
-    if (_ttl != null && _setAt != null) {
+    final ttl = _ttl;
+    if (ttl != null && _setAt != null) {
       final now = DateTime.now();
       final diff = now.difference(_setAt!);
 
-      if (diff > _ttl!) {
+      if (diff > ttl) {
         _future = null;
       }
     }

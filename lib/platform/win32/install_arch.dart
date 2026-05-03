@@ -1,14 +1,9 @@
-import 'dart:io';
-
 import 'package:arquivolta/interfaces.dart';
 import 'package:arquivolta/logging.dart';
-import 'package:arquivolta/platform/win32/arch_to_rootfs.dart';
 import 'package:arquivolta/platform/win32/util.dart';
 import 'package:arquivolta/platform/win32/wsl.dart';
 import 'package:arquivolta/services/async_memoize.dart';
 import 'package:arquivolta/services/job.dart';
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 
 // XXX: This Feels Bad?
 const arquivoltaRepoKey = '8C23AC40F9AC3CD756ADBB240D3678F5DF8F474D';
@@ -19,7 +14,8 @@ echo "[boot]" > /etc/wsl.conf
 echo "systemd=true" >> /etc/wsl.conf
 ''';
 
-String setUpPacman(String architecture) => '''
+String setUpPacman(String architecture) =>
+    '''
 #!/bin/bash
 set -eux
 
@@ -38,7 +34,8 @@ echo '[arquivolta-extras]' >> /etc/pacman.conf
 echo 'Server = https://$architecture.repo-extras.arquivolta.dev' >> /etc/pacman.conf
 ''';
 
-String configureLocale(String locale) => '''
+String configureLocale(String locale) =>
+    '''
 #!/bin/bash
 set -eux
 
@@ -54,7 +51,8 @@ echo "LANG=$locale.UTF-8" > /etc/locale.conf
 // optdepends basically just prints stuff so it's useless
 String optionalDefaultDependencies = 'docker tmux htop vim yay man-db';
 
-String installSystem = '''
+String installSystem =
+    '''
 #!/bin/bash
 set -euxo pipefail
 
@@ -73,7 +71,8 @@ systemctl mask systemd-homed systemd-homed-activate systemd-resolved systemd-fir
 systemctl enable systemd-tmpfiles-clean.timer docker
 ''';
 
-String addUser(String userName, String password) => '''
+String addUser(String userName, String password) =>
+    '''
 #!/bin/bash
 set -euo pipefail
 
@@ -98,7 +97,8 @@ echo '[interop]' >> /etc/wsl.conf
 echo 'appendWindowsPath=true' >> /etc/wsl.conf
 ''';
 
-String installWinSymlink = '''
+String installWinSymlink =
+    '''
 #!/bin/bash
 set -euxo pipefail
 
@@ -108,46 +108,28 @@ ln -sf ${win32PathToWslPath(getHomeDirectory())} "\$HOME/win"
 class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
   @override
   Future<DistroWorker> installArchLinux(String distroName) async {
-    final targetPath = join(getLocalAppDataPath(), distroName);
-    final tmpDir = (await getTemporaryDirectory()).path;
-    final archLinuxPath = join(tmpDir, 'archlinux.tar.zst');
-    final rootfsPath = join(tmpDir, 'rootfs-arch.tar');
-
-    await Directory(targetPath).create();
-
-    final downloadJob = await downloadArchLinux(archLinuxPath);
-    final convertJob =
-        convertArchBootstrapToWSLRootFsJob(archLinuxPath, rootfsPath);
-
-    await downloadJob.execute();
-    await convertJob.execute();
-
-    final importArgs = [
-      '--import',
+    final installArgs = [
+      '--install',
+      officialArchLinuxDistroName,
+      '--name',
       distroName,
-      targetPath,
-      rootfsPath,
-      '--version',
-      '2',
+      '-n',
     ];
 
-    final importJob = JobBase.fromBlock<void>(
-      'Import into WSL2',
-      'Import Arch Linux image into WSL2',
+    final installJob = JobBase.fromBlock<void>(
+      'Install Arch Linux',
+      'Install the official Arch Linux distro into WSL',
       (job) async {
         job
-          ..i('Importing $distroName')
-          ..i('wsl.exe ${importArgs.join(' ')}');
+          ..i('Installing $officialArchLinuxDistroName as $distroName')
+          ..i('wsl.exe ${installArgs.join(' ')}');
 
         try {
           final result = await startProcessWithOutput(
             'wsl.exe',
-            importArgs,
+            installArgs,
           );
 
-          // NB: We mangle the encoding here because stdout is in UTF-16
-          // but we don't actually have a supported decoder
-          // https://github.com/dart-lang/convert/issues/30
           job
             ..i(result.stdout)
             ..i(result.stderr)
@@ -155,13 +137,13 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
 
           if (result.exitCode != 0) throw Exception('wsl.exe failed');
         } catch (ex, st) {
-          job.e('Failed to import', ex, st);
+          job.e('Failed to install Arch Linux', ex, st);
           rethrow;
         }
       },
     );
 
-    await importJob.execute();
+    await installJob.execute();
     return Win32DistroWorker(distroName);
   }
 
@@ -222,15 +204,15 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
       ),
     ];
 
-
     for (final job in jobQueue) {
       await job.execute();
     }
 
     // NB: The user that we set up to run via /etc/wsl.conf won't apply until we
     // restart the distro, so terminate it off now
-    worker
-        .i('Restarting Arquivolta distro to start systemd as the correct user');
+    worker.i(
+      'Restarting Arquivolta distro to start systemd as the correct user',
+    );
     await worker.terminate();
   }
 
@@ -251,8 +233,10 @@ class WSL2ArchLinuxInstaller implements ArchLinuxInstaller {
         : null;
   }
 
-  final AsyncMemoize<List<String>> _distroNamesMemoized =
-      AsyncMemoize(_getDistroNamesDirect, const Duration(seconds: 5));
+  final AsyncMemoize<List<String>> _distroNamesMemoized = AsyncMemoize(
+    _getDistroNamesDirect,
+    const Duration(seconds: 5),
+  );
 
   Future<List<String>> _getDistroNames() => _distroNamesMemoized.value;
 

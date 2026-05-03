@@ -86,8 +86,10 @@ AsyncSnapshot<T?> useStreamEffect<T>(
           (x) => ret.value = AsyncSnapshot.withData(ConnectionState.active, x),
           onError: (Object e) =>
               ret.value = AsyncSnapshot.withError(ConnectionState.active, e),
-          onDone: () => ret.value =
-              const AsyncSnapshot.withData(ConnectionState.done, null),
+          onDone: () => ret.value = const AsyncSnapshot.withData(
+            ConnectionState.done,
+            null,
+          ),
         );
       } catch (e) {
         ret.value = AsyncSnapshot.withError(ConnectionState.active, e);
@@ -113,17 +115,19 @@ AsyncSnapshot<T> useFutureEffect<T>(
       var cancelled = false;
 
       try {
-        block().then(
-          (x) {
-            if (!cancelled) {
-              ret.value = AsyncSnapshot.withData(ConnectionState.done, x);
-            }
-          },
-          onError: (Object e) {
-            if (!cancelled) {
-              ret.value = AsyncSnapshot.withError(ConnectionState.done, e);
-            }
-          },
+        unawaited(
+          block().then(
+            (x) {
+              if (!cancelled) {
+                ret.value = AsyncSnapshot.withData(ConnectionState.done, x);
+              }
+            },
+            onError: (Object e) {
+              if (!cancelled) {
+                ret.value = AsyncSnapshot.withError(ConnectionState.done, e);
+              }
+            },
+          ),
         );
       } catch (e) {
         ret.value = AsyncSnapshot.withError(ConnectionState.active, e);

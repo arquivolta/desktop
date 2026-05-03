@@ -7,7 +7,6 @@ import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 
-// ignore: avoid_void_async
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 

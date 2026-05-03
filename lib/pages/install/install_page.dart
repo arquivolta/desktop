@@ -22,8 +22,9 @@ class InstallPage extends HookWidget implements Loggable {
     final platformUtils = App.find<PlatformUtilities>();
 
     final pageController = usePagedViewController(3);
-    final languageTag =
-        View.of(context).platformDispatcher.locale.toLanguageTag();
+    final languageTag = View.of(
+      context,
+    ).platformDispatcher.locale.toLanguageTag();
 
     final installResult = useAction(
       () async {
@@ -49,39 +50,39 @@ class InstallPage extends HookWidget implements Loggable {
       pageController,
       (ctx, ctrl) => switch (ctrl.page.value) {
         0 => InstallPrompt(
-            defaultUserName: installer.getDefaultUsername(),
-            installer: installer,
-            onPressedInstall: (d, u, p) {
-              distroName.value = d;
-              username.value = u;
-              password.value = p;
+          defaultUserName: installer.getDefaultUsername(),
+          installer: installer,
+          onPressedInstall: (d, u, p) {
+            distroName.value = d;
+            username.value = u;
+            password.value = p;
 
-              i('Next clicked, moving to install in-progress page');
-              pageController.next();
+            i('Next clicked, moving to install in-progress page');
+            pageController.next();
 
-              // NB: Without doing this, InProgressInstall will miss the first
-              // job, which is important because it's usually a download
-              delayBeat(installResult.invoke);
-            },
-          ),
+            // NB: Without doing this, InProgressInstall will miss the WSL
+            // install job that starts immediately after this page transition.
+            delayBeat(installResult.invoke);
+          },
+        ),
         1 => InProgressInstall(
-            finished: !installResult.isPending,
-            error: installResult.result.error,
-            onPressedFinish: () {
-              i('Finished install, now showing Whats Next page');
-              pageController.next();
-            },
-          ),
+          finished: !installResult.isPending,
+          error: installResult.result.error,
+          onPressedFinish: () {
+            i('Finished install, now showing Whats Next page');
+            pageController.next();
+          },
+        ),
         2 => InstallFinishedPage(
-            onWindowsTerminalOpen: platformUtils.openTerminalWindow,
-          ),
-        _ => throw Exception('Wrong page?!?!')
+          onWindowsTerminalOpen: platformUtils.openTerminalWindow,
+        ),
+        _ => throw Exception('Wrong page?!?!'),
       },
     );
 
     final style = FluentTheme.of(context);
     final headerText = installResult.isPending
-        ? 'Installing Arch Linux to ${distroName.value}'
+        ? 'Installing Arch Linux as ${distroName.value}'
         : 'Install Arch Linux';
 
     return Padding(

@@ -63,26 +63,6 @@ class ActionWidget extends HookWidget {
   }
 }
 
-Future<T> firstNoCancel<T>(Stream<T> stream) {
-  final completer = Completer<T>();
-  var hasValue = false;
-
-  stream.take(1).listen(
-        (e) {
-          completer.complete(e);
-          hasValue = true;
-        },
-        onError: completer.completeError,
-        onDone: () {
-          if (!hasValue) {
-            completer.completeError('done');
-          }
-        },
-      );
-
-  return completer.future;
-}
-
 void main() {
   /*
    * useFutureEffect
@@ -124,10 +104,10 @@ void main() {
 
     // ignore: prefer_function_declarations_over_variables
     final widgeter = (String dep) => FluentApp(
-          builder: (context, child) =>
-              FutureWidget(future: () => Future.value(box[0]), dep: dep),
-          color: const Color.fromARGB(0, 0, 0, 0),
-        );
+      builder: (context, child) =>
+          FutureWidget(future: () => Future.value(box[0]), dep: dep),
+      color: const Color.fromARGB(0, 0, 0, 0),
+    );
 
     await tester.pumpWidget(widgeter('foo'));
     expect(find.text('Pending!'), findsOneWidget);
@@ -155,10 +135,10 @@ void main() {
 
     // ignore: prefer_function_declarations_over_variables
     final widgeter = (String dep) => FluentApp(
-          builder: (context, child) =>
-              ActionWidget(future: () => Future.value(box[0]), dep: dep),
-          color: Colors.grey,
-        );
+      builder: (context, child) =>
+          ActionWidget(future: () => Future.value(box[0]), dep: dep),
+      color: Colors.grey,
+    );
 
     await tester.pumpWidget(widgeter('foo'));
     expect(find.text('(null)'), findsOneWidget);
@@ -183,16 +163,16 @@ void main() {
 
     // ignore: prefer_function_declarations_over_variables
     final widgeter = (String dep) => FluentApp(
-          builder: (context, child) => ActionWidget(
-            future: () async {
-              callCount++;
-              await gate[0].stream.first;
-              return callCount.toString();
-            },
-            dep: dep,
-          ),
-          color: Colors.grey,
-        );
+      builder: (context, child) => ActionWidget(
+        future: () async {
+          callCount++;
+          await gate[0].stream.first;
+          return callCount.toString();
+        },
+        dep: dep,
+      ),
+      color: Colors.grey,
+    );
 
     await tester.pumpWidget(widgeter('foo'));
     expect(find.text('(null)'), findsOneWidget);
